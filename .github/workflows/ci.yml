@@ -1,0 +1,101 @@
+name: iConnect CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # -----------------------------------------------------------------------------
+  # Job 1: Flutter Android Build (Mobile App)
+  # -----------------------------------------------------------------------------
+  mobile-build:
+    name: Mobile (Android) Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0' # Use stable or match your local version
+          channel: 'stable'
+          
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Generate Code (Build Runner)
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        
+      - name: Run Tests
+        run: flutter test
+        
+      - name: Build Android APK
+        run: flutter build apk --debug
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+  # -----------------------------------------------------------------------------
+  # Job 2: Next.js Build (Web Portal)
+  # -----------------------------------------------------------------------------
+  web-build:
+    name: Web (Next.js) Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./iconnect-web
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: iconnect-web/package-lock.json
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Lint
+        run: npm run lint
+        
+      - name: Build
+        run: npm run build
+        env:
+          # Add placeholder env vars for build to succeed if they are required at build time
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+
+  # -----------------------------------------------------------------------------
+  # Job 3: Firebase Functions Build
+  # -----------------------------------------------------------------------------
+  functions-build:
+    name: Cloud Functions Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./functions
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Build TypeScript
+        run: npm run build

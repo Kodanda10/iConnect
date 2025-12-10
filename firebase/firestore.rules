@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: Check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function: Get user document
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function: Check user role
+    function hasRole(role) {
+      return isSignedIn() && getUserData().role == role;
+    }
+    
+    function isStaff() {
+      return hasRole('STAFF');
+    }
+    
+    function isLeader() {
+      return hasRole('LEADER');
+    }
+    
+    function isStaffOrLeader() {
+      return isStaff() || isLeader();
+    }
+    
+    // Users collection - users can read own doc, staff can read all
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow write: if isStaff();
+    }
+    
+    // Settings collection - singleton document
+    match /settings/{docId} {
+      allow read: if isStaffOrLeader();
+      allow write: if isStaff(); // Only staff can update app settings
+    }
+    
+    // Constituents collection
+    match /constituents/{constituentId} {
+      allow read: if isStaffOrLeader();
+      allow write: if isStaff(); // Leaders cannot modify constituent data
+    }
+    
+    // Tasks collection
+    match /tasks/{taskId} {
+      allow read: if isStaffOrLeader();
+      // Staff can do full CRUD, Leader can only update status/notes
+      allow create: if isStaff();
+      allow update: if isStaff() || (isLeader() && 
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'notes', 'action_taken', 'completed_by']));
+      allow delete: if isStaff();
+    }
+    
+    // Festivals collection
+    match /festivals/{festivalId} {
+      allow read: if isStaffOrLeader();
+      allow write: if isStaff();
+    }
+  }
+}

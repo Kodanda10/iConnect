@@ -1,0 +1,9 @@
+
+{
+  "name": "AC Connect CRM",
+  "description": "A constituent relationship management system bridging staff data entry and leader engagement actions.",
+  "requestFramePermissions": [
+    "microphone",
+    "notifications"
+  ]
+}
