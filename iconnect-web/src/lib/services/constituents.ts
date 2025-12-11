@@ -106,13 +106,16 @@ export async function addConstituent(
     const db = getFirebaseDb();
 
     // Extract day/month for efficient birthday/anniversary queries
-    const dobDate = new Date(data.dob);
-    const constituentData = {
+    const constituentData: Record<string, unknown> = {
         ...data,
-        dob_month: dobDate.getMonth() + 1,
-        dob_day: dobDate.getDate(),
         created_at: new Date().toISOString(),
     };
+
+    if (data.dob) {
+        const dobDate = new Date(data.dob);
+        constituentData.dob_month = dobDate.getMonth() + 1;
+        constituentData.dob_day = dobDate.getDate();
+    }
 
     if (data.anniversary) {
         const annDate = new Date(data.anniversary);
@@ -207,3 +210,29 @@ export async function getConstituentsForDate(
 
     return results;
 }
+
+/**
+ * Get constituents by MM-DD formatted string (for seeded data)
+ */
+export async function getConstituentsForDateMMDD(
+    mmdd: string,
+    type: 'birthday' | 'anniversary' = 'birthday'
+): Promise<Constituent[]> {
+    const db = getFirebaseDb();
+    const field = type === 'birthday' ? 'birthday_mmdd' : 'anniversary_mmdd';
+
+    const q = query(
+        collection(db, COLLECTION_NAME),
+        where(field, '==', mmdd)
+    );
+
+    const snapshot = await getDocs(q);
+    const results: Constituent[] = [];
+
+    snapshot.forEach((doc) => {
+        results.push({ id: doc.id, ...doc.data() } as Constituent);
+    });
+
+    return results;
+}
+

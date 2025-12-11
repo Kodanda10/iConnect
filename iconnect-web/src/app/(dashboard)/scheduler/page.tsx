@@ -3,12 +3,15 @@
  * @description Scheduler page with calendar and task management
  * @changelog
  * - 2024-12-11: Initial implementation
+ * - 2024-12-11: Connected to Firestore for birthday/anniversary display
  */
 
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { getConstituentsForDateMMDD } from '@/lib/services/constituents';
+import { Constituent } from '@/types';
 import {
     ChevronLeft,
     ChevronRight,
@@ -20,7 +23,7 @@ import {
     Filter,
     Loader2,
 } from 'lucide-react';
-import { EnrichedTask, TaskStatus, TaskType } from '@/types';
+import { TaskStatus, TaskType } from '@/types';
 
 // WhatsApp icon component
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -29,13 +32,19 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Display item for birthdays/anniversaries
+interface EventItem {
+    constituent: Constituent;
+    type: 'birthday' | 'anniversary';
+}
+
 export default function SchedulerPage() {
     const { isStaff } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [filterStatus, setFilterStatus] = useState<TaskStatus>('PENDING');
     const [filterType, setFilterType] = useState<'ALL' | TaskType>('ALL');
-    const [tasks, setTasks] = useState<EnrichedTask[]>([]);
+    const [events, setEvents] = useState<EventItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Calendar helpers
@@ -66,15 +75,47 @@ export default function SchedulerPage() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
-    // Placeholder: In production, this would fetch from Firestore
+    // Format selected date to MM-DD
+    const formatMMDD = (date: Date): string => {
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${month}-${day}`;
+    };
+
+    // Fetch birthdays and anniversaries for selected date
     useEffect(() => {
-        setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setTasks([]);
-            setLoading(false);
-        }, 500);
-    }, [selectedDate, filterStatus, filterType]);
+        const fetchEvents = async () => {
+            setLoading(true);
+            try {
+                const mmdd = formatMMDD(selectedDate);
+                const [birthdays, anniversaries] = await Promise.all([
+                    getConstituentsForDateMMDD(mmdd, 'birthday'),
+                    getConstituentsForDateMMDD(mmdd, 'anniversary'),
+                ]);
+
+                const allEvents: EventItem[] = [
+                    ...birthdays.map(c => ({ constituent: c, type: 'birthday' as const })),
+                    ...anniversaries.map(c => ({ constituent: c, type: 'anniversary' as const })),
+                ];
+
+                // Apply filter
+                if (filterType === 'BIRTHDAY') {
+                    setEvents(allEvents.filter(e => e.type === 'birthday'));
+                } else if (filterType === 'ANNIVERSARY') {
+                    setEvents(allEvents.filter(e => e.type === 'anniversary'));
+                } else {
+                    setEvents(allEvents);
+                }
+            } catch (error) {
+                console.error('Failed to fetch events:', error);
+                setEvents([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvents();
+    }, [selectedDate, filterType]);
 
     const isToday = (day: number) => {
         const today = new Date();
@@ -192,8 +233,8 @@ export default function SchedulerPage() {
                         <button
                             onClick={() => setFilterStatus('PENDING')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterStatus === 'PENDING'
-                                    ? 'bg-[var(--color-primary)] text-white'
-                                    : 'bg-black/5 text-[var(--color-text-secondary)]'
+                                ? 'bg-[var(--color-primary)] text-white'
+                                : 'bg-black/5 text-[var(--color-text-secondary)]'
                                 }`}
                         >
                             Pending
@@ -201,8 +242,8 @@ export default function SchedulerPage() {
                         <button
                             onClick={() => setFilterStatus('COMPLETED')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterStatus === 'COMPLETED'
-                                    ? 'bg-[var(--color-primary)] text-white'
-                                    : 'bg-black/5 text-[var(--color-text-secondary)]'
+                                ? 'bg-[var(--color-primary)] text-white'
+                                : 'bg-black/5 text-[var(--color-text-secondary)]'
                                 }`}
                         >
                             History
@@ -214,8 +255,8 @@ export default function SchedulerPage() {
                         <button
                             onClick={() => setFilterType('ALL')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterType === 'ALL'
-                                    ? 'bg-[var(--color-secondary)] text-white'
-                                    : 'bg-black/5 text-[var(--color-text-secondary)]'
+                                ? 'bg-[var(--color-secondary)] text-white'
+                                : 'bg-black/5 text-[var(--color-text-secondary)]'
                                 }`}
                         >
                             All
@@ -223,8 +264,8 @@ export default function SchedulerPage() {
                         <button
                             onClick={() => setFilterType('BIRTHDAY')}
                             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterType === 'BIRTHDAY'
-                                    ? 'bg-pink-500 text-white'
-                                    : 'bg-black/5 text-[var(--color-text-secondary)]'
+                                ? 'bg-pink-500 text-white'
+                                : 'bg-black/5 text-[var(--color-text-secondary)]'
                                 }`}
                         >
                             <Gift className="w-3 h-3" />
@@ -233,8 +274,8 @@ export default function SchedulerPage() {
                         <button
                             onClick={() => setFilterType('ANNIVERSARY')}
                             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterType === 'ANNIVERSARY'
-                                    ? 'bg-purple-500 text-white'
-                                    : 'bg-black/5 text-[var(--color-text-secondary)]'
+                                ? 'bg-purple-500 text-white'
+                                : 'bg-black/5 text-[var(--color-text-secondary)]'
                                 }`}
                         >
                             <Heart className="w-3 h-3" />
@@ -242,29 +283,29 @@ export default function SchedulerPage() {
                         </button>
                     </div>
 
-                    {/* Task List */}
+                    {/* Event List - Birthdays & Anniversaries */}
                     <div className="space-y-3">
                         {loading ? (
                             <div className="text-center py-8">
                                 <Loader2 className="w-6 h-6 text-[var(--color-primary)] animate-spin mx-auto" />
                             </div>
-                        ) : tasks.length === 0 ? (
+                        ) : events.length === 0 ? (
                             <div className="text-center py-8 text-[var(--color-text-secondary)]">
                                 <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                                <p className="text-sm">No tasks for this date</p>
+                                <p className="text-sm">No birthdays or anniversaries</p>
                             </div>
                         ) : (
-                            tasks.map((task) => (
+                            events.map((event, idx) => (
                                 <div
-                                    key={task.id}
+                                    key={`${event.constituent.id}-${event.type}-${idx}`}
                                     className="p-4 bg-black/5 rounded-xl hover:bg-black/10 transition-colors cursor-pointer"
                                 >
                                     <div className="flex items-center gap-3 mb-2">
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center ${task.type === 'BIRTHDAY' ? 'bg-pink-100 text-pink-500' : 'bg-purple-100 text-purple-500'
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center ${event.type === 'birthday' ? 'bg-pink-100 text-pink-500' : 'bg-purple-100 text-purple-500'
                                                 }`}
                                         >
-                                            {task.type === 'BIRTHDAY' ? (
+                                            {event.type === 'birthday' ? (
                                                 <Gift className="w-5 h-5" />
                                             ) : (
                                                 <Heart className="w-5 h-5" />
@@ -272,26 +313,37 @@ export default function SchedulerPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-[var(--color-text-primary)]">
-                                                {task.constituent.name}
+                                                {event.constituent.full_name || event.constituent.name}
                                             </p>
                                             <p className="text-xs text-[var(--color-text-secondary)]">
-                                                Ward {task.constituent.ward_number}
+                                                {event.type === 'birthday' ? '🎂 Birthday' : '💍 Anniversary'} • Ward {event.constituent.ward || event.constituent.ward_number}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="flex gap-2 mt-3">
-                                        <button className="flex-1 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center gap-1">
+                                        <a
+                                            href={`tel:${event.constituent.phone || event.constituent.mobile_number}`}
+                                            className="flex-1 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center gap-1"
+                                        >
                                             <Phone className="w-3 h-3" />
                                             Call
-                                        </button>
-                                        <button className="flex-1 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center gap-1">
+                                        </a>
+                                        <a
+                                            href={`sms:${event.constituent.phone || event.constituent.mobile_number}`}
+                                            className="flex-1 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center gap-1"
+                                        >
                                             <MessageSquare className="w-3 h-3" />
                                             SMS
-                                        </button>
-                                        <button className="flex-1 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 text-xs font-bold flex items-center justify-center gap-1">
+                                        </a>
+                                        <a
+                                            href={`https://wa.me/${event.constituent.phone || event.constituent.mobile_number}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 py-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 text-xs font-bold flex items-center justify-center gap-1"
+                                        >
                                             <WhatsAppIcon className="w-3 h-3" />
                                             WhatsApp
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             ))

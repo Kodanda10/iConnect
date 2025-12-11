@@ -93,7 +93,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             const auth = getFirebaseAuth();
             const result = await signInWithEmailAndPassword(auth, email, password);
-            const userData = await fetchUserRole(result.user.uid);
+
+            // Check if profile exists, if not create it (Lazy Provisioning)
+            let userData = await fetchUserRole(result.user.uid);
+            if (!userData) {
+                console.log('User profile missing, creating default profile...');
+                const db = getFirebaseDb();
+                await import('firebase/firestore').then(({ doc, setDoc }) =>
+                    setDoc(doc(db, 'users', result.user.uid), {
+                        email: result.user.email,
+                        role: 'STAFF', // Default role for manual console creations
+                        created_at: new Date().toISOString(),
+                        name: result.user.email?.split('@')[0] || 'Admin'
+                    })
+                );
+                userData = {
+                    uid: result.user.uid,
+                    email: result.user.email || '',
+                    role: 'STAFF',
+                    name: result.user.email?.split('@')[0] || 'Admin'
+                };
+            }
+
             setUser(userData);
             setFirebaseUser(result.user);
         } catch (err) {

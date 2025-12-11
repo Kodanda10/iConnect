@@ -48,83 +48,83 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
 
     const navItems = [
-        { href: '/', label: 'Dashboard', icon: Database, staffOnly: false },
+        { href: '/settings', label: 'Dashboard', icon: Database, staffOnly: false },
+        { href: '/upload', label: 'Data Entry', icon: Upload, staffOnly: true },
         { href: '/scheduler', label: 'Scheduler', icon: Calendar, staffOnly: false },
         { href: '/festivals', label: 'Festivals', icon: PartyPopper, staffOnly: true },
-        { href: '/upload', label: 'Data Entry', icon: Upload, staffOnly: true },
-        { href: '/settings', label: 'Settings', icon: Settings, staffOnly: true },
     ];
 
     const filteredNavItems = navItems.filter(item => !item.staffOnly || isStaff);
 
     return (
         <div className="min-h-screen">
-            {/* Header */}
-            <header className="glass-card-light border-b border-white/10 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
+            {/* VisionOS Floating Glass Header */}
+            <header className="sticky top-0 z-50 py-3 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="glass-navbar flex items-center justify-between h-14 px-4 sm:px-6">
                         {/* Logo */}
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
-                                <Database className="w-5 h-5 text-white" />
+                            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                                <Database className="w-4 h-4 text-white" />
                             </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-[var(--color-text-primary)]">
+                            <div className="hidden sm:block">
+                                <h1 className="text-base font-bold text-white">
                                     iConnect
                                 </h1>
-                                <p className="text-xs text-[var(--color-text-secondary)] -mt-0.5">
+                                <p className="text-[10px] text-white/50 -mt-0.5">
                                     Staff Portal
                                 </p>
                             </div>
                         </div>
 
-                        {/* Navigation */}
-                        <nav className="hidden md:flex items-center gap-1 bg-black/5 p-1 rounded-xl">
+                        {/* Navigation - Animated Glass Pills */}
+                        <nav className="hidden md:flex items-center gap-1 bg-white/5 backdrop-blur-sm p-1.5 rounded-full">
                             {filteredNavItems.map((item) => {
                                 const isActive = pathname === item.href;
                                 return (
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                      ${isActive
-                                                ? 'bg-white text-[var(--color-primary)] shadow-sm'
-                                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-black/5'
-                                            }
-                    `}
+                                        className={`glass-navbar-link ${isActive ? 'active' : ''}`}
+                                        onMouseMove={(e) => {
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+                                            e.currentTarget.style.setProperty('--mouse-x', `${x}%`);
+                                            e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
+                                        }}
                                     >
-                                        <item.icon className="w-4 h-4" />
-                                        {item.label}
+                                        <item.icon className="w-4 h-4 nav-icon" />
+                                        <span>{item.label}</span>
                                     </Link>
                                 );
                             })}
                         </nav>
 
                         {/* Right Section */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             {/* Notification Bell */}
-                            <button className="relative p-2 rounded-full hover:bg-black/5 transition-colors">
-                                <Bell className="w-5 h-5 text-[var(--color-text-secondary)]" />
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
+                            <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
+                                <Bell className="w-5 h-5 text-white/70" />
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[rgba(30,45,40,0.8)]" />
                             </button>
 
                             {/* User Info */}
-                            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-black/10">
+                            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-white/20">
                                 <div className="text-right">
-                                    <p className="text-sm font-medium text-[var(--color-text-primary)]">
-                                        {user.name || user.email}
+                                    <p className="text-sm font-medium text-white">
+                                        {user.name || user.email?.split('@')[0]}
                                     </p>
-                                    <p className="text-xs text-[var(--color-text-secondary)]">
+                                    <p className="text-[10px] text-white/50 uppercase tracking-wider">
                                         {user.role}
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => signOut()}
-                                    className="p-2 rounded-lg hover:bg-red-50 text-[var(--color-text-secondary)] hover:text-red-500 transition-colors"
+                                    className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-red-400 transition-colors"
                                     title="Sign Out"
                                 >
-                                    <LogOut className="w-5 h-5" />
+                                    <LogOut className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>

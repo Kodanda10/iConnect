@@ -5,7 +5,8 @@
  * - 2024-12-11: Initial implementation with generateGreeting and dailyScan
  */
 
-import * as functions from 'firebase-functions';
+import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from 'firebase-admin';
 import { generateGreetingMessage, GreetingRequest } from './greeting';
 import { scanForTasks, Constituent, Task } from './dailyScan';
@@ -18,24 +19,24 @@ const db = admin.firestore();
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side
  */
-export const generateGreeting = functions.https.onCall(
-    async (data: GreetingRequest, context) => {
+export const generateGreeting = onCall<GreetingRequest>(
+    async (request) => {
         // Verify authentication
-        if (!context.auth) {
-            throw new functions.https.HttpsError(
+        if (!request.auth) {
+            throw new HttpsError(
                 'unauthenticated',
                 'User must be authenticated'
             );
         }
 
         try {
-            const message = await generateGreetingMessage(data);
+            const message = await generateGreetingMessage(request.data);
             return { message };
         } catch (error) {
             if (error instanceof Error) {
-                throw new functions.https.HttpsError('invalid-argument', error.message);
+                throw new HttpsError('invalid-argument', error.message);
             }
-            throw new functions.https.HttpsError('internal', 'Failed to generate greeting');
+            throw new HttpsError('internal', 'Failed to generate greeting');
         }
     }
 );
@@ -44,57 +45,56 @@ export const generateGreeting = functions.https.onCall(
  * Daily scan cron job - runs at 00:01 AM IST every day
  * Scans constituents for birthdays/anniversaries and creates tasks
  */
-export const dailyScan = functions.pubsub
-    .schedule('1 0 * * *') // Every day at 00:01
-    .timeZone('Asia/Kolkata')
-    .onRun(async (context) => {
-        console.log('Starting daily scan at', new Date().toISOString());
+export const dailyScan = onSchedule({
+    schedule: '1 0 * * *',
+    timeZone: 'Asia/Kolkata',
+}, async (event) => {
+    console.log('Starting daily scan at', new Date().toISOString());
 
-        try {
-            // Fetch all constituents
-            const constituentsSnapshot = await db.collection('constituents').get();
-            const constituents: Constituent[] = [];
+    try {
+        // Fetch all constituents
+        const constituentsSnapshot = await db.collection('constituents').get();
+        const constituents: Constituent[] = [];
 
-            constituentsSnapshot.forEach((doc) => {
-                constituents.push({ id: doc.id, ...doc.data() } as Constituent);
-            });
+        constituentsSnapshot.forEach((doc) => {
+            constituents.push({ id: doc.id, ...doc.data() } as Constituent);
+        });
 
-            // Fetch existing tasks for today and tomorrow
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
+        // Fetch existing tasks for today and tomorrow
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
 
-            const todayStr = today.toISOString().split('T')[0];
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const todayStr = today.toISOString().split('T')[0];
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-            const tasksSnapshot = await db
-                .collection('tasks')
-                .where('due_date', 'in', [todayStr, tomorrowStr])
-                .get();
+        const tasksSnapshot = await db
+            .collection('tasks')
+            .where('due_date', 'in', [todayStr, tomorrowStr])
+            .get();
 
-            const existingTasks: Task[] = [];
-            tasksSnapshot.forEach((doc) => {
-                existingTasks.push({ id: doc.id, ...doc.data() } as Task);
-            });
+        const existingTasks: Task[] = [];
+        tasksSnapshot.forEach((doc) => {
+            existingTasks.push({ id: doc.id, ...doc.data() } as Task);
+        });
 
-            // Run the scan
-            const result = scanForTasks(constituents, existingTasks);
+        // Run the scan
+        const result = scanForTasks(constituents, existingTasks);
 
-            // Write new tasks to Firestore
-            const batch = db.batch();
-            for (const task of result.newTasks) {
-                const docRef = db.collection('tasks').doc(task.id);
-                batch.set(docRef, task);
-            }
-            await batch.commit();
-
-            console.log(`Daily scan complete. Created ${result.count} new tasks.`);
-            return null;
-        } catch (error) {
-            console.error('Daily scan failed:', error);
-            throw error;
+        // Write new tasks to Firestore
+        const batch = db.batch();
+        for (const task of result.newTasks) {
+            const docRef = db.collection('tasks').doc(task.id);
+            batch.set(docRef, task);
         }
-    });
+        await batch.commit();
+
+        console.log(`Daily scan complete. Created ${result.count} new tasks.`);
+    } catch (error) {
+        console.error('Daily scan failed:', error);
+        throw error;
+    }
+});
 
 // Export types for testing
 export { GreetingRequest } from './greeting';

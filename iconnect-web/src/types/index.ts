@@ -18,19 +18,36 @@ export interface User {
 // Constituent (Citizen) data
 export interface Constituent {
     id: string;
-    name: string;
-    mobile_number: string;
-    dob: string; // YYYY-MM-DD
-    dob_month?: number; // For efficient Firestore queries
+    // Name fields
+    name?: string;
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
+    // Contact
+    mobile_number?: string;
+    phone?: string;
+    // Birthday
+    dob?: string; // YYYY-MM-DD
+    dob_month?: number;
     dob_day?: number;
-    anniversary?: string; // YYYY-MM-DD
+    birthday?: any; // Firestore Timestamp
+    birthday_mmdd?: string; // MM-DD format
+    // Anniversary
+    anniversary?: string | any; // YYYY-MM-DD or Timestamp
     anniversary_month?: number;
     anniversary_day?: number;
+    anniversary_mmdd?: string; // MM-DD format
+    // Location
     block?: string;
     gp_ulb?: string; // Gram Panchayat or ULB
-    ward_number: string;
-    address: string;
-    created_at: string;
+    ward_number?: string;
+    ward?: string;
+    village?: string;
+    address?: string;
+    // Metadata
+    tags?: string[];
+    created_at?: string | any;
+    updated_at?: string | any;
 }
 
 // Task types

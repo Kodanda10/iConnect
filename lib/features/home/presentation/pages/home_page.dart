@@ -5,12 +5,13 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../domain/entities/task.dart';
-import '../bloc/task_bloc.dart';
-import '../bloc/task_state.dart';
-import '../bloc/task_event.dart';
-import '../../action/presentation/widgets/ai_greeting_sheet.dart';
+import 'package:iconnect_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:iconnect_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:iconnect_mobile/features/tasks/domain/entities/task.dart';
+import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_bloc.dart';
+import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_state.dart';
+import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_event.dart';
+import 'package:iconnect_mobile/features/action/presentation/widgets/ai_greeting_sheet.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

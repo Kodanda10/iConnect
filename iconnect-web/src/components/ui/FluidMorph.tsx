@@ -57,8 +57,11 @@ export function FluidMorph({
             const scaleY = previousPos.height / currentPos.height;
 
             // Only animate if there's significant change
+            // Only animate if there's significant change
             if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1 || Math.abs(scaleX - 1) > 0.01 || Math.abs(scaleY - 1) > 0.01) {
-                setIsAnimating(true);
+                // Use a ref or standard animation loop instead of state if possible, 
+                // but if we need state, wrap in rAF to avoid sync render issues
+                requestAnimationFrame(() => setIsAnimating(true));
 
                 // Apply inverse transform (snap to previous position)
                 element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`;

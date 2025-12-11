@@ -90,7 +90,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white.withOpacity(0.9),
-        title: const Text('Task Completion', style: TextStyle(color: AppColors.primaryText)),
+        title: const Text('Task Completion', style: TextStyle(color: AppColors.textPrimary)),
         content: Text('Did you successfully send the ${widget.type.toLowerCase()} wish to ${widget.constituentName}?'),
         actions: [
           TextButton(

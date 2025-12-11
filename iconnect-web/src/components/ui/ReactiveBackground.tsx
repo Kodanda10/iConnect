@@ -7,12 +7,20 @@
 
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 
 interface ReactiveBackgroundProps {
     urgencyLevel?: 'calm' | 'normal' | 'active' | 'urgent';
     particleCount?: number;
 }
+
+// Urgency-based animation speeds
+const urgencyConfig = {
+    calm: { speed: 0.5, saturation: 80, pulse: false },
+    normal: { speed: 1, saturation: 100, pulse: false },
+    active: { speed: 1.5, saturation: 110, pulse: true },
+    urgent: { speed: 2.5, saturation: 130, pulse: true },
+};
 
 export function ReactiveBackground({
     urgencyLevel = 'normal',
@@ -20,14 +28,6 @@ export function ReactiveBackground({
 }: ReactiveBackgroundProps) {
     const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
     const containerRef = useRef<HTMLDivElement>(null);
-
-    // Urgency-based animation speeds
-    const urgencyConfig = {
-        calm: { speed: 0.5, saturation: 80, pulse: false },
-        normal: { speed: 1, saturation: 100, pulse: false },
-        active: { speed: 1.5, saturation: 110, pulse: true },
-        urgent: { speed: 2.5, saturation: 130, pulse: true },
-    };
 
     const config = urgencyConfig[urgencyLevel];
 
@@ -45,15 +45,30 @@ export function ReactiveBackground({
     }, []);
 
     // Generate particles with varied properties
-    const particles = Array.from({ length: particleCount }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        size: 2 + Math.random() * 4,
-        duration: (4 + Math.random() * 4) / config.speed,
-        delay: Math.random() * 5,
-        opacity: 0.1 + Math.random() * 0.15,
-    }));
+    // Generate stable particles on mount to avoid impure render
+    interface Particle {
+        id: number;
+        left: number;
+        top: number;
+        size: number;
+        duration: number;
+        delay: number;
+        opacity: number;
+    }
+    const [particles, setParticles] = useState<Particle[]>([]);
+
+    useEffect(() => {
+        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
+            id: i,
+            left: Math.random() * 100,
+            top: Math.random() * 100,
+            size: 2 + Math.random() * 4,
+            duration: (4 + Math.random() * 4) / config.speed,
+            delay: Math.random() * 5,
+            opacity: 0.1 + Math.random() * 0.15,
+        }));
+        setParticles(newParticles);
+    }, [particleCount, config.speed]);
 
     return (
         <div
@@ -91,7 +106,7 @@ export function ReactiveBackground({
             />
 
             {/* Floating Particles */}
-            {particles.map((p) => (
+            {particles.map((p: any) => (
                 <div
                     key={p.id}
                     className="absolute rounded-full"

@@ -30,10 +30,10 @@ service cloud.firestore {
       return isStaff() || isLeader();
     }
     
-    // Users collection - users can read own doc, staff can read all
+    // Users collection - users can read/write own doc, staff can read all
     match /users/{userId} {
       allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
-      allow write: if isStaff();
+      allow write: if isStaff() || (isSignedIn() && request.auth.uid == userId);
     }
     
     // Settings collection - singleton document
@@ -45,7 +45,9 @@ service cloud.firestore {
     // Constituents collection
     match /constituents/{constituentId} {
       allow read: if isStaffOrLeader();
-      allow write: if isStaff(); // Leaders cannot modify constituent data
+      // Allow write if staff OR if document is tagged as 'seeded' (for API seeding)
+      allow create: if isStaff() || request.resource.data.tags.hasAny(['seeded']);
+      allow update, delete: if isStaff();
     }
     
     // Tasks collection
