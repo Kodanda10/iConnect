@@ -207,22 +207,24 @@ export default function SettingsPage() {
                     <h1 className="text-2xl font-bold text-white">CMS</h1>
                     <p className="text-white/60 mt-1">Customize app appearance and notifications</p>
                 </div>
-                <button onClick={handleSave} disabled={isSaving} className="btn-primary flex items-center gap-2 ripple">
-                    {isSaving ? (
-                        <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
-                    ) : saveSuccess ? (
-                        <><CheckCircle className="w-4 h-4" /> Saved!</>
-                    ) : (
-                        <><Save className="w-4 h-4" /> Save Changes</>
-                    )}
-                </button>
             </div>
 
             {/* Row 1: Visual Configuration (Merged) */}
             <div className="glass-card-light p-8 rounded-2xl">
-                <div className="flex items-center gap-2 text-white mb-8">
-                    <Smartphone className="w-5 h-5 text-emerald-400" />
-                    <h2 className="font-bold text-lg">Visual Configuration</h2>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-white">
+                        <Smartphone className="w-5 h-5 text-emerald-400" />
+                        <h2 className="font-bold text-lg">Visual Configuration</h2>
+                    </div>
+                    <button onClick={handleSave} disabled={isSaving} className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all flex items-center gap-1.5 disabled:opacity-50">
+                        {isSaving ? (
+                            <><Loader2 className="w-3 h-3 animate-spin" /> Saving...</>
+                        ) : saveSuccess ? (
+                            <><CheckCircle className="w-3 h-3" /> Saved</>
+                        ) : (
+                            <><Save className="w-3 h-3" /> Save</>
+                        )}
+                    </button>
                 </div>
 
                 <div className="grid lg:grid-cols-3 gap-12 items-center">

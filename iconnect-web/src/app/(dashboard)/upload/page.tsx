@@ -11,7 +11,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { getConstituents } from '@/lib/services/constituents';
+import { getConstituents, addConstituent } from '@/lib/services/constituents';
 import { downloadConstituentsAsCSV, downloadConstituentsAsPDF } from '@/lib/utils/download';
 import { Constituent } from '@/types';
 import {
@@ -169,20 +169,38 @@ export default function UploadPage() {
     const handleManualSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setUploadStatus('success');
-        setFormData({
-            name: '',
-            mobile: '',
-            dob: '',
-            anniversary: '',
-            block: '',
-            gp_ulb: '',
-            village: '',
-            ward: '',
-        });
-        setIsLoading(false);
-        setTimeout(() => setUploadStatus('idle'), 3000);
+        try {
+            await addConstituent({
+                name: formData.name,
+                mobile_number: formData.mobile,
+                dob: formData.dob || undefined,
+                anniversary: formData.anniversary || undefined,
+                block: formData.block || undefined,
+                gp_ulb: formData.gp_ulb || undefined,
+                village: formData.village || undefined,
+                ward: formData.ward || undefined,
+            });
+            setUploadStatus('success');
+            setFormData({
+                name: '',
+                mobile: '',
+                dob: '',
+                anniversary: '',
+                block: '',
+                gp_ulb: '',
+                village: '',
+                ward: '',
+            });
+            // Refresh constituents list
+            const { constituents: newData } = await getConstituents();
+            setConstituents(newData);
+        } catch (error) {
+            console.error('Failed to add constituent:', error);
+            setUploadStatus('error');
+        } finally {
+            setIsLoading(false);
+            setTimeout(() => setUploadStatus('idle'), 3000);
+        }
     };
 
     // Filter constituents
@@ -422,7 +440,7 @@ export default function UploadPage() {
                         {/* Date of Birth */}
                         <div>
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Date of Birth *
+                                Date of Birth
                             </label>
                             <div className="relative group">
                                 <div
@@ -437,7 +455,6 @@ export default function UploadPage() {
                                     value={formatDateForInput(formData.dob)}
                                     onClick={() => setActiveDatePicker(activeDatePicker === 'dob' ? null : 'dob')}
                                     placeholder="dd/mm/yyyy"
-                                    required
                                     className="glass-input-dark pl-10 h-12 w-full cursor-pointer"
                                 />
                                 {activeDatePicker === 'dob' && (
