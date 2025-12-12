@@ -97,8 +97,10 @@ export default function UploadPage() {
     // Search
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Date picker state
     const [activeDatePicker, setActiveDatePicker] = useState<'dob' | 'anniversary' | null>(null);
+    const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0, width: 0 });
+    const dobInputRef = React.useRef<HTMLInputElement>(null);
+    const anniversaryInputRef = React.useRef<HTMLInputElement>(null);
 
     const formatDateForInput = (dateStr: string) => {
         if (!dateStr) return '';
@@ -131,6 +133,20 @@ export default function UploadPage() {
             // Store as-is in a display format, will be validated on submit
             setFormData(prev => ({ ...prev, [field]: value }));
         }
+    };
+
+    // Open date picker and calculate position
+    const openDatePicker = (field: 'dob' | 'anniversary') => {
+        const inputRef = field === 'dob' ? dobInputRef : anniversaryInputRef;
+        if (inputRef.current) {
+            const rect = inputRef.current.getBoundingClientRect();
+            setCalendarPosition({
+                top: rect.bottom + 8, // 8px gap below input
+                left: rect.left,
+                width: rect.width,
+            });
+        }
+        setActiveDatePicker(field);
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -463,29 +479,19 @@ export default function UploadPage() {
                             <div className="relative group">
                                 <div
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
-                                    onClick={() => setActiveDatePicker(activeDatePicker === 'dob' ? null : 'dob')}
+                                    onClick={() => openDatePicker('dob')}
                                 >
                                     <Calendar className="w-4 h-4" />
                                 </div>
                                 <input
+                                    ref={dobInputRef}
                                     type="text"
                                     value={formatDateForInput(formData.dob)}
                                     onChange={(e) => handleDateTextInput('dob', e.target.value)}
-                                    onFocus={() => setActiveDatePicker('dob')}
+                                    onFocus={() => openDatePicker('dob')}
                                     placeholder="dd/mm/yyyy"
                                     className="glass-input-dark pl-10 h-12 w-full"
                                 />
-                                {activeDatePicker === 'dob' && (
-                                    <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
-                                        <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
-                                            <GlassCalendar
-                                                selectedDate={formData.dob ? new Date(formData.dob) : new Date()}
-                                                onSelect={(date) => handleDateSelect('dob', date)}
-                                                className="!bg-transparent !p-2 !shadow-none"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -497,32 +503,56 @@ export default function UploadPage() {
                             <div className="relative group">
                                 <div
                                     className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
-                                    onClick={() => setActiveDatePicker(activeDatePicker === 'anniversary' ? null : 'anniversary')}
+                                    onClick={() => openDatePicker('anniversary')}
                                 >
                                     <Calendar className="w-4 h-4" />
                                 </div>
                                 <input
+                                    ref={anniversaryInputRef}
                                     type="text"
                                     value={formatDateForInput(formData.anniversary)}
                                     onChange={(e) => handleDateTextInput('anniversary', e.target.value)}
-                                    onFocus={() => setActiveDatePicker('anniversary')}
+                                    onFocus={() => openDatePicker('anniversary')}
                                     placeholder="dd/mm/yyyy"
                                     className="glass-input-dark pl-10 h-12 w-full"
                                 />
-                                {activeDatePicker === 'anniversary' && (
-                                    <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
-                                        <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
-                                            <GlassCalendar
-                                                selectedDate={formData.anniversary ? new Date(formData.anniversary) : new Date()}
-                                                onSelect={(date) => handleDateSelect('anniversary', date)}
-                                                className="!bg-transparent !p-2 !shadow-none"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
+
+                    {/* Fixed position calendar portal */}
+                    {activeDatePicker && (
+                        <>
+                            {/* Backdrop to close calendar */}
+                            <div
+                                className="fixed inset-0 z-[9998]"
+                                onClick={() => setActiveDatePicker(null)}
+                            />
+                            {/* Calendar dropdown */}
+                            <div
+                                className="fixed z-[9999] animate-in fade-in zoom-in-95 duration-200"
+                                style={{
+                                    top: calendarPosition.top,
+                                    left: calendarPosition.left,
+                                    width: Math.max(calendarPosition.width, 300),
+                                }}
+                            >
+                                <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
+                                    <GlassCalendar
+                                        selectedDate={
+                                            activeDatePicker === 'dob'
+                                                ? (formData.dob ? new Date(formData.dob) : new Date())
+                                                : (formData.anniversary ? new Date(formData.anniversary) : new Date())
+                                        }
+                                        onSelect={(date) => handleDateSelect(activeDatePicker, date)}
+                                        className="!bg-transparent !p-2 !shadow-none"
+                                        minYear={1920}
+                                        maxYear={new Date().getFullYear() + 5}
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     <button
                         type="submit"
