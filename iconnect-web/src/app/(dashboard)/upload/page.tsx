@@ -29,7 +29,9 @@ import {
     Download,
     FileDown,
     User,
+    Calendar,
 } from 'lucide-react';
+import GlassCalendar from '@/components/ui/GlassCalendar';
 
 export default function UploadPage() {
     const { isStaff } = useAuth();
@@ -94,6 +96,24 @@ export default function UploadPage() {
 
     // Search
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Date picker state
+    const [activeDatePicker, setActiveDatePicker] = useState<'dob' | 'anniversary' | null>(null);
+
+    const formatDateForInput = (dateStr: string) => {
+        if (!dateStr) return '';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    };
+
+    const handleDateSelect = (field: 'dob' | 'anniversary', date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+        setFormData(prev => ({ ...prev, [field]: dateStr }));
+        setActiveDatePicker(null);
+    };
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -319,7 +339,7 @@ export default function UploadPage() {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     required
-                                    className="glass-input-dark pl-10"
+                                    className="glass-input-dark pl-10 h-12 w-full"
                                     placeholder="Enter full name"
                                 />
                             </div>
@@ -336,7 +356,7 @@ export default function UploadPage() {
                                 onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                                 required
                                 pattern="[0-9]{10}"
-                                className="glass-input-dark"
+                                className="glass-input-dark h-12 w-full px-4"
                                 placeholder="10-digit number"
                             />
                         </div>
@@ -350,7 +370,7 @@ export default function UploadPage() {
                                 type="text"
                                 value={formData.ward}
                                 onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-                                className="glass-input-dark"
+                                className="glass-input-dark h-12 w-full px-4"
                                 placeholder="Ward #"
                             />
                         </div>
@@ -360,18 +380,21 @@ export default function UploadPage() {
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 Block
                             </label>
-                            <select
-                                value={formData.block}
-                                onChange={(e) => setFormData({ ...formData, block: e.target.value })}
-                                className="glass-input-dark"
-                            >
-                                <option value="">Select Block</option>
-                                <option value="Raipur">Raipur</option>
-                                <option value="Bilaspur">Bilaspur</option>
-                                <option value="Durg">Durg</option>
-                                <option value="Korba">Korba</option>
-                                <option value="Rajnandgaon">Rajnandgaon</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={formData.block}
+                                    onChange={(e) => setFormData({ ...formData, block: e.target.value })}
+                                    className="glass-input-dark h-12 w-full px-4 appearance-none"
+                                >
+                                    <option value="">Select Block</option>
+                                    <option value="Raipur">Raipur</option>
+                                    <option value="Bilaspur">Bilaspur</option>
+                                    <option value="Durg">Durg</option>
+                                    <option value="Korba">Korba</option>
+                                    <option value="Rajnandgaon">Rajnandgaon</option>
+                                </select>
+                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* GP/ULB */}
@@ -379,17 +402,20 @@ export default function UploadPage() {
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 GP / ULB
                             </label>
-                            <select
-                                value={formData.gp_ulb}
-                                onChange={(e) => setFormData({ ...formData, gp_ulb: e.target.value })}
-                                className="glass-input-dark"
-                            >
-                                <option value="">Select GP/ULB</option>
-                                <option value="GP1">Gram Panchayat 1</option>
-                                <option value="GP2">Gram Panchayat 2</option>
-                                <option value="ULB1">Urban Local Body 1</option>
-                                <option value="ULB2">Urban Local Body 2</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={formData.gp_ulb}
+                                    onChange={(e) => setFormData({ ...formData, gp_ulb: e.target.value })}
+                                    className="glass-input-dark h-12 w-full px-4 appearance-none"
+                                >
+                                    <option value="">Select GP/ULB</option>
+                                    <option value="GP1">Gram Panchayat 1</option>
+                                    <option value="GP2">Gram Panchayat 2</option>
+                                    <option value="ULB1">Urban Local Body 1</option>
+                                    <option value="ULB2">Urban Local Body 2</option>
+                                </select>
+                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* Date of Birth */}
@@ -397,13 +423,34 @@ export default function UploadPage() {
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 Date of Birth *
                             </label>
-                            <input
-                                type="date"
-                                value={formData.dob}
-                                onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                                required
-                                className="glass-input-dark"
-                            />
+                            <div className="relative group">
+                                <div
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
+                                    onClick={() => setActiveDatePicker(activeDatePicker === 'dob' ? null : 'dob')}
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={formatDateForInput(formData.dob)}
+                                    onClick={() => setActiveDatePicker(activeDatePicker === 'dob' ? null : 'dob')}
+                                    placeholder="dd/mm/yyyy"
+                                    required
+                                    className="glass-input-dark pl-10 h-12 w-full cursor-pointer"
+                                />
+                                {activeDatePicker === 'dob' && (
+                                    <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
+                                            <GlassCalendar
+                                                selectedDate={formData.dob ? new Date(formData.dob) : new Date()}
+                                                onSelect={(date) => handleDateSelect('dob', date)}
+                                                className="!bg-transparent !p-2 !shadow-none"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Anniversary */}
@@ -411,12 +458,33 @@ export default function UploadPage() {
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 Anniversary
                             </label>
-                            <input
-                                type="date"
-                                value={formData.anniversary}
-                                onChange={(e) => setFormData({ ...formData, anniversary: e.target.value })}
-                                className="glass-input-dark"
-                            />
+                            <div className="relative group">
+                                <div
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
+                                    onClick={() => setActiveDatePicker(activeDatePicker === 'anniversary' ? null : 'anniversary')}
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={formatDateForInput(formData.anniversary)}
+                                    onClick={() => setActiveDatePicker(activeDatePicker === 'anniversary' ? null : 'anniversary')}
+                                    placeholder="dd/mm/yyyy"
+                                    className="glass-input-dark pl-10 h-12 w-full cursor-pointer"
+                                />
+                                {activeDatePicker === 'anniversary' && (
+                                    <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
+                                            <GlassCalendar
+                                                selectedDate={formData.anniversary ? new Date(formData.anniversary) : new Date()}
+                                                onSelect={(date) => handleDateSelect('anniversary', date)}
+                                                className="!bg-transparent !p-2 !shadow-none"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -442,7 +510,7 @@ export default function UploadPage() {
             </div>
 
             {/* --- Full-Width Database Table --- */}
-            <div className="glass-card-light p-6 rounded-2xl">
+            <div className="glass-card-light p-6 rounded-2xl" style={{ overflow: 'visible' }}>
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <h3 className="font-bold text-white flex items-center gap-2">
                         <Database className="w-5 h-5 text-emerald-400" />

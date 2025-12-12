@@ -12,6 +12,9 @@ import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_bloc.dart'
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_state.dart';
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_event.dart';
 import 'package:iconnect_mobile/features/action/presentation/widgets/ai_greeting_sheet.dart';
+import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_state.dart';
+import 'package:iconnect_mobile/features/settings/domain/entities/app_settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,7 +24,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  String _filter = 'ALL';
+  // Config now from CMS via SettingsCubit
+  // Removed: final String _appName = "AC Connect";
+  // Removed: final String _leaderName = "Pranab Kumar Balabantaray";
+  // Removed: final String? _headerImage = "...";
+
+  // Filter State
+  String _filterStatus = 'PENDING'; // 'PENDING' or 'COMPLETED' (History)
+  String _filterType = 'ALL'; // 'ALL', 'BIRTHDAY', 'ANNIVERSARY'
+  
   late AnimationController _headerAnim;
   late Animation<double> _headerSlide;
 
@@ -47,404 +58,541 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // --- Actions ---
+
   void _launchPhone(String number) async {
     final uri = Uri.parse('tel:$number');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   void _launchSMS(String number, String message) async {
     final uri = Uri.parse('sms:$number?body=${Uri.encodeComponent(message)}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 
   void _launchWhatsApp(String number, String message) async {
     final cleanNumber = number.replaceAll(RegExp(r'[^0-9]'), '');
     final uri = Uri.parse('https://wa.me/$cleanNumber?text=${Uri.encodeComponent(message)}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   void _signOut() {
     context.read<AuthBloc>().add(AuthLogoutRequested());
   }
 
+  // --- Filtering ---
+
   List<EnrichedTask> _filterTasks(List<EnrichedTask> tasks) {
-    if (_filter == 'ALL') return tasks;
-    return tasks.where((t) => t.type == _filter).toList();
+    return tasks.where((t) {
+      // 1. Status Filter
+      // Note: Backend might define status differently. 
+      // Assuming 'PENDING' maps to pending list.
+      // For 'COMPLETED' (History), we might need a separate query, 
+      // but for now let's just filter locally if we have them, or show empty.
+      if (_filterStatus == 'PENDING' && t.status != 'PENDING') return false;
+      if (_filterStatus == 'COMPLETED' && t.status != 'COMPLETED') return false;
+
+      // 2. Type Filter
+      if (_filterType != 'ALL' && t.type != _filterType) return false;
+
+      return true;
+    }).toList();
+  }
+
+  int _getCount(List<EnrichedTask> tasks, String type) {
+    if (type == 'ALL') return tasks.length;
+    return tasks.where((t) => t.type == type).length;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: AppTheme.meshGradient,
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Animated Header
-              AnimatedBuilder(
-                animation: _headerSlide,
-                builder: (context, child) => Transform.translate(
-                  offset: Offset(0, _headerSlide.value),
-                  child: child,
-                ),
-                child: _buildHeader(),
-              ),
-              
-              // Filter Chips
-              _buildFilters(),
-              
-              // Task List
-              Expanded(
-                child: BlocBuilder<TaskBloc, TaskState>(
-                  builder: (context, state) {
-                    if (state is TaskLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    } else if (state is TaskError) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.error_outline, color: AppColors.error, size: 48),
-                            const SizedBox(height: 16),
-                            Text(
-                              state.message,
-                              style: const TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    } else if (state is TaskLoaded) {
-                      return _buildTaskList(state.tasks);
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: AppTheme.secondaryGradient,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.secondary.withOpacity(0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+      backgroundColor: Colors.grey[50], // Light background matching React
+      body: Column(
+        children: [
+          // Custom Header Section
+          _buildHeader(),
+          
+          // Sub Filters (All / Birthday / Anniversary)
+          _buildSubFilters(),
+          
+          // Task List
+          Expanded(
+            child: BlocBuilder<TaskBloc, TaskState>(
+              builder: (context, state) {
+                if (state is TaskLoading) {
+                  return const Center(child: CircularProgressIndicator(color: Colors.teal));
+                } else if (state is TaskError) {
+                  return _buildErrorState(state.message);
+                } else if (state is TaskLoaded) {
+                  final tasks = _filterTasks(state.tasks);
+                  // Quick hack: Calculate counts based on ALL loaded tasks
+                  // In a real app, counts might come from metadata
+                  return _buildTaskList(tasks);
+                }
+                return const SizedBox.shrink();
+              },
             ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () {
-            // Batch action sheet
-            _showBatchActionSheet();
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.send_rounded, color: Colors.white),
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  // --- Header Implementation ---
+
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          // Profile/Logo
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: AppTheme.primaryGradient,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.hub_outlined, color: Colors.white, size: 24),
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settingsState) {
+        // Extract settings with defaults
+        final settings = settingsState is SettingsLoaded 
+            ? settingsState.settings 
+            : AppSettings.defaults();
+        
+        final appName = settings.appName;
+        final leaderName = settings.leaderName;
+        final headerImageUrl = settings.headerImageUrl;
+        
+        return AnimatedBuilder(
+          animation: _headerSlide,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(0, _headerSlide.value),
+            child: child,
           ),
-          const SizedBox(width: 16),
-          
-          // Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Container(
+            height: 240, // Taller header to match screenshot
+            width: double.infinity,
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              color: Color(0xFF134E4A), // teal-900 equivalent
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+            ),
+            child: Stack(
               children: [
-                Text(
-                  'iConnect',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
+                // Background Image (from CMS or placeholder)
+                Positioned.fill(
+                  child: headerImageUrl != null && headerImageUrl.isNotEmpty
+                      ? Image.network(
+                          headerImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
+                        )
+                      : Image.network(
+                          "https://picsum.photos/seed/bg/800/600", // Fallback placeholder
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
+                        ),
+                ),
+            
+            // Gradient Overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.6),
+                    ],
                   ),
                 ),
-                Row(
+              ),
+            ),
+
+            // Content
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                      ),
+                    // Top Row (Leader Info)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             Text(
+                               appName,
+                               style: const TextStyle(
+                                 color: Colors.white,
+                                 fontSize: 32,
+                                 fontWeight: FontWeight.w900,
+                                 height: 1.1,
+                                 shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
+                               ),
+                             ),
+                             const SizedBox(height: 8),
+                             Row(
+                               children: [
+                                 Container(
+                                   width: 10, 
+                                   height: 10, 
+                                   decoration: BoxDecoration(
+                                     color: Colors.greenAccent[400],
+                                     shape: BoxShape.circle,
+                                     boxShadow: const [BoxShadow(color: Colors.green, blurRadius: 8)]
+                                   ),
+                                 ),
+                                 const SizedBox(width: 8),
+                                 Text(
+                                   leaderName,
+                                   style: const TextStyle(
+                                     color: Colors.white,
+                                     fontSize: 14, 
+                                     fontWeight: FontWeight.w500,
+                                     shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                                   ),
+                                 ),
+                               ],
+                             ),
+                           ],
+                         ),
+                         // Logout Button (DP Removed)
+                         InkWell(
+                           onTap: _signOut,
+                           borderRadius: BorderRadius.circular(50),
+                           child: Container(
+                             padding: const EdgeInsets.all(8),
+                             decoration: BoxDecoration(
+                               color: Colors.white.withOpacity(0.2),
+                               shape: BoxShape.circle,
+                             ),
+                             child: const Icon(Icons.logout, color: Colors.white, size: 20),
+                           ),
+                         ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Leader Mode',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 12,
+                    
+                    const Spacer(),
+
+                    // Floating Glass Tab Bar (Pending / History)
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(50),
+                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+                      ),
+                      child: Row(
+                        children: [
+                          _buildMainTab('PENDING', 'Pending', true),
+                          _buildMainTab('COMPLETED', 'History', false),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          
-          // Sign Out
-          IconButton(
-            onPressed: _signOut,
-            icon: Icon(Icons.logout_rounded, color: Colors.white.withOpacity(0.7)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          _buildFilterChip('ALL', 'All'),
-          const SizedBox(width: 8),
-          _buildFilterChip('BIRTHDAY', 'Birthdays', icon: Icons.cake_outlined),
-          const SizedBox(width: 8),
-          _buildFilterChip('ANNIVERSARY', 'Anniversaries', icon: Icons.favorite_outline),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String value, String label, {IconData? icon}) {
-    final isSelected = _filter == value;
-    return GestureDetector(
-      onTap: () => setState(() => _filter = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: isSelected ? AppTheme.primaryGradient : null,
-          color: isSelected ? null : Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(AppRadius.full),
-          border: Border.all(
-            color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.2),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 16, color: Colors.white),
-              const SizedBox(width: 6),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 13,
               ),
             ),
           ],
         ),
       ),
     );
+      },
+    );
   }
 
-  Widget _buildTaskList(List<EnrichedTask> allTasks) {
-    final tasks = _filterTasks(allTasks);
+  Widget _buildMainTab(String key, String label, bool showCount) {
+    final bool isSelected = _filterStatus == key;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _filterStatus = key;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(50),
+            boxShadow: isSelected ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)] : [],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF134E4A) : Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              if (showCount && _filterStatus == key) ...[
+                 // We can fetch real count if possible, for now hardcode logic or leave implicit
+                 // const SizedBox(width: 8),
+                 // Container(
+                 //   padding: const EdgeInsets.all(4),
+                 //   decoration: const BoxDecoration(color: Color(0xFFCCFBF1), shape: BoxShape.circle),
+                 //   child: Text("8", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.teal[800])),
+                 // )
+              ]
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- Sub Filters ---
+  
+  Widget _buildSubFilters() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
+      ),
+      child: BlocBuilder<TaskBloc, TaskState>(
+        builder: (context, state) {
+          int countAll = 0, countBirthday = 0, countAnniversary = 0;
+          if (state is TaskLoaded) {
+             final list = state.tasks.where((t) => t.status == 'PENDING').toList(); // Only count pending for filters
+             countAll = list.length;
+             countBirthday = list.where((t) => t.type == 'BIRTHDAY').length;
+             countAnniversary = list.where((t) => t.type == 'ANNIVERSARY').length;
+          }
+
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _buildFilterChip('ALL', 'All', null, countAll),
+                const SizedBox(width: 8),
+                _buildFilterChip('BIRTHDAY', 'Birthdays', Icons.card_giftcard, countBirthday),
+                const SizedBox(width: 8),
+                _buildFilterChip('ANNIVERSARY', 'Anniversaries', Icons.favorite, countAnniversary),
+              ],
+            ),
+          );
+        }
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String key, String label, IconData? icon, int count) {
+    final bool isSelected = _filterType == key;
+    Color activeColor = Colors.teal;
+    Color activeBg = Colors.teal[50]!;
     
+    if (key == 'BIRTHDAY') {
+       activeColor = Colors.pink;
+       activeBg = Colors.pink[50]!;
+    } else if (key == 'ANNIVERSARY') {
+       activeColor = Colors.purple;
+       activeBg = Colors.purple[50]!;
+    }
+
+    return GestureDetector(
+      onTap: () => setState(() => _filterType = key),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? activeBg : Colors.white,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: isSelected ? activeColor.withOpacity(0.3) : Colors.grey[200]!,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 14, color: isSelected ? activeColor : Colors.grey[400]),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: isSelected ? activeColor : Colors.grey[500],
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            if (count > 0) ...[
+               const SizedBox(width: 4),
+               Text(
+                 "($count)",
+                 style: TextStyle(
+                   color: isSelected ? activeColor : Colors.grey[400],
+                   fontSize: 11,
+                   fontWeight: FontWeight.bold,
+                 ),
+               ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  // --- Task List ---
+
+  Widget _buildTaskList(List<EnrichedTask> tasks) {
     if (tasks.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.white.withOpacity(0.2)),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check_circle, size: 64, color: Colors.grey[300]),
+            ),
             const SizedBox(height: 16),
             Text(
               'No pending tasks',
-              style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 16),
+              style: TextStyle(color: Colors.grey[500], fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
       );
     }
-    
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(24),
       itemCount: tasks.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final task = tasks[index];
-        return TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-          duration: Duration(milliseconds: 300 + (index * 100)),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, child) {
-            return Opacity(
-              opacity: value,
-              child: Transform.translate(
-                offset: Offset(0, 20 * (1 - value)),
-                child: child,
-              ),
-            );
-          },
-          child: _buildTaskCard(task),
-        );
+        return _buildTaskCard(task);
       },
     );
   }
 
   Widget _buildTaskCard(EnrichedTask task) {
-    final isBirthday = task.type == 'BIRTHDAY';
-    final isToday = DateFormat('yyyy-MM-dd').format(task.dueDate) == DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final dateStr = isToday ? 'Today' : DateFormat('MMM d').format(task.dueDate);
-    
+    final bool isBirthday = task.type == 'BIRTHDAY';
+    final Color typeColor = isBirthday ? Colors.pink : Colors.purple;
+    final Color typeBg = isBirthday ? Colors.pink[50]! : Colors.purple[50]!;
+    final IconData typeIcon = isBirthday ? Icons.card_giftcard : Icons.favorite;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: AppTheme.glassCard(opacity: 0.15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey[100]!),
+        boxShadow: const [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.04), blurRadius: 16, offset: Offset(0, 4))],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48, 
+                height: 48, 
+                decoration: BoxDecoration(
+                  color: typeBg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(typeIcon, color: typeColor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Type Icon
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: (isBirthday ? AppColors.birthday : AppColors.anniversary)
-                            .withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      child: Icon(
-                        isBirthday ? Icons.cake_outlined : Icons.favorite_outline,
-                        color: isBirthday ? AppColors.birthday : AppColors.anniversary,
-                      ),
+                    Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+                           Expanded(child: Text(
+                             task.name,
+                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                           )),
+                           Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                border: Border.all(color: Colors.grey[200]!),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "WARD ${task.ward}",
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500]),
+                              ),
+                           ),
+                       ],
                     ),
-                    const SizedBox(width: 12),
-                    
-                    // Name & Details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            task.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Ward ${task.ward} • $dateStr',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    // Due Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isToday
-                            ? AppColors.warning.withOpacity(0.2)
-                            : Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Text(
-                        dateStr,
-                        style: TextStyle(
-                          color: isToday
-                              ? AppColors.warning
-                              : Colors.white.withOpacity(0.6),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 4),
+                    const Row(
+                       children: [
+                           Icon(Icons.calendar_today, size: 12, color: Colors.grey),
+                           SizedBox(width: 4),
+                           Text("2025-12-12", style: TextStyle(fontSize: 12, color: Colors.grey)), // Placeholder date
+                       ],
+                    )
                   ],
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        'Call',
-                        Icons.phone_outlined,
-                        Colors.white.withOpacity(0.1),
-                        Colors.white,
-                        () => _launchPhone(task.mobile),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildActionButton(
-                        'SMS',
-                        Icons.message_outlined,
-                        Colors.blue.withOpacity(0.2),
-                        Colors.blue,
-                        () => _openAiWizard(task, 'SMS'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _buildActionButton(
-                        'WhatsApp',
-                        Icons.chat_bubble_outline,
-                        Colors.green.withOpacity(0.2),
-                        Colors.green,
-                        () => _openAiWizard(task, 'WHATSAPP'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 8),
+
+          // Address
+          const Padding(
+            padding: EdgeInsets.only(left: 64.0),
+            child: Row(
+               children: [
+                  Icon(Icons.location_on, size: 12, color: Colors.grey),
+                  SizedBox(width: 4),
+                  Text("20, MG Road", style: TextStyle(color: Colors.grey, fontSize: 12)),
+               ],
             ),
           ),
+          
+          const SizedBox(height: 20),
+          
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(child: _buildActionButton("Call", Icons.phone, Colors.grey[50]!, Colors.grey[700]!, () => _launchPhone(task.mobile))),
+              const SizedBox(width: 8),
+              Expanded(child: _buildActionButton("SMS", Icons.message, const Color(0xFFEFF6FF), Colors.blue[600]!, () => _openAiWizard(task, 'SMS'))),
+              const SizedBox(width: 8),
+              Expanded(child: _buildActionButton("WhatsApp", Icons.chat_bubble, const Color(0xFFECFDF5), const Color(0xFF10B981), () => _openAiWizard(task, 'WHATSAPP'))),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, IconData icon, Color bg, Color text, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: bg == Colors.grey[50] ? Colors.grey[200]! : Colors.transparent),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: text),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(color: text, fontWeight: FontWeight.bold, fontSize: 13)),
+          ],
         ),
       ),
     );
@@ -465,119 +613,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildActionButton(
-    String label,
-    IconData icon,
-    Color bgColor,
-    Color iconColor,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: iconColor),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: iconColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Simplified batch show
-  void _showBatchActionSheet() {
-    // ... same as before
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.bgGradientStart,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Batch Actions',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Send greetings to all pending tasks',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildBatchButton('WhatsApp All', Icons.chat_bubble_outline, AppColors.success),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildBatchButton('SMS All', Icons.message_outlined, Colors.blue),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBatchButton(String label, IconData icon, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: color),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  Widget _buildErrorState(String message) {
+    return Center(child: Text(message, style: const TextStyle(color: Colors.red)));
   }
 }

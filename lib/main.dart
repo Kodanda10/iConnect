@@ -12,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -21,6 +22,8 @@ import 'features/action/presentation/bloc/greeting_bloc.dart';
 
 import 'features/tasks/presentation/bloc/task_bloc.dart';
 import 'features/tasks/presentation/bloc/task_event.dart';
+import 'features/tasks/presentation/bloc/task_event.dart';
+import 'features/settings/presentation/cubit/settings_cubit.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'injection_container.dart' as di;
 
@@ -28,7 +31,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Initialize Dependency Injection
   await di.init();
@@ -66,6 +71,9 @@ class IConnectApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di.sl<GreetingBloc>(),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<SettingsCubit>()..loadSettings(),
         ),
       ],
       child: MaterialApp(

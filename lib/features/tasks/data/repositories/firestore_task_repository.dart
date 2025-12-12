@@ -36,7 +36,7 @@ class FirestoreTaskRepository implements TaskRepository {
       final querySnapshot = await _firestore
           .collection('tasks')
           .where('status', isEqualTo: 'PENDING')
-          .orderBy('dueDate', descending: false)
+          // .orderBy('dueDate', descending: false) // Commented out to bypass index requirement for now
           .limit(50) // Limit for performance
           .get();
 

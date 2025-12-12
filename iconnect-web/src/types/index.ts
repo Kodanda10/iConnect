@@ -93,6 +93,10 @@ export interface AppSettings {
     alertSettings: {
         headsUp: boolean;
         action: boolean;
+        headsUpMessage?: string;
+        includeNamesHeadsUp?: boolean;
+        actionMessage?: string;
+        includeNamesAction?: boolean;
     };
 }
 

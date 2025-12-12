@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { Database, Loader2, LogOut, Calendar, Upload, Settings, Bell, PartyPopper } from 'lucide-react';
+import { Database, Loader2, LogOut, Calendar, Upload, Settings, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -51,7 +51,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         { href: '/settings', label: 'Dashboard', icon: Database, staffOnly: false },
         { href: '/upload', label: 'Data Entry', icon: Upload, staffOnly: true },
         { href: '/scheduler', label: 'Scheduler', icon: Calendar, staffOnly: false },
-        { href: '/festivals', label: 'Festivals', icon: PartyPopper, staffOnly: true },
     ];
 
     const filteredNavItems = navItems.filter(item => !item.staffOnly || isStaff);

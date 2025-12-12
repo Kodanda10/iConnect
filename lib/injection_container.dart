@@ -15,6 +15,10 @@ import 'features/tasks/data/repositories/firestore_task_repository.dart';
 import 'features/tasks/domain/repositories/task_repository.dart';
 import 'features/tasks/presentation/bloc/task_bloc.dart';
 
+import 'features/settings/data/repositories/firestore_settings_repository.dart';
+import 'features/settings/domain/repositories/settings_repository.dart';
+import 'features/settings/presentation/cubit/settings_cubit.dart';
+
 final sl = GetIt.instance; // Service Locator
 
 Future<void> init() async {
@@ -43,6 +47,15 @@ Future<void> init() async {
   // Repository
   sl.registerLazySingleton<GreetingRepository>(
     () => FirebaseGreetingRepository(functions: sl()),
+  );
+
+  //! Features - Settings
+  // Cubit
+  sl.registerFactory(() => SettingsCubit(repository: sl()));
+
+  // Repository
+  sl.registerLazySingleton<SettingsRepository>(
+    () => FirestoreSettingsRepository(firestore: sl()),
   );
 
   //! External

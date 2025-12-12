@@ -78,8 +78,6 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
     
     // 2. Show Verification Dialog (after a short delay to simulate return)
     if (mounted) {
-      // Close sheet first? No, maybe keep it open or show dialog on top.
-      // Better to check "Did you send it?"
       _showCompletionDialog();
     }
   }
@@ -89,8 +87,9 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white.withOpacity(0.9),
-        title: const Text('Task Completion', style: TextStyle(color: AppColors.textPrimary)),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Task Completion', style: TextStyle(color: Color(0xFF134E4A), fontWeight: FontWeight.bold)),
         content: Text('Did you successfully send the ${widget.type.toLowerCase()} wish to ${widget.constituentName}?'),
         actions: [
           TextButton(
@@ -100,7 +99,10 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
             child: const Text('No, keep pending', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF134E4A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () {
               // Mark Done
               context.read<TaskBloc>().add(UpdateTaskStatus(
@@ -113,7 +115,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Task marked as completed!'),
-                  backgroundColor: AppColors.success,
+                  backgroundColor: Colors.teal,
                 ),
               );
             },
@@ -133,14 +135,10 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
         right: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      decoration: BoxDecoration(
-        color: AppColors.bgGradientStart, // Fallback
-        image: const DecorationImage(
-          image: AssetImage('assets/images/mesh_bg.png'), // If we had one, but we use code gradient
-          fit: BoxFit.cover,
-        ),
-        gradient: AppTheme.secondaryGradient, // Using secondary for action sheet
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 24, offset: Offset(0, -4))],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -152,7 +150,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -165,12 +163,12 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  color: const Color(0xFF134E4A).withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
                   widget.actionType == 'WHATSAPP' ? Icons.chat_bubble : Icons.message,
-                  color: Colors.white,
+                  color: const Color(0xFF134E4A),
                 ),
               ),
               const SizedBox(width: 16),
@@ -181,13 +179,13 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                     Text(
                       'AI Message Wizard',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
+                        color: const Color(0xFF111827),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       'Drafting for ${widget.constituentName}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      style: TextStyle(color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -227,9 +225,9 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               icon: const Icon(Icons.auto_awesome, color: Colors.white),
               label: const Text('Generate with AI', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: const Color(0xFF134E4A),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
             ),
 
@@ -245,7 +243,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               if (state is GreetingLoading) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 32),
-                  child: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  child: Center(child: CircularProgressIndicator(color:  Color(0xFF134E4A))),
                 );
               }
               
@@ -253,26 +251,22 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (_hasGenerated && state is! GreetingLoaded) ...[
-                       // Keep showing text box even if we reset state (though we don't reset here)
-                    ],
-                    
                     Container(
                       margin: const EdgeInsets.only(top: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey[200]!),
                       ),
                       child: TextField(
                         controller: _messageController,
                         maxLines: 4,
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                        decoration: const InputDecoration(
+                        style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+                        decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Message will appear here...',
-                          hintStyle: TextStyle(color: Colors.white30),
+                          hintStyle: TextStyle(color: Colors.grey[400]),
                         ),
                       ),
                     ),
@@ -281,7 +275,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                       children: [
                         IconButton(
                           onPressed: _generate, 
-                          icon: const Icon(Icons.refresh, color: Colors.white70),
+                          icon: Icon(Icons.refresh, color: Colors.grey[600]),
                           tooltip: 'Regenerate',
                         ),
                         const Spacer(),
@@ -290,7 +284,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                              Clipboard.setData(ClipboardData(text: _messageController.text));
                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!')));
                           },
-                          icon: const Icon(Icons.copy, color: Colors.white70),
+                          icon: Icon(Icons.copy, color: Colors.grey[600]),
                           tooltip: 'Copy',
                         ),
                       ],
@@ -300,16 +294,16 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                       onPressed: _send,
                       icon: Icon(
                         widget.actionType == 'WHATSAPP' ? Icons.send : Icons.sms, 
-                        color: AppColors.primary
+                        color: Colors.white,
                       ),
                       label: Text(
                         'Send via ${widget.actionType == 'WHATSAPP' ? 'WhatsApp' : 'SMS'}',
-                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: widget.actionType == 'WHATSAPP' ? const Color(0xFF10B981) : Colors.blue[600],
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                   ],
@@ -333,18 +327,18 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
     required Function(String?) onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(color: Colors.grey[200]!),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          icon: Icon(icon, color: Colors.white70, size: 20),
-          dropdownColor: AppColors.secondary,
-          style: const TextStyle(color: Colors.white),
+          icon: Icon(icon, color: Colors.grey[400], size: 16),
+          dropdownColor: Colors.white,
+          style: const TextStyle(color: Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 13),
           items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           onChanged: onChanged,
         ),
