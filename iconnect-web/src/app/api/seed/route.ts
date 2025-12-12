@@ -100,57 +100,86 @@ export async function POST() {
             }, { status: 401 });
         }
 
-        const today = new Date();
-        const results = [];
-        const errors = [];
+        // Dec 12-16 2024 synthetic data with complete fields
+        const decemberData = [
+            // Dec 12 - TODAY (Birthdays)
+            { name: 'Rajesh Sharma', mobile: '9876543210', whatsapp: '9876543210', dob: '1985-12-12', block: 'Raipur', gp_ulb: 'GP1', ward: '1' },
+            { name: 'Priya Verma', mobile: '8765432109', whatsapp: '8765432109', dob: '1990-12-12', block: 'Bilaspur', gp_ulb: 'GP2', ward: '2' },
+            { name: 'Amit Patel', mobile: '7654321098', dob: '1988-12-12', block: 'Durg', gp_ulb: 'ULB1', ward: '3' },
 
-        for (let i = 0; i < 50; i++) {
-            const firstName = randomFrom(firstNames);
-            const lastName = randomFrom(lastNames);
+            // Dec 12 - TODAY (Anniversaries)
+            { name: 'Sunita Singh', mobile: '6543210987', anniversary: '2010-12-12', dob: '1982-05-20', block: 'Korba', gp_ulb: 'GP1', ward: '4' },
+            { name: 'Vikram Kumar', mobile: '9543210876', whatsapp: '9543210876', anniversary: '2015-12-12', block: 'Rajnandgaon', gp_ulb: 'GP2', ward: '5' },
 
-            // Generate birthday - some today/upcoming for testing
-            let birthday: Date;
-            if (i < 5) {
-                birthday = new Date(1980 + Math.floor(Math.random() * 30), today.getMonth(), today.getDate());
-            } else if (i < 10) {
-                const daysAhead = Math.floor(Math.random() * 7) + 1;
-                birthday = new Date(1980 + Math.floor(Math.random() * 30), today.getMonth(), today.getDate() + daysAhead);
-            } else {
-                birthday = randomDate(1950, 2000);
-            }
+            // Dec 13 - TOMORROW (Birthdays for Heads Up)
+            { name: 'Anjali Gupta', mobile: '8543219876', whatsapp: '8543219876', dob: '1995-12-13', block: 'Raipur', gp_ulb: 'ULB1', ward: '6' },
+            { name: 'Suresh Agarwal', mobile: '7543218765', dob: '1980-12-13', block: 'Bilaspur', gp_ulb: 'GP1', ward: '7' },
+            { name: 'Kavita Joshi', mobile: '6543217654', whatsapp: '6543217654', dob: '1992-12-13', block: 'Durg', gp_ulb: 'GP2', ward: '8' },
 
-            // Generate anniversary - some today/upcoming
-            let anniversary: Date | null = null;
-            if (i % 2 === 0) {
-                if (i < 3) {
-                    anniversary = new Date(2000 + Math.floor(Math.random() * 20), today.getMonth(), today.getDate());
-                } else if (i < 6) {
-                    const daysAhead = Math.floor(Math.random() * 7) + 1;
-                    anniversary = new Date(2000 + Math.floor(Math.random() * 20), today.getMonth(), today.getDate() + daysAhead);
-                } else {
-                    anniversary = randomDate(1990, 2020);
-                }
-            }
+            // Dec 13 - TOMORROW (Anniversaries for Heads Up)
+            { name: 'Ravi Mishra', mobile: '9443216543', anniversary: '2008-12-13', dob: '1978-03-15', block: 'Korba', gp_ulb: 'ULB2', ward: '9' },
+            { name: 'Meena Yadav', mobile: '8443215432', whatsapp: '8443215432', anniversary: '2012-12-13', block: 'Rajnandgaon', gp_ulb: 'GP1', ward: '10' },
+
+            // Dec 14 (Birthdays)
+            { name: 'Anil Reddy', mobile: '7443214321', whatsapp: '7443214321', dob: '1987-12-14', block: 'Raipur', gp_ulb: 'GP2', ward: '11' },
+            { name: 'Pooja Nair', mobile: '6443213210', dob: '1993-12-14', block: 'Bilaspur', gp_ulb: 'ULB1', ward: '12' },
+
+            // Dec 14 (Anniversaries)
+            { name: 'Deepak Iyer', mobile: '9343212109', anniversary: '2005-12-14', dob: '1975-08-10', block: 'Durg', gp_ulb: 'GP1', ward: '13' },
+
+            // Dec 15 (Birthdays)
+            { name: 'Nisha Rao', mobile: '8343211098', whatsapp: '8343211098', dob: '1991-12-15', block: 'Korba', gp_ulb: 'GP2', ward: '14' },
+            { name: 'Manoj Pandey', mobile: '7343210987', dob: '1983-12-15', block: 'Rajnandgaon', gp_ulb: 'ULB2', ward: '15' },
+
+            // Dec 15 (Anniversaries)
+            { name: 'Rekha Sharma', mobile: '6343209876', whatsapp: '6343209876', anniversary: '2018-12-15', dob: '1988-01-25', block: 'Raipur', gp_ulb: 'GP1', ward: '16' },
+
+            // Dec 16 (Birthdays)
+            { name: 'Sanjay Verma', mobile: '9243208765', dob: '1979-12-16', block: 'Bilaspur', gp_ulb: 'GP2', ward: '17' },
+            { name: 'Geeta Patel', mobile: '8243207654', whatsapp: '8243207654', dob: '1996-12-16', block: 'Durg', gp_ulb: 'ULB1', ward: '18' },
+
+            // Dec 16 (Anniversaries)
+            { name: 'Ashok Singh', mobile: '7243206543', anniversary: '2000-12-16', dob: '1970-06-30', block: 'Korba', gp_ulb: 'GP1', ward: '19' },
+            { name: 'Shobha Kumar', mobile: '6243205432', whatsapp: '6243205432', anniversary: '2020-12-16', block: 'Rajnandgaon', gp_ulb: 'GP2', ward: '20' },
+        ];
+
+        const results: { id: string; name: string }[] = [];
+        const errors: { name: string; error: string }[] = [];
+
+        for (const person of decemberData) {
+            const dobDate = person.dob ? new Date(person.dob) : null;
+            const annDate = person.anniversary ? new Date(person.anniversary) : null;
 
             const fields: Record<string, any> = {
-                first_name: toFirestoreString(firstName),
-                last_name: toFirestoreString(lastName),
-                full_name: toFirestoreString(`${firstName} ${lastName}`),
-                phone: toFirestoreString(randomPhone()),
-                block: toFirestoreString(randomFrom(blocks)),
-                gp_ulb: toFirestoreString(randomFrom(gpUlbs)),
-                village: toFirestoreString(randomFrom(villages)),
-                ward: toFirestoreString(String(Math.floor(Math.random() * 20) + 1)),
-                birthday: toFirestoreTimestamp(birthday),
-                birthday_mmdd: toFirestoreString(formatDateMMDD(birthday)),
-                tags: toFirestoreArray(['seeded']),
+                full_name: toFirestoreString(person.name),
+                name: toFirestoreString(person.name),
+                phone: toFirestoreString(person.mobile),
+                mobile_number: toFirestoreString(person.mobile),
+                block: toFirestoreString(person.block),
+                gp_ulb: toFirestoreString(person.gp_ulb),
+                ward: toFirestoreString(person.ward),
+                tags: toFirestoreArray(['seeded', 'dec-test']),
                 created_at: toFirestoreTimestamp(new Date()),
                 updated_at: toFirestoreTimestamp(new Date()),
             };
 
-            if (anniversary) {
-                fields.anniversary = toFirestoreTimestamp(anniversary);
-                fields.anniversary_mmdd = toFirestoreString(formatDateMMDD(anniversary));
+            if (person.whatsapp) {
+                fields.whatsapp = toFirestoreString(person.whatsapp);
+            }
+
+            if (dobDate) {
+                fields.birthday = toFirestoreTimestamp(dobDate);
+                fields.dob = toFirestoreString(person.dob!);
+                fields.dob_month = { integerValue: String(dobDate.getMonth() + 1) };
+                fields.dob_day = { integerValue: String(dobDate.getDate()) };
+                fields.birthday_mmdd = toFirestoreString(formatDateMMDD(dobDate));
+            }
+
+            if (annDate) {
+                fields.anniversary = toFirestoreTimestamp(annDate);
+                fields.anniversary_month = { integerValue: String(annDate.getMonth() + 1) };
+                fields.anniversary_day = { integerValue: String(annDate.getDate()) };
+                fields.anniversary_mmdd = toFirestoreString(formatDateMMDD(annDate));
             }
 
             // Use Firestore REST API with auth token
@@ -167,21 +196,28 @@ export async function POST() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error(`Firestore error for ${firstName}:`, errorData);
-                errors.push({ name: `${firstName} ${lastName}`, error: errorData.error?.message || 'Unknown error' });
+                console.error(`Firestore error for ${person.name}:`, errorData);
+                errors.push({ name: person.name, error: errorData.error?.message || 'Unknown error' });
                 continue;
             }
 
             const data = await response.json();
             const docId = data.name?.split('/').pop();
-            results.push({ id: docId, name: `${firstName} ${lastName}` });
+            results.push({ id: docId, name: person.name });
         }
 
         return NextResponse.json({
             success: true,
-            message: `Created ${results.length} constituents (${errors.length} errors)`,
+            message: `Created ${results.length} constituents with Dec 12-16 dates (${errors.length} errors)`,
             data: results,
-            errors: errors.length > 0 ? errors.slice(0, 5) : undefined
+            errors: errors.length > 0 ? errors : undefined,
+            distribution: {
+                'Dec 12 (Today)': '5 people (3 birthdays, 2 anniversaries)',
+                'Dec 13 (Tomorrow)': '5 people (3 birthdays, 2 anniversaries)',
+                'Dec 14': '3 people (2 birthdays, 1 anniversary)',
+                'Dec 15': '3 people (2 birthdays, 1 anniversary)',
+                'Dec 16': '4 people (2 birthdays, 2 anniversaries)',
+            }
         });
     } catch (error: any) {
         console.error('Seed error:', error);
