@@ -32,6 +32,7 @@ import {
     Calendar,
 } from 'lucide-react';
 import GlassCalendar from '@/components/ui/GlassCalendar';
+import { isValidIndianMobile, isValidWhatsApp } from '@/lib/utils/validation';
 
 export default function UploadPage() {
     const { isStaff } = useAuth();
@@ -82,16 +83,16 @@ export default function UploadPage() {
         }
     };
 
-    // Manual form state
+    // Manual form state - ordered as: Name → Mobile → WhatsApp → Block → GP → Ward → DOB → Anniversary
     const [formData, setFormData] = useState({
         name: '',
         mobile: '',
-        dob: '',
-        anniversary: '',
+        whatsapp: '',
         block: '',
         gp_ulb: '',
-        village: '',
         ward: '',
+        dob: '',
+        anniversary: '',
     });
 
     // Search
@@ -211,19 +212,19 @@ export default function UploadPage() {
                 anniversary: formData.anniversary || undefined,
                 block: formData.block || undefined,
                 gp_ulb: formData.gp_ulb || undefined,
-                village: formData.village || undefined,
                 ward: formData.ward || undefined,
+                whatsapp: formData.whatsapp || undefined,
             });
             setUploadStatus('success');
             setFormData({
                 name: '',
                 mobile: '',
-                dob: '',
-                anniversary: '',
+                whatsapp: '',
                 block: '',
                 gp_ulb: '',
-                village: '',
                 ward: '',
+                dob: '',
+                anniversary: '',
             });
             // Refresh constituents list
             const { constituents: newData } = await getConstituents();
@@ -401,30 +402,29 @@ export default function UploadPage() {
                         {/* Mobile Number */}
                         <div>
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Mobile Number *
+                                Mobile *
                             </label>
                             <input
                                 type="tel"
                                 value={formData.mobile}
-                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                                 required
-                                pattern="[0-9]{10}"
-                                className="glass-input-dark h-12 w-full px-4"
+                                className={`glass-input-dark h-11 w-full px-3 text-sm ${formData.mobile && !isValidIndianMobile(formData.mobile) ? 'border-red-500/50' : ''}`}
                                 placeholder="10-digit number"
                             />
                         </div>
 
-                        {/* Ward Number */}
+                        {/* WhatsApp Number */}
                         <div>
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Ward Number
+                                WhatsApp
                             </label>
                             <input
-                                type="text"
-                                value={formData.ward}
-                                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-                                className="glass-input-dark h-12 w-full px-4"
-                                placeholder="Ward #"
+                                type="tel"
+                                value={formData.whatsapp}
+                                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                className={`glass-input-dark h-11 w-full px-3 text-sm ${formData.whatsapp && !isValidWhatsApp(formData.whatsapp) ? 'border-red-500/50' : ''}`}
+                                placeholder="10-digit number"
                             />
                         </div>
 
@@ -437,7 +437,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.block}
                                     onChange={(e) => setFormData({ ...formData, block: e.target.value })}
-                                    className="glass-input-dark h-12 w-full px-4 appearance-none"
+                                    className="glass-input-dark h-11 w-full px-3 text-sm appearance-none"
                                 >
                                     <option value="">Select Block</option>
                                     <option value="Raipur">Raipur</option>
@@ -446,7 +446,7 @@ export default function UploadPage() {
                                     <option value="Korba">Korba</option>
                                     <option value="Rajnandgaon">Rajnandgaon</option>
                                 </select>
-                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
                             </div>
                         </div>
 
@@ -459,7 +459,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.gp_ulb}
                                     onChange={(e) => setFormData({ ...formData, gp_ulb: e.target.value })}
-                                    className="glass-input-dark h-12 w-full px-4 appearance-none"
+                                    className="glass-input-dark h-11 w-full px-3 text-sm appearance-none"
                                 >
                                     <option value="">Select GP/ULB</option>
                                     <option value="GP1">Gram Panchayat 1</option>
@@ -467,8 +467,22 @@ export default function UploadPage() {
                                     <option value="ULB1">Urban Local Body 1</option>
                                     <option value="ULB2">Urban Local Body 2</option>
                                 </select>
-                                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
+                                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 rotate-90 pointer-events-none" />
                             </div>
+                        </div>
+
+                        {/* Ward Number */}
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-white/70 mb-1.5">
+                                Ward
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.ward}
+                                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                                className="glass-input-dark h-11 w-full px-3 text-sm"
+                                placeholder="Ward #"
+                            />
                         </div>
 
                         {/* Date of Birth */}
@@ -557,18 +571,18 @@ export default function UploadPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-3 flex items-center justify-center gap-2 font-semibold text-white rounded-full transition-all duration-300 disabled:opacity-50"
+                        className="w-full py-2.5 flex items-center justify-center gap-2 font-semibold text-white text-sm rounded-full transition-all duration-300 disabled:opacity-50"
                         style={{ background: 'linear-gradient(135deg, #00A896 0%, #00C4A7 100%)', boxShadow: '0 4px 16px rgba(0, 168, 150, 0.4)' }}
                     >
                         {isLoading ? (
                             <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <Loader2 className="w-4 h-4 animate-spin" />
                                 Saving...
                             </>
                         ) : (
                             <>
-                                <UserPlus className="w-5 h-5" />
-                                Add Constituent
+                                <UserPlus className="w-4 h-4" />
+                                Add
                             </>
                         )}
                     </button>
