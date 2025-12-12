@@ -115,6 +115,24 @@ export default function UploadPage() {
         setActiveDatePicker(null);
     };
 
+    // Handle manual text input for dates (supports dd/mm/yyyy and yyyy-mm-dd)
+    const handleDateTextInput = (field: 'dob' | 'anniversary', value: string) => {
+        // If user types in dd/mm/yyyy format, convert to yyyy-mm-dd
+        const ddmmyyyyMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (ddmmyyyyMatch) {
+            const [, d, m, y] = ddmmyyyyMatch;
+            const dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+            setFormData(prev => ({ ...prev, [field]: dateStr }));
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            // Already in yyyy-mm-dd format
+            setFormData(prev => ({ ...prev, [field]: value }));
+        } else {
+            // Allow partial input while typing
+            // Store as-is in a display format, will be validated on submit
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
+    };
+
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);
@@ -451,11 +469,11 @@ export default function UploadPage() {
                                 </div>
                                 <input
                                     type="text"
-                                    readOnly
                                     value={formatDateForInput(formData.dob)}
-                                    onClick={() => setActiveDatePicker(activeDatePicker === 'dob' ? null : 'dob')}
+                                    onChange={(e) => handleDateTextInput('dob', e.target.value)}
+                                    onFocus={() => setActiveDatePicker('dob')}
                                     placeholder="dd/mm/yyyy"
-                                    className="glass-input-dark pl-10 h-12 w-full cursor-pointer"
+                                    className="glass-input-dark pl-10 h-12 w-full"
                                 />
                                 {activeDatePicker === 'dob' && (
                                     <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
@@ -485,11 +503,11 @@ export default function UploadPage() {
                                 </div>
                                 <input
                                     type="text"
-                                    readOnly
                                     value={formatDateForInput(formData.anniversary)}
-                                    onClick={() => setActiveDatePicker(activeDatePicker === 'anniversary' ? null : 'anniversary')}
+                                    onChange={(e) => handleDateTextInput('anniversary', e.target.value)}
+                                    onFocus={() => setActiveDatePicker('anniversary')}
                                     placeholder="dd/mm/yyyy"
-                                    className="glass-input-dark pl-10 h-12 w-full cursor-pointer"
+                                    className="glass-input-dark pl-10 h-12 w-full"
                                 />
                                 {activeDatePicker === 'anniversary' && (
                                     <div className="absolute top-full left-0 mt-2 w-full z-50 animate-in fade-in zoom-in-95 duration-200">
@@ -528,7 +546,7 @@ export default function UploadPage() {
             </div>
 
             {/* --- Full-Width Database Table --- */}
-            <div className="glass-card-light p-6 rounded-2xl" style={{ overflow: 'visible' }}>
+            <div className="glass-card-light p-6 rounded-2xl">
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <h3 className="font-bold text-white flex items-center gap-2">
                         <Database className="w-5 h-5 text-emerald-400" />

@@ -155,32 +155,35 @@ export default function SettingsPage() {
     const handleSave = async () => {
         setIsSaving(true);
         try {
+            let newHeaderImageUrl = settings.headerImageUrl;
+
             // Upload image if a new one was selected
             if (pendingImageFile) {
                 console.log('[DEBUG] Uploading header image...');
-                const imageUrl = await uploadHeaderImage(pendingImageFile);
-                console.log('[DEBUG] Upload complete, URL:', imageUrl);
-                setSettings(prev => ({ ...prev, headerImageUrl: imageUrl }));
-                setPreviewImage(imageUrl); // Also update preview to the permanent URL
+                newHeaderImageUrl = await uploadHeaderImage(pendingImageFile);
+                console.log('[DEBUG] Upload complete, URL:', newHeaderImageUrl);
+                setPreviewImage(newHeaderImageUrl); // Update preview to the permanent URL
                 setPendingImageFile(null);
             }
 
-            // Save other settings
-            console.log('[DEBUG] Saving settings:', {
+            // Save ALL settings including the new header image URL
+            const settingsToSave = {
                 appName: settings.appName,
                 leaderName: settings.leaderName,
                 alertSettings: settings.alertSettings,
-            });
-            await updateSettings({
-                appName: settings.appName,
-                leaderName: settings.leaderName,
-                alertSettings: settings.alertSettings,
-            });
+                headerImageUrl: newHeaderImageUrl,
+            };
+            console.log('[DEBUG] Saving settings:', settingsToSave);
+            await updateSettings(settingsToSave);
+
+            // Update local state with the new URL
+            setSettings(prev => ({ ...prev, headerImageUrl: newHeaderImageUrl }));
 
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
             console.error('Failed to save settings:', error);
+            alert('Failed to save settings. Please check the console for details.');
         } finally {
             setIsSaving(false);
         }
