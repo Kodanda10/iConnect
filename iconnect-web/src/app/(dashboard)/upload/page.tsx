@@ -319,7 +319,8 @@ export default function UploadPage() {
                 {/* Manual Entry Form */}
                 <form
                     onSubmit={handleManualSubmit}
-                    className="glass-card-light p-6 rounded-2xl space-y-4"
+                    className="glass-card-light p-6 rounded-2xl space-y-4 overflow-visible"
+                    style={{ overflow: 'visible' }}
                 >
                     <div className="flex items-center gap-2 text-white">
                         <UserPlus className="w-5 h-5 text-emerald-400 animate-float" />
