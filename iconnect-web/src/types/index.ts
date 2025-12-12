@@ -26,6 +26,7 @@ export interface Constituent {
     // Contact
     mobile_number?: string;
     phone?: string;
+    whatsapp?: string;
     // Birthday
     dob?: string; // YYYY-MM-DD
     dob_month?: number;
