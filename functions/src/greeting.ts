@@ -1,9 +1,12 @@
 /**
  * @file greeting.ts
- * @description Greeting message generation service
+ * @description Greeting message generation service with Gemini AI integration
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2024-12-15: Added real Gemini AI integration with template fallback
  */
+
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -13,6 +16,7 @@ export interface GreetingRequest {
     type: TaskType;
     language: Language;
     ward?: string;
+    leaderName?: string;
 }
 
 // Greeting templates for fallback (when Gemini API is unavailable)
@@ -56,9 +60,42 @@ const TEMPLATES = {
 const VALID_TYPES: TaskType[] = ['BIRTHDAY', 'ANNIVERSARY'];
 const VALID_LANGUAGES: Language[] = ['ODIA', 'ENGLISH', 'HINDI'];
 
+const LANGUAGE_NAMES: Record<Language, string> = {
+    ODIA: 'Odia',
+    ENGLISH: 'English',
+    HINDI: 'Hindi',
+};
+
+/**
+ * Build a prompt for Gemini AI
+ */
+function buildPrompt(request: GreetingRequest): string {
+    const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
+    const language = LANGUAGE_NAMES[request.language];
+    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
+
+    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+The message should be:
+- Personal and sincere
+- 2-3 sentences maximum
+- Culturally appropriate for Indian context
+- Include blessings for health and happiness
+Only return the greeting message, nothing else.`;
+}
+
+/**
+ * Get a template-based message (fallback)
+ */
+function getTemplateMessage(request: GreetingRequest): string {
+    const typeTemplates = TEMPLATES[request.type];
+    const langTemplates = typeTemplates[request.language];
+    const template = langTemplates[Math.floor(Math.random() * langTemplates.length)];
+    return template.replace('{name}', request.name);
+}
+
 /**
  * Generate a greeting message for a constituent
- * Uses templates as fallback when Gemini API is unavailable
+ * Uses Gemini AI when available, falls back to templates
  */
 export async function generateGreetingMessage(
     request: GreetingRequest
@@ -76,15 +113,24 @@ export async function generateGreetingMessage(
         throw new Error('Invalid language');
     }
 
-    // Get templates for the type and language
-    const typeTemplates = TEMPLATES[request.type];
-    const langTemplates = typeTemplates[request.language];
+    // Try Gemini API if key is configured
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+        try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const prompt = buildPrompt(request);
+            const result = await model.generateContent(prompt);
+            const text = result.response.text();
+            if (text && text.trim().length > 0) {
+                return text.trim();
+            }
+        } catch (error) {
+            console.warn('[GREETING] Gemini API failed, falling back to templates:', error);
+        }
+    }
 
-    // Pick a random template
-    const template = langTemplates[Math.floor(Math.random() * langTemplates.length)];
-
-    // Replace placeholder with actual name
-    const message = template.replace('{name}', request.name);
-
-    return message;
+    // Fallback to templates
+    return getTemplateMessage(request);
 }
+

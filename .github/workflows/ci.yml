@@ -99,3 +99,27 @@ jobs:
         
       - name: Build TypeScript
         run: npm run build
+
+  # -----------------------------------------------------------------------------
+  # Job 4: Flutter iOS Build
+  # -----------------------------------------------------------------------------
+  ios-build:
+    name: Mobile (iOS) Build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          
+      - name: Install Dependencies
+        run: flutter pub get
+        
+      - name: Generate Code (Build Runner)
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        
+      - name: Build iOS (No Codesign)
+        run: flutter build ios --release --no-codesign
+

@@ -3,6 +3,7 @@
  * @description Firebase Cloud Functions entry point
  * @changelog
  * - 2024-12-11: Initial implementation with generateGreeting and dailyScan
+ * - 2024-12-15: Optimized dailyScan to use indexed queries (O(1) vs O(N))
  */
 
 import { onCall, HttpsError } from "firebase-functions/v2/https";
@@ -42,29 +43,77 @@ export const generateGreeting = onCall<GreetingRequest>(
 );
 
 /**
+ * Helper: Fetch constituents by indexed date fields (optimized O(1) query)
+ */
+async function fetchConstituentsByDateFields(
+    monthField: string,
+    dayField: string,
+    month: number,
+    day: number
+): Promise<Constituent[]> {
+    const snapshot = await db.collection('constituents')
+        .where(monthField, '==', month)
+        .where(dayField, '==', day)
+        .get();
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Constituent));
+}
+
+/**
  * Daily scan cron job - runs at 00:01 AM IST every day
  * Scans constituents for birthdays/anniversaries and creates tasks
+ * OPTIMIZED: Uses indexed date fields if available, falls back to full scan
  */
 export const dailyScan = onSchedule({
     schedule: '1 0 * * *',
     timeZone: 'Asia/Kolkata',
-}, async (event) => {
-    console.log('Starting daily scan at', new Date().toISOString());
+}, async () => {
+    console.log('[DAILY_SCAN] Starting at', new Date().toISOString());
 
     try {
-        // Fetch all constituents
-        const constituentsSnapshot = await db.collection('constituents').get();
-        const constituents: Constituent[] = [];
-
-        constituentsSnapshot.forEach((doc) => {
-            constituents.push({ id: doc.id, ...doc.data() } as Constituent);
-        });
-
-        // Fetch existing tasks for today and tomorrow
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
 
+        const todayMonth = today.getMonth() + 1;
+        const todayDay = today.getDate();
+        const tomorrowMonth = tomorrow.getMonth() + 1;
+        const tomorrowDay = tomorrow.getDate();
+
+        let constituents: Constituent[] = [];
+
+        // Try optimized queries first (requires indexed fields: dob_month, dob_day, anniversary_month, anniversary_day)
+        try {
+            console.log('[DAILY_SCAN] Attempting optimized indexed queries...');
+
+            // Query birthdays for today and tomorrow
+            const birthdaysToday = await fetchConstituentsByDateFields('dob_month', 'dob_day', todayMonth, todayDay);
+            const birthdaysTomorrow = await fetchConstituentsByDateFields('dob_month', 'dob_day', tomorrowMonth, tomorrowDay);
+
+            // Query anniversaries for today and tomorrow
+            const anniversariesToday = await fetchConstituentsByDateFields('anniversary_month', 'anniversary_day', todayMonth, todayDay);
+            const anniversariesTomorrow = await fetchConstituentsByDateFields('anniversary_month', 'anniversary_day', tomorrowMonth, tomorrowDay);
+
+            // Merge unique constituents
+            const constituentMap = new Map<string, Constituent>();
+            [...birthdaysToday, ...birthdaysTomorrow, ...anniversariesToday, ...anniversariesTomorrow].forEach(c => {
+                constituentMap.set(c.id, c);
+            });
+            constituents = Array.from(constituentMap.values());
+
+            console.log(`[DAILY_SCAN] Optimized query found ${constituents.length} constituents with events`);
+        } catch (indexError) {
+            // Fallback to full scan if indexed fields don't exist
+            console.warn('[DAILY_SCAN] Indexed query failed, falling back to full scan:', indexError);
+
+            const constituentsSnapshot = await db.collection('constituents').get();
+            constituentsSnapshot.forEach((doc) => {
+                constituents.push({ id: doc.id, ...doc.data() } as Constituent);
+            });
+            console.log(`[DAILY_SCAN] Full scan loaded ${constituents.length} constituents`);
+        }
+
+        // Fetch existing tasks for today and tomorrow
         const todayStr = today.toISOString().split('T')[0];
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
@@ -82,16 +131,18 @@ export const dailyScan = onSchedule({
         const result = scanForTasks(constituents, existingTasks);
 
         // Write new tasks to Firestore
-        const batch = db.batch();
-        for (const task of result.newTasks) {
-            const docRef = db.collection('tasks').doc(task.id);
-            batch.set(docRef, task);
+        if (result.newTasks.length > 0) {
+            const batch = db.batch();
+            for (const task of result.newTasks) {
+                const docRef = db.collection('tasks').doc(task.id);
+                batch.set(docRef, task);
+            }
+            await batch.commit();
         }
-        await batch.commit();
 
-        console.log(`Daily scan complete. Created ${result.count} new tasks.`);
+        console.log(`[DAILY_SCAN] Complete. Created ${result.count} new tasks.`);
     } catch (error) {
-        console.error('Daily scan failed:', error);
+        console.error('[DAILY_SCAN] Failed:', error);
         throw error;
     }
 });
@@ -99,3 +150,4 @@ export const dailyScan = onSchedule({
 // Export types for testing
 export { GreetingRequest } from './greeting';
 export { Constituent, Task, ScanResult } from './dailyScan';
+

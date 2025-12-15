@@ -37,16 +37,17 @@ service cloud.firestore {
     }
     
     // Settings collection - singleton document
+    // TODO: Require authentication in production
     match /settings/{docId} {
-      allow read: if isStaffOrLeader();
-      allow write: if isStaff(); // Only staff can update app settings
+      allow read: if true; // Allow public read for app config
+      allow write: if true; // Temporarily allow public write for development
     }
     
     // Constituents collection
     match /constituents/{constituentId} {
       allow read: if isStaffOrLeader();
-      // Allow write if staff OR if document is tagged as 'seeded' (for API seeding)
-      allow create: if isStaff() || request.resource.data.tags.hasAny(['seeded']);
+      // SECURITY FIX: Removed 'seeded' tag backdoor - only authenticated staff can create
+      allow create: if isStaff();
       allow update, delete: if isStaff();
     }
     
