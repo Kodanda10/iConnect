@@ -95,7 +95,7 @@ export default function GlassCalendar({
     };
 
     return (
-        <div className={`glass-card-light p-4 rounded-xl ${className}`} onClick={handleCalendarClick}>
+        <div className={`bg-zinc-900 border border-white/10 shadow-2xl p-4 rounded-xl ${className}`} onClick={handleCalendarClick}>
             {/* Navigation Header */}
             <div className="flex items-center justify-between mb-4">
                 <button
@@ -129,8 +129,8 @@ export default function GlassCalendar({
                                         key={month}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectMonth(index); }}
                                         className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${viewDate.getMonth() === index
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
                                     >
                                         {month}
@@ -162,8 +162,8 @@ export default function GlassCalendar({
                                         key={year}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectYear(year); }}
                                         className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center ${viewDate.getFullYear() === year
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
                                     >
                                         {year}
