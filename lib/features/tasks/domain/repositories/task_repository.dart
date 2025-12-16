@@ -7,4 +7,7 @@ abstract class TaskRepository {
   Future<Either<Failure, List<EnrichedTask>>> getPendingTasks();
   Future<Either<Failure, List<EnrichedTask>>> getCompletedTasks();
   Future<Either<Failure, void>> updateTaskStatus(String taskId, String status);
+  
+  /// Update action status (CALL, SMS, WHATSAPP) for a task
+  Future<Either<Failure, void>> updateActionStatus(String taskId, String actionType);
 }

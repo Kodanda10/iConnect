@@ -1,22 +1,25 @@
 /**
  * @file components/dashboard/DataMetricsCard.tsx
- * @description Data Metrics Dashboard component - 50/50 layout
+ * @description Data Metrics Dashboard component - 50/50 layout with animated GP hover
  * @changelog
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
+ * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
  */
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3 } from 'lucide-react';
-import { fetchConstituentMetrics, ConstituentMetrics, BlockMetric } from '@/lib/services/metrics';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
+import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
 export default function DataMetricsCard() {
     const [metrics, setMetrics] = useState<ConstituentMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
+    const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
+    const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         loadMetrics();
@@ -34,6 +37,26 @@ export default function DataMetricsCard() {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Lazy load GP data on hover
+    const loadGPData = useCallback(async (blockName: string) => {
+        if (gpData[blockName] || gpLoading[blockName]) return;
+
+        setGpLoading(prev => ({ ...prev, [blockName]: true }));
+        try {
+            const gps = await fetchGPMetricsForBlock(blockName);
+            setGpData(prev => ({ ...prev, [blockName]: gps }));
+        } catch (err) {
+            console.error('Error loading GP data:', err);
+        } finally {
+            setGpLoading(prev => ({ ...prev, [blockName]: false }));
+        }
+    }, [gpData, gpLoading]);
+
+    const handleBlockHover = (blockName: string) => {
+        setHoveredBlock(blockName);
+        loadGPData(blockName);
     };
 
     // Loading state
@@ -149,7 +172,9 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => setHoveredBlock(block.name)}
+                            gpData={gpData[block.name] || []}
+                            gpLoading={gpLoading[block.name] || false}
+                            onMouseEnter={() => handleBlockHover(block.name)}
                             onMouseLeave={() => setHoveredBlock(null)}
                         />
                     ))}
@@ -163,12 +188,15 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
+    gpData: GPMetric[];
+    gpLoading: boolean;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+function BlockItem({ block, total, isHovered, gpData, gpLoading, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
+    const maxGpCount = gpData.length > 0 ? Math.max(...gpData.map(gp => gp.count)) : 1;
 
     return (
         <div
@@ -185,7 +213,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
         >
             {/* Progress bar background */}
             <div
-                className="absolute inset-0 bg-emerald-500/5 transition-all"
+                className="absolute inset-0 bg-emerald-500/5 transition-all duration-500"
                 style={{ width: `${percentage}%` }}
             />
 
@@ -203,33 +231,88 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     <span className="text-xs text-white/40 w-10 text-right">
                         {percentage}%
                     </span>
-                    {block.gps.length > 0 && (
-                        <ChevronRight
-                            className={`w-4 h-4 text-white/40 transition-transform ${isHovered ? 'rotate-90' : ''
-                                }`}
-                        />
-                    )}
+                    <ChevronRight
+                        className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90' : ''
+                            }`}
+                    />
                 </div>
             </div>
 
-            {/* GP Dropdown on Hover */}
-            {isHovered && block.gps.length > 0 && (
-                <div className="relative mt-3 pt-3 border-t border-white/10 space-y-1 animate-fade-in">
-                    {block.gps.map((gp) => (
-                        <div
-                            key={gp.name}
-                            className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5"
-                        >
-                            <span className="text-sm text-white/70">
-                                {gp.name}
-                            </span>
-                            <span className="text-sm font-medium text-emerald-400">
-                                {gp.count.toLocaleString()}
-                            </span>
+            {/* GP Dropdown on Hover - Animated with Progress Bars */}
+            {isHovered && (
+                <div className="relative mt-3 pt-3 border-t border-white/10 animate-fade-in">
+                    {/* Header */}
+                    <div className="flex items-center gap-2 mb-3">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-xs font-medium text-white/60 uppercase tracking-wide">
+                            Gram Panchayats in {block.name}
+                        </span>
+                    </div>
+
+                    {gpLoading ? (
+                        <div className="flex items-center gap-2 py-4 justify-center">
+                            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                            <span className="text-sm text-white/50">Loading GPs...</span>
                         </div>
-                    ))}
+                    ) : gpData.length === 0 ? (
+                        <div className="py-3 text-center text-white/40 text-sm">
+                            No GP data available
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {gpData.map((gp, index) => (
+                                <GPProgressBar
+                                    key={gp.name}
+                                    gp={gp}
+                                    maxCount={maxGpCount}
+                                    delay={index * 80}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     );
 }
+
+interface GPProgressBarProps {
+    gp: GPMetric;
+    maxCount: number;
+    delay: number;
+}
+
+function GPProgressBar({ gp, maxCount, delay }: GPProgressBarProps) {
+    const [animatedWidth, setAnimatedWidth] = useState(0);
+    const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setAnimatedWidth(percentage);
+        }, delay);
+        return () => clearTimeout(timer);
+    }, [percentage, delay]);
+
+    return (
+        <div className="group">
+            <div className="flex items-center justify-between mb-1">
+                <span className="text-sm text-white/80 font-medium truncate max-w-[60%]">
+                    {gp.name}
+                </span>
+                <span className="text-sm font-bold text-emerald-400 tabular-nums">
+                    {gp.count.toLocaleString()}
+                </span>
+            </div>
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700 ease-out"
+                    style={{
+                        width: `${animatedWidth}%`,
+                        boxShadow: '0 0 10px rgba(16, 185, 129, 0.5)'
+                    }}
+                />
+            </div>
+        </div>
+    );
+}
+

@@ -83,6 +83,33 @@ class FirestoreTaskRepository implements TaskRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> updateActionStatus(String taskId, String actionType) async {
+    try {
+      // Map action type to field name
+      final fieldMap = {
+        'CALL': 'callSent',
+        'SMS': 'smsSent',
+        'WHATSAPP': 'whatsappSent',
+      };
+      
+      final fieldName = fieldMap[actionType.toUpperCase()];
+      if (fieldName == null) {
+        return Left(ServerFailure('Invalid action type: $actionType'));
+      }
+      
+      await _firestore.collection('tasks').doc(taskId).update({
+        fieldName: true,
+        '${fieldName}At': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   // Private helper to fetch constituent details
   Future<Either<Failure, List<EnrichedTask>>> _enrichTasks(
       List<QueryDocumentSnapshot> docs) async {

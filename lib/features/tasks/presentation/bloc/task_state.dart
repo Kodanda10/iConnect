@@ -29,3 +29,31 @@ class TaskError extends TaskState {
   @override
   List<Object?> get props => [message];
 }
+
+/// State while an action (CALL, SMS, WHATSAPP) is being recorded
+class ActionStatusUpdating extends TaskState {
+  final String taskId;
+  final String actionType;
+
+  const ActionStatusUpdating({
+    required this.taskId,
+    required this.actionType,
+  });
+
+  @override
+  List<Object?> get props => [taskId, actionType];
+}
+
+/// State when action status has been successfully updated
+class ActionStatusUpdated extends TaskState {
+  final String taskId;
+  final String actionType;
+
+  const ActionStatusUpdated({
+    required this.taskId,
+    required this.actionType,
+  });
+
+  @override
+  List<Object?> get props => [taskId, actionType];
+}

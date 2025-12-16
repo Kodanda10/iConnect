@@ -13,6 +13,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<LoadPendingTasks>(_onLoadPendingTasks);
     on<LoadCompletedTasks>(_onLoadCompletedTasks);
     on<UpdateTaskStatus>(_onUpdateTaskStatus);
+    on<UpdateActionStatus>(_onUpdateActionStatus);
   }
 
   Future<void> _onLoadTasksForDate(
@@ -59,6 +60,30 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     result.fold(
       (failure) => emit(TaskError(failure.message)),
       (_) => add(LoadPendingTasks()),
+    );
+  }
+
+  /// Handle UpdateActionStatus event - marks CALL/SMS/WHATSAPP as sent
+  Future<void> _onUpdateActionStatus(
+    UpdateActionStatus event,
+    Emitter<TaskState> emit,
+  ) async {
+    emit(ActionStatusUpdating(
+      taskId: event.taskId,
+      actionType: event.actionType,
+    ));
+    
+    final result = await _taskRepository.updateActionStatus(
+      event.taskId,
+      event.actionType,
+    );
+    
+    result.fold(
+      (failure) => emit(TaskError(failure.message)),
+      (_) => emit(ActionStatusUpdated(
+        taskId: event.taskId,
+        actionType: event.actionType,
+      )),
     );
   }
 }

@@ -2,6 +2,7 @@
 /// 
 /// @changelog
 /// - 2024-12-16: Initial TDD tests for action status tracking (RED phase)
+/// - 2025-12-17: Added bloc tests for UpdateActionStatus event handling
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -12,6 +13,7 @@ import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_event.dart
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_state.dart';
 import 'package:iconnect_mobile/features/tasks/domain/repositories/task_repository.dart';
 import 'package:iconnect_mobile/features/tasks/domain/entities/task.dart';
+import 'package:iconnect_mobile/core/error/failures.dart';
 
 class MockTaskRepository extends Mock implements TaskRepository {}
 
@@ -113,5 +115,50 @@ void main() {
       expect(event.taskId, 'task_1');
       expect(event.actionType, 'CALL');
     });
+
+    blocTest<TaskBloc, TaskState>(
+      'emits ActionStatusUpdated when UpdateActionStatus is added successfully',
+      build: () {
+        when(() => mockTaskRepository.updateActionStatus(
+          any(),
+          any(),
+        )).thenAnswer((_) async => const Right(null));
+        when(() => mockTaskRepository.getPendingTasks()).thenAnswer(
+          (_) async => const Right([]),
+        );
+        return TaskBloc(taskRepository: mockTaskRepository);
+      },
+      act: (bloc) => bloc.add(const UpdateActionStatus(
+        taskId: 'task_1',
+        actionType: 'SMS',
+      )),
+      expect: () => [
+        isA<ActionStatusUpdating>(),
+        isA<ActionStatusUpdated>(),
+      ],
+      verify: (_) {
+        verify(() => mockTaskRepository.updateActionStatus('task_1', 'SMS')).called(1);
+      },
+    );
+
+    blocTest<TaskBloc, TaskState>(
+      'emits TaskError when UpdateActionStatus fails',
+      build: () {
+        when(() => mockTaskRepository.updateActionStatus(
+          any(),
+          any(),
+        )).thenAnswer((_) async => Left(ServerFailure('Network error')));
+        return TaskBloc(taskRepository: mockTaskRepository);
+      },
+      act: (bloc) => bloc.add(const UpdateActionStatus(
+        taskId: 'task_1',
+        actionType: 'WHATSAPP',
+      )),
+      expect: () => [
+        isA<ActionStatusUpdating>(),
+        isA<TaskError>(),
+      ],
+    );
   });
 }
+

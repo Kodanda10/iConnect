@@ -77,6 +77,10 @@ describe('DataMetricsCard Component', () => {
     it('shows GP breakdown on block hover', async () => {
         // Arrange
         (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+            { name: 'GP2', count: 300 },
+        ]);
 
         // Act
         render(<DataMetricsCard />);
@@ -96,6 +100,9 @@ describe('DataMetricsCard Component', () => {
     it('hides GP breakdown on mouse leave', async () => {
         // Arrange
         (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
 
         // Act
         render(<DataMetricsCard />);
