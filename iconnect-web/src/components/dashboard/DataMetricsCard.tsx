@@ -266,6 +266,7 @@ function BlockItem({ block, total, isHovered, gpData, gpLoading, onMouseEnter, o
                                     gp={gp}
                                     maxCount={maxGpCount}
                                     delay={index * 80}
+                                    index={index}
                                 />
                             ))}
                         </div>
@@ -280,11 +281,25 @@ interface GPProgressBarProps {
     gp: GPMetric;
     maxCount: number;
     delay: number;
+    index: number;
 }
 
-function GPProgressBar({ gp, maxCount, delay }: GPProgressBarProps) {
+// Beautiful multi-color palette for GP bars
+const GP_BAR_COLORS = [
+    { from: '#10B981', to: '#34D399', shadow: 'rgba(16, 185, 129, 0.5)' },   // Emerald
+    { from: '#6366F1', to: '#818CF8', shadow: 'rgba(99, 102, 241, 0.5)' },   // Indigo
+    { from: '#F59E0B', to: '#FBBF24', shadow: 'rgba(245, 158, 11, 0.5)' },   // Amber
+    { from: '#EC4899', to: '#F472B6', shadow: 'rgba(236, 72, 153, 0.5)' },   // Pink
+    { from: '#8B5CF6', to: '#A78BFA', shadow: 'rgba(139, 92, 246, 0.5)' },   // Violet
+    { from: '#14B8A6', to: '#2DD4BF', shadow: 'rgba(20, 184, 166, 0.5)' },   // Teal
+    { from: '#F97316', to: '#FB923C', shadow: 'rgba(249, 115, 22, 0.5)' },   // Orange
+    { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
+];
+
+function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
+    const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -296,23 +311,28 @@ function GPProgressBar({ gp, maxCount, delay }: GPProgressBarProps) {
     return (
         <div className="group">
             <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-white/80 font-medium truncate max-w-[60%]">
+                <span className="text-sm text-white/80 font-medium truncate max-w-[70%]">
                     {gp.name}
                 </span>
-                <span className="text-sm font-bold text-emerald-400 tabular-nums">
+                <span
+                    className="text-sm font-bold tabular-nums"
+                    style={{ color: colorScheme.from }}
+                >
                     {gp.count.toLocaleString()}
                 </span>
             </div>
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
                 <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700 ease-out"
+                    className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{
                         width: `${animatedWidth}%`,
-                        boxShadow: '0 0 10px rgba(16, 185, 129, 0.5)'
+                        background: `linear-gradient(90deg, ${colorScheme.from}, ${colorScheme.to})`,
+                        boxShadow: `0 0 12px ${colorScheme.shadow}`
                     }}
                 />
             </div>
         </div>
     );
 }
+
 

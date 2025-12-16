@@ -438,7 +438,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.block}
                                     onChange={(e) => setFormData({ ...formData, block: e.target.value })}
-                                    className="glass-input-dark h-11 w-full px-3 text-sm appearance-none"
+                                    className="glass-input-dark h-11 w-full text-sm appearance-none !pl-3 !pr-10"
                                 >
                                     <option value="">Select Block</option>
                                     <option value="Raipur">Raipur</option>
@@ -460,7 +460,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.gp_ulb}
                                     onChange={(e) => setFormData({ ...formData, gp_ulb: e.target.value })}
-                                    className="glass-input-dark h-11 w-full px-3 text-sm appearance-none"
+                                    className="glass-input-dark h-11 w-full text-sm appearance-none !pl-3 !pr-10"
                                 >
                                     <option value="">Select GP/ULB</option>
                                     <option value="GP1">Gram Panchayat 1</option>
