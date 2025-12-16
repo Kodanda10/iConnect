@@ -106,8 +106,12 @@ export default function UploadPage() {
 
     const formatDateForInput = (dateStr: string) => {
         if (!dateStr) return '';
-        const [y, m, d] = dateStr.split('-');
-        return `${d}/${m}/${y}`;
+        // Only format if it matches YYYY-MM-DD exactly
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+        return dateStr;
     };
 
     const handleDateSelect = (field: 'dob' | 'anniversary', date: Date) => {

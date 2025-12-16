@@ -501,6 +501,11 @@ body {
   outline: none;
 }
 
+/* Select-specific variant with reduced left padding */
+select.glass-input-dark {
+  padding: 14px 40px 14px 12px;
+}
+
 .glass-input-dark::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
