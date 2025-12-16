@@ -28,7 +28,7 @@ jest.mock('firebase/storage', () => ({
 import { uploadHeaderImage, getSettings, updateSettings } from '@/lib/services/settings';
 import { getFirebaseStorage, getFirebaseDb } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 describe('Header Image Persistence Bug', () => {
     beforeEach(() => {

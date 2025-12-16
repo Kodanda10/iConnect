@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { Database, Loader2, LogOut, Calendar, Upload, Settings, Bell, Users } from 'lucide-react';
+import { Database, Loader2, LogOut, Calendar, Upload, Bell, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

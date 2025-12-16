@@ -15,11 +15,8 @@ import {
     Sparkles,
     Send,
     Trash2,
-    Edit2,
     X,
-    Loader2,
     PartyPopper,
-    MessageSquare,
     Users,
     CheckCircle,
     Copy,
@@ -297,8 +294,8 @@ export default function FestivalsPage() {
                                 <div key={step} className="flex items-center gap-2 flex-1">
                                     <div
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i <= ['select', 'audience', 'generate', 'preview'].indexOf(wizardStep) - 1
-                                                ? 'gradient-primary text-white'
-                                                : 'bg-black/10 text-[var(--color-text-secondary)]'
+                                            ? 'gradient-primary text-white'
+                                            : 'bg-black/10 text-[var(--color-text-secondary)]'
                                             }`}
                                     >
                                         {i + 1}
@@ -324,8 +321,8 @@ export default function FestivalsPage() {
                                         <button
                                             onClick={() => setCampaignAudience('ALL')}
                                             className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${campaignAudience === 'ALL'
-                                                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
-                                                    : 'border-black/10 hover:border-[var(--color-primary)]'
+                                                ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
+                                                : 'border-black/10 hover:border-[var(--color-primary)]'
                                                 }`}
                                         >
                                             <Users className="w-5 h-5 text-[var(--color-primary)]" />
@@ -337,8 +334,8 @@ export default function FestivalsPage() {
                                         <button
                                             onClick={() => setCampaignAudience('WARD')}
                                             className={`p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${campaignAudience === 'WARD'
-                                                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
-                                                    : 'border-black/10 hover:border-[var(--color-primary)]'
+                                                ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
+                                                : 'border-black/10 hover:border-[var(--color-primary)]'
                                                 }`}
                                         >
                                             <Calendar className="w-5 h-5 text-[var(--color-secondary)]" />
@@ -360,8 +357,8 @@ export default function FestivalsPage() {
                                                 key={lang}
                                                 onClick={() => setCampaignLanguage(lang)}
                                                 className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${campaignLanguage === lang
-                                                        ? 'gradient-primary text-white'
-                                                        : 'bg-black/5 text-[var(--color-text-secondary)] hover:bg-black/10'
+                                                    ? 'gradient-primary text-white'
+                                                    : 'bg-black/5 text-[var(--color-text-secondary)] hover:bg-black/10'
                                                     }`}
                                             >
                                                 {lang}
@@ -417,8 +414,8 @@ export default function FestivalsPage() {
                                             key={i}
                                             onClick={() => setSelectedMessage(msg)}
                                             className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMessage === msg
-                                                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
-                                                    : 'border-black/10 hover:border-[var(--color-primary)]'
+                                                ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
+                                                : 'border-black/10 hover:border-[var(--color-primary)]'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between gap-3">
