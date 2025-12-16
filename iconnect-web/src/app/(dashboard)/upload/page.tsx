@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import GlassCalendar from '@/components/ui/GlassCalendar';
 import { isValidIndianMobile, isValidWhatsApp } from '@/lib/utils/validation';
+import DataMetricsCard from '@/components/dashboard/DataMetricsCard';
 
 export default function UploadPage() {
     const { isStaff } = useAuth();
@@ -587,6 +588,12 @@ export default function UploadPage() {
                         )}
                     </button>
                 </form>
+            </div>
+
+            {/* --- Data Metrics Dashboard (50% width) --- */}
+            <div className="grid lg:grid-cols-2 gap-6">
+                <DataMetricsCard />
+                <div className="hidden lg:block" /> {/* Spacer for 50% width */}
             </div>
 
             {/* --- Full-Width Database Table --- */}
