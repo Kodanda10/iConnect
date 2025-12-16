@@ -31,10 +31,10 @@ export interface Constituent {
     dob?: string; // YYYY-MM-DD
     dob_month?: number;
     dob_day?: number;
-    birthday?: any; // Firestore Timestamp
+    birthday?: Date | { seconds: number; nanoseconds: number }; // Firestore Timestamp
     birthday_mmdd?: string; // MM-DD format
     // Anniversary
-    anniversary?: string | any; // YYYY-MM-DD or Timestamp
+    anniversary?: string | Date | { seconds: number; nanoseconds: number }; // YYYY-MM-DD or Timestamp
     anniversary_month?: number;
     anniversary_day?: number;
     anniversary_mmdd?: string; // MM-DD format
@@ -47,8 +47,8 @@ export interface Constituent {
     address?: string;
     // Metadata
     tags?: string[];
-    created_at?: string | any;
-    updated_at?: string | any;
+    created_at?: string | Date | { seconds: number; nanoseconds: number };
+    updated_at?: string | Date | { seconds: number; nanoseconds: number };
 }
 
 // Task types

@@ -32,7 +32,7 @@ export default function DashboardPage() {
                             Welcome back, {user?.name || 'User'}!
                         </h1>
                         <p className="text-[var(--color-text-secondary)] mt-1">
-                            Here's what's happening with your constituents today.
+                            Here&apos;s what&apos;s happening with your constituents today.
                         </p>
                     </div>
                     {isStaff && (
@@ -73,7 +73,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-2 glass-card-light p-6 rounded-2xl">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-bold text-[var(--color-text-primary)]">
-                            Today's Tasks
+                            Today&apos;s Tasks
                         </h2>
                         <button className="text-sm text-[var(--color-primary)] font-medium hover:underline">
                             View All

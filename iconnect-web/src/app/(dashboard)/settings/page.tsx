@@ -448,7 +448,7 @@ export default function SettingsPage() {
                                                 <span className="text-[10px] text-white/60">Yesterday, 8:00 PM</span>
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-bold text-white">Tomorrow's Celebrations 🎉</h4>
+                                                <h4 className="text-sm font-bold text-white">Tomorrow&apos;s Celebrations 🎉</h4>
                                                 <p className="text-xs text-white/90 mt-0.5 leading-relaxed">{settings.alertSettings.headsUpMessage}</p>
                                                 {settings.alertSettings.includeNamesHeadsUp && (
                                                     <div className="mt-2 pt-2 border-t border-white/10 space-y-2">

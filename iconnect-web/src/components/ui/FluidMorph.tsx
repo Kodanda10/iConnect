@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { ReactNode, useRef, useState, useLayoutEffect } from 'react';
+import React, { ReactNode, useRef, useLayoutEffect } from 'react';
 
 interface FluidMorphProps {
     children: ReactNode;
@@ -33,7 +33,6 @@ export function FluidMorph({
     duration = 400,
 }: FluidMorphProps) {
     const elementRef = useRef<HTMLDivElement>(null);
-    const [isAnimating, setIsAnimating] = useState(false);
 
     useLayoutEffect(() => {
         if (!elementRef.current) return;
@@ -59,9 +58,6 @@ export function FluidMorph({
             // Only animate if there's significant change
             // Only animate if there's significant change
             if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1 || Math.abs(scaleX - 1) > 0.01 || Math.abs(scaleY - 1) > 0.01) {
-                // Use a ref or standard animation loop instead of state if possible, 
-                // but if we need state, wrap in rAF to avoid sync render issues
-                requestAnimationFrame(() => setIsAnimating(true));
 
                 // Apply inverse transform (snap to previous position)
                 element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`;
@@ -79,7 +75,6 @@ export function FluidMorph({
                     element.style.transition = '';
                     element.style.transform = '';
                     element.style.transformOrigin = '';
-                    setIsAnimating(false);
                 }, duration);
 
                 return () => clearTimeout(cleanup);

@@ -14,6 +14,17 @@ interface ReactiveBackgroundProps {
     particleCount?: number;
 }
 
+// Particle type for the floating particles
+interface Particle {
+    id: number;
+    left: number;
+    top: number;
+    size: number;
+    baseDuration: number;
+    delay: number;
+    opacity: number;
+}
+
 // Urgency-based animation speeds
 const urgencyConfig = {
     calm: { speed: 0.5, saturation: 80, pulse: false },
@@ -21,6 +32,19 @@ const urgencyConfig = {
     active: { speed: 1.5, saturation: 110, pulse: true },
     urgent: { speed: 2.5, saturation: 130, pulse: true },
 };
+
+// Generate particles once - seed-based for consistency
+function generateParticles(count: number): Particle[] {
+    return Array.from({ length: count }, (_, i) => ({
+        id: i,
+        left: ((i * 17 + 7) % 100),
+        top: ((i * 23 + 11) % 100),
+        size: 2 + ((i * 13) % 4),
+        baseDuration: 4 + ((i * 7) % 4),
+        delay: (i * 11) % 5,
+        opacity: 0.1 + ((i * 19) % 15) / 100,
+    }));
+}
 
 export function ReactiveBackground({
     urgencyLevel = 'normal',
@@ -44,31 +68,8 @@ export function ReactiveBackground({
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    // Generate particles with varied properties
-    // Generate stable particles on mount to avoid impure render
-    interface Particle {
-        id: number;
-        left: number;
-        top: number;
-        size: number;
-        duration: number;
-        delay: number;
-        opacity: number;
-    }
-    const [particles, setParticles] = useState<Particle[]>([]);
-
-    useEffect(() => {
-        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
-            id: i,
-            left: Math.random() * 100,
-            top: Math.random() * 100,
-            size: 2 + Math.random() * 4,
-            duration: (4 + Math.random() * 4) / config.speed,
-            delay: Math.random() * 5,
-            opacity: 0.1 + Math.random() * 0.15,
-        }));
-        setParticles(newParticles);
-    }, [particleCount, config.speed]);
+    // Generate stable particles using useMemo instead of useEffect+setState
+    const particles = useMemo(() => generateParticles(particleCount), [particleCount]);
 
     return (
         <div
@@ -106,7 +107,7 @@ export function ReactiveBackground({
             />
 
             {/* Floating Particles */}
-            {particles.map((p: any) => (
+            {particles.map((p: Particle) => (
                 <div
                     key={p.id}
                     className="absolute rounded-full"
@@ -116,7 +117,7 @@ export function ReactiveBackground({
                         width: p.size,
                         height: p.size,
                         background: `rgba(255, 255, 255, ${p.opacity})`,
-                        animation: `float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+                        animation: `float ${p.baseDuration / config.speed}s ease-in-out ${p.delay}s infinite`,
                         boxShadow: `0 0 ${p.size * 2}px rgba(255, 255, 255, ${p.opacity * 0.5})`,
                     }}
                 />

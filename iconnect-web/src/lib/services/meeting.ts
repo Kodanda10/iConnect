@@ -4,8 +4,11 @@
  */
 
 import { httpsCallable } from 'firebase/functions';
-import { doc, getDoc, setDoc, deleteDoc, serverTimestamp, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { doc, deleteDoc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { getFirebaseFunctions, getFirebaseDb } from '@/lib/firebase';
+
+// Firestore timestamp type
+type FirebaseTimestamp = { seconds: number; nanoseconds: number } | Date;
 
 export interface MeetingTickerData {
     title: string;
@@ -25,7 +28,7 @@ export interface ActiveTicker {
     dialInNumber?: string;
     accessCode?: string;
     status: 'scheduled' | 'live' | 'concluded';
-    createdAt?: any;
+    createdAt?: FirebaseTimestamp;
 }
 
 /**

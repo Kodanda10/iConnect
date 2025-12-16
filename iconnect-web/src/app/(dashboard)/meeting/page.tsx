@@ -285,8 +285,8 @@ Action Required: Review attached materials 15m prior to start.`;
                                     <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                                         <Clock className="w-4 h-4 text-emerald-400" />
                                         <span>
-                                            {(activeTicker.startTime && typeof (activeTicker.startTime as any).toDate === 'function')
-                                                ? (activeTicker.startTime as any).toDate().toLocaleString()
+                                            {(activeTicker.startTime && typeof (activeTicker.startTime as unknown as { toDate?: () => Date }).toDate === 'function')
+                                                ? (activeTicker.startTime as unknown as { toDate: () => Date }).toDate().toLocaleString()
                                                 : new Date(activeTicker.startTime).toLocaleString()}
                                         </span>
                                     </div>

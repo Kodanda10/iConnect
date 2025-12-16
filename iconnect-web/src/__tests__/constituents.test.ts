@@ -44,7 +44,7 @@ jest.mock('firebase/firestore', () => ({
     addDoc: jest.fn(() => Promise.resolve({ id: 'test-id-123' })),
     getDocs: jest.fn(() => Promise.resolve({
         docs: mockDocs,
-        forEach: (callback: Function) => mockDocs.forEach(callback),
+        forEach: (callback: (doc: typeof mockDocs[0]) => void) => mockDocs.forEach(callback),
     })),
     query: jest.fn(),
     where: jest.fn(),

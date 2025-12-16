@@ -9,6 +9,14 @@
 
 import { NextResponse } from 'next/server';
 
+// Firestore REST API field types
+interface FirestoreFieldValue {
+    stringValue?: string;
+    integerValue?: string;
+    timestampValue?: string;
+    arrayValue?: { values: FirestoreFieldValue[] };
+}
+
 // Sample data
 const firstNames = ['Rajesh', 'Priya', 'Amit', 'Sunita', 'Vikram', 'Anjali', 'Suresh', 'Kavita', 'Ravi', 'Meena', 'Anil', 'Pooja', 'Deepak', 'Nisha', 'Manoj', 'Rekha', 'Sanjay', 'Geeta', 'Ashok', 'Shobha'];
 const lastNames = ['Sharma', 'Verma', 'Patel', 'Singh', 'Kumar', 'Gupta', 'Agarwal', 'Joshi', 'Mishra', 'Yadav', 'Reddy', 'Nair', 'Iyer', 'Rao', 'Pandey'];
@@ -150,7 +158,7 @@ export async function POST() {
             const dobDate = person.dob ? new Date(person.dob) : null;
             const annDate = person.anniversary ? new Date(person.anniversary) : null;
 
-            const fields: Record<string, any> = {
+            const fields: Record<string, FirestoreFieldValue> = {
                 full_name: toFirestoreString(person.name),
                 name: toFirestoreString(person.name),
                 phone: toFirestoreString(person.mobile),
@@ -219,8 +227,9 @@ export async function POST() {
                 'Dec 16': '4 people (2 birthdays, 2 anniversaries)',
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error('Seed error:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
     }
 }

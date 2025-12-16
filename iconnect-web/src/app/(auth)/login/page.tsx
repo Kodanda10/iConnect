@@ -56,15 +56,16 @@ export default function LoginPage() {
             await signInWithEmailAndPassword(auth, email, password);
             // Navigate immediately after successful login
             router.replace('/settings');
-        } catch (err: any) {
+        } catch (err: unknown) {
             let msg = 'Authentication failed';
-            if (err.code === 'auth/invalid-credential') {
+            const firebaseErr = err as { code?: string };
+            if (firebaseErr.code === 'auth/invalid-credential') {
                 msg = 'Invalid email or password';
-            } else if (err.code === 'auth/user-not-found') {
+            } else if (firebaseErr.code === 'auth/user-not-found') {
                 msg = 'User not found';
-            } else if (err.code === 'auth/wrong-password') {
+            } else if (firebaseErr.code === 'auth/wrong-password') {
                 msg = 'Incorrect password';
-            } else if (err.code === 'auth/too-many-requests') {
+            } else if (firebaseErr.code === 'auth/too-many-requests') {
                 msg = 'Too many attempts. Try again later.';
             }
             setLocalError(msg);

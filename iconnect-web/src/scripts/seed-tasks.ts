@@ -7,10 +7,15 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 
-// Firebase config (Same as constituents seed)
-// Firebase config (Same as constituents seed)
-import * as dotenv from 'dotenv';
-import path from 'path';
+// Firebase config
+// Note: dotenv and path not needed when using hardcoded config
+
+// Constituent type for type-safe access
+interface ConstituentDoc {
+    id: string;
+    full_name?: string;
+    name?: string;
+}
 
 const firebaseConfig = {
     apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
@@ -58,7 +63,7 @@ async function seedTasks() {
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
             // Flattened fields for easier query if needed (optional)
-            constituentName: (constituent as any).full_name || 'Unknown',
+            constituentName: (constituent as ConstituentDoc).full_name || (constituent as ConstituentDoc).name || 'Unknown',
         };
 
         try {

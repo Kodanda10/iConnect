@@ -44,7 +44,7 @@ jest.mock('firebase/firestore', () => ({
     deleteDoc: jest.fn(() => Promise.resolve()),
     getDocs: jest.fn(() => Promise.resolve({
         docs: mockFestivalDocs,
-        forEach: (callback: Function) => mockFestivalDocs.forEach(callback as any),
+        forEach: (callback: (doc: typeof mockFestivalDocs[0]) => void) => mockFestivalDocs.forEach(callback),
     })),
     query: jest.fn(),
     orderBy: jest.fn(),
