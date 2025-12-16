@@ -1,5 +1,5 @@
 /**
- * @file lib/features/history/domain/entities/action_log.dart
+ * @file lib/features/report/domain/entities/action_log.dart
  * @description Action log entity for tracking constituent interactions
  * @changelog
  * - 2025-12-17: Initial implementation (TDD GREEN phase)

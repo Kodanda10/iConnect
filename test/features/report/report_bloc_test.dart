@@ -1,6 +1,6 @@
 /**
- * History Tab TDD Tests
- * @description Test-first implementation for 7-day action log history
+ * Report Tab TDD Tests
+ * @description Test-first implementation for 7-day action log report
  * @changelog
  * - 2025-12-17: Initial TDD RED phase - writing failing tests
  */
@@ -10,15 +10,15 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
 
-import 'package:iconnect_mobile/features/history/domain/entities/action_log.dart';
-import 'package:iconnect_mobile/features/history/domain/entities/day_summary.dart';
-import 'package:iconnect_mobile/features/history/domain/repositories/history_repository.dart';
-import 'package:iconnect_mobile/features/history/presentation/bloc/history_bloc.dart';
-import 'package:iconnect_mobile/features/history/presentation/bloc/history_event.dart';
-import 'package:iconnect_mobile/features/history/presentation/bloc/history_state.dart';
+import 'package:iconnect_mobile/features/report/domain/entities/action_log.dart';
+import 'package:iconnect_mobile/features/report/domain/entities/day_summary.dart';
+import 'package:iconnect_mobile/features/report/domain/repositories/report_repository.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_bloc.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_event.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_state.dart';
 import 'package:iconnect_mobile/core/error/failures.dart';
 
-class MockHistoryRepository extends Mock implements HistoryRepository {}
+class MockReportRepository extends Mock implements ReportRepository {}
 
 void main() {
   group('ActionLog Entity', () {
@@ -79,25 +79,25 @@ void main() {
     });
   });
 
-  group('HistoryBloc', () {
-    late MockHistoryRepository mockRepository;
-    late HistoryBloc historyBloc;
+  group('ReportBloc', () {
+    late MockReportRepository mockRepository;
+    late ReportBloc reportBloc;
 
     setUp(() {
-      mockRepository = MockHistoryRepository();
-      historyBloc = HistoryBloc(repository: mockRepository);
+      mockRepository = MockReportRepository();
+      reportBloc = ReportBloc(repository: mockRepository);
     });
 
     tearDown(() {
-      historyBloc.close();
+      reportBloc.close();
     });
 
-    test('initial state is HistoryInitial', () {
-      expect(historyBloc.state, isA<HistoryInitial>());
+    test('initial state is ReportInitial', () {
+      expect(reportBloc.state, isA<ReportInitial>());
     });
 
-    blocTest<HistoryBloc, HistoryState>(
-      'emits [HistoryLoading, HistoryLoaded] when LoadHistory is successful',
+    blocTest<ReportBloc, ReportState>(
+      'emits [ReportLoading, ReportLoaded] when LoadReport is successful',
       build: () {
         final now = DateTime.now();
         final mockSummaries = [
@@ -131,37 +131,37 @@ void main() {
           ),
         ];
 
-        when(() => mockRepository.getHistoryForDays(7))
+        when(() => mockRepository.getReportForDays(7))
             .thenAnswer((_) async => Right(mockSummaries));
 
-        return HistoryBloc(repository: mockRepository);
+        return ReportBloc(repository: mockRepository);
       },
-      act: (bloc) => bloc.add(const LoadHistory(days: 7)),
+      act: (bloc) => bloc.add(const LoadReport(days: 7)),
       expect: () => [
-        isA<HistoryLoading>(),
-        isA<HistoryLoaded>().having(
+        isA<ReportLoading>(),
+        isA<ReportLoaded>().having(
           (s) => s.daySummaries.length,
           'has 2 day summaries',
           2,
         ),
       ],
       verify: (_) {
-        verify(() => mockRepository.getHistoryForDays(7)).called(1);
+        verify(() => mockRepository.getReportForDays(7)).called(1);
       },
     );
 
-    blocTest<HistoryBloc, HistoryState>(
-      'emits [HistoryLoading, HistoryError] when LoadHistory fails',
+    blocTest<ReportBloc, ReportState>(
+      'emits [ReportLoading, ReportError] when LoadReport fails',
       build: () {
-        when(() => mockRepository.getHistoryForDays(any()))
+        when(() => mockRepository.getReportForDays(any()))
             .thenAnswer((_) async => Left(ServerFailure('Network error')));
 
-        return HistoryBloc(repository: mockRepository);
+        return ReportBloc(repository: mockRepository);
       },
-      act: (bloc) => bloc.add(const LoadHistory(days: 7)),
+      act: (bloc) => bloc.add(const LoadReport(days: 7)),
       expect: () => [
-        isA<HistoryLoading>(),
-        isA<HistoryError>().having(
+        isA<ReportLoading>(),
+        isA<ReportError>().having(
           (s) => s.message,
           'has error message',
           'Network error',
@@ -169,8 +169,8 @@ void main() {
       ],
     );
 
-    blocTest<HistoryBloc, HistoryState>(
-      'LoadMoreHistory appends to existing data',
+    blocTest<ReportBloc, ReportState>(
+      'LoadMoreReport appends to existing data',
       build: () {
         final now = DateTime.now();
         final initialSummary = DaySummary(
@@ -203,15 +203,15 @@ void main() {
           ],
         );
 
-        when(() => mockRepository.getHistoryForDays(7))
+        when(() => mockRepository.getReportForDays(7))
             .thenAnswer((_) async => Right([initialSummary]));
 
-        when(() => mockRepository.getHistoryForDateRange(any(), any()))
+        when(() => mockRepository.getReportForDateRange(any(), any()))
             .thenAnswer((_) async => Right([olderSummary]));
 
-        return HistoryBloc(repository: mockRepository);
+        return ReportBloc(repository: mockRepository);
       },
-      seed: () => HistoryLoaded(
+      seed: () => ReportLoaded(
         daySummaries: [
           DaySummary(
             date: DateTime.now(),
@@ -220,16 +220,16 @@ void main() {
         ],
         hasMore: true,
       ),
-      act: (bloc) => bloc.add(LoadMoreHistory()),
+      act: (bloc) => bloc.add(LoadMoreReport()),
       expect: () => [
         // First: loading more indicator
-        isA<HistoryLoaded>().having(
+        isA<ReportLoaded>().having(
           (s) => s.loadingMore,
           'is loading more',
           true,
         ),
         // Then: combined results with loading done
-        isA<HistoryLoaded>().having(
+        isA<ReportLoaded>().having(
           (s) => s.daySummaries.length,
           'has more summaries after loading more',
           2,

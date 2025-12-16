@@ -1,6 +1,6 @@
 /**
- * @file lib/features/history/presentation/bloc/history_state.dart
- * @description States for HistoryBloc
+ * @file lib/features/report/presentation/bloc/report_state.dart
+ * @description States for ReportBloc
  * @changelog
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  */
@@ -8,26 +8,26 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/day_summary.dart';
 
-abstract class HistoryState extends Equatable {
-  const HistoryState();
+abstract class ReportState extends Equatable {
+  const ReportState();
 
   @override
   List<Object?> get props => [];
 }
 
 /// Initial state
-class HistoryInitial extends HistoryState {}
+class ReportInitial extends ReportState {}
 
 /// Loading state
-class HistoryLoading extends HistoryState {}
+class ReportLoading extends ReportState {}
 
 /// Loaded state with day summaries
-class HistoryLoaded extends HistoryState {
+class ReportLoaded extends ReportState {
   final List<DaySummary> daySummaries;
   final bool hasMore;
   final bool loadingMore;
 
-  const HistoryLoaded({
+  const ReportLoaded({
     required this.daySummaries,
     this.hasMore = true,
     this.loadingMore = false,
@@ -36,12 +36,12 @@ class HistoryLoaded extends HistoryState {
   @override
   List<Object?> get props => [daySummaries, hasMore, loadingMore];
 
-  HistoryLoaded copyWith({
+  ReportLoaded copyWith({
     List<DaySummary>? daySummaries,
     bool? hasMore,
     bool? loadingMore,
   }) {
-    return HistoryLoaded(
+    return ReportLoaded(
       daySummaries: daySummaries ?? this.daySummaries,
       hasMore: hasMore ?? this.hasMore,
       loadingMore: loadingMore ?? this.loadingMore,
@@ -50,10 +50,10 @@ class HistoryLoaded extends HistoryState {
 }
 
 /// Error state
-class HistoryError extends HistoryState {
+class ReportError extends ReportState {
   final String message;
 
-  const HistoryError(this.message);
+  const ReportError(this.message);
 
   @override
   List<Object?> get props => [message];

@@ -1,5 +1,5 @@
 /**
- * @file lib/features/history/domain/entities/day_summary.dart
+ * @file lib/features/report/domain/entities/day_summary.dart
  * @description Day summary entity grouping actions by date
  * @changelog
  * - 2025-12-17: Initial implementation (TDD GREEN phase)

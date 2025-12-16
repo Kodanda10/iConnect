@@ -1,6 +1,6 @@
 /**
- * @file lib/features/history/domain/repositories/history_repository.dart
- * @description Abstract repository interface for history data
+ * @file lib/features/report/domain/repositories/report_repository.dart
+ * @description Abstract repository interface for report data
  * @changelog
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  */
@@ -9,13 +9,13 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/day_summary.dart';
 
-/// Abstract repository for fetching action history
-abstract class HistoryRepository {
-  /// Get history for the last N days, grouped by day
-  Future<Either<Failure, List<DaySummary>>> getHistoryForDays(int days);
+/// Abstract repository for fetching action report
+abstract class ReportRepository {
+  /// Get report for the last N days, grouped by day
+  Future<Either<Failure, List<DaySummary>>> getReportForDays(int days);
 
-  /// Get history for a specific date range (for infinite scroll)
-  Future<Either<Failure, List<DaySummary>>> getHistoryForDateRange(
+  /// Get report for a specific date range (for infinite scroll)
+  Future<Either<Failure, List<DaySummary>>> getReportForDateRange(
     DateTime start,
     DateTime end,
   );
