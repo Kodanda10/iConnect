@@ -54,11 +54,8 @@ export default function MeetingPage() {
     const [isDrafting, setIsDrafting] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
 
-    // Dual Mode State
-    const [meetingType, setMeetingType] = useState<'VIDEO_MEET' | 'CONFERENCE_CALL'>('VIDEO_MEET');
-
-    // Video Specific
-    const [meetUrl, setMeetUrl] = useState('');
+    // Conference Call Only (Video Meet removed)
+    const meetingType = 'CONFERENCE_CALL' as const;
 
     // Conference Specific
     const [dialInNumber, setDialInNumber] = useState('');
@@ -118,7 +115,7 @@ export default function MeetingPage() {
             title: title || 'Upcoming Meeting',
             time: time,
             date: date.toLocaleDateString('en-GB'),
-            type: meetingType === 'VIDEO_MEET' ? 'Video Conference' : 'Conference Call'
+            type: 'Conference Call'
         };
 
         const draft = `URGENT BROADCAST: ${context.title}
@@ -127,7 +124,7 @@ export default function MeetingPage() {
 ⏰ Time: ${context.time}
 📡 Format: ${context.type}
 
-Please prioritize attendance. ${meetingType === 'VIDEO_MEET' ? 'Click the secure video link below to join.' : 'Use the provided secure dial-in credentials.'}
+Please prioritize attendance. Use the provided secure dial-in credentials.
         
 Action Required: Review attached materials 15m prior to start.`;
 
@@ -145,21 +142,14 @@ Action Required: Review attached materials 15m prior to start.`;
     // Update Message Preview dynamically when inputs change (if user hasn't manually edited it much)
     useEffect(() => {
         const dateStr = date.toLocaleDateString('en-GB');
-        let body = `URGENT: ${title || "Meeting"} scheduled for ${dateStr} at ${time}.`;
+        const body = `URGENT: ${title || "Meeting"} scheduled for ${dateStr} at ${time}.\n\nJoin Audio Bridge:\nDial: ${dialInNumber || "..."}\nCode: ${accessCode || "..."}#`;
 
-        if (meetingType === 'VIDEO_MEET') {
-            body += `\n\nJoin Video Link: ${meetUrl || "https://..."}`;
-        } else {
-            body += `\n\nJoin Audio Bridge:\nDial: ${dialInNumber || "..."}\nCode: ${accessCode || "..."}#`;
-        }
-
-        // Only update if the user hasn't completely rewritten it (simple check)
-        // ideally we might want a "reset" button or "auto-generate" toggle, but for now we'll pre-fill
+        // Only update if the user hasn't completely rewritten it
         if (!messageBody || messageBody.startsWith('URGENT:')) {
             setMessageBody(body);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [title, date, time, meetingType, meetUrl, dialInNumber, accessCode]);
+    }, [title, date, time, dialInNumber, accessCode]);
 
     // Provision a Conference Bridge
     const handleCreateBridge = async () => {
@@ -181,11 +171,7 @@ Action Required: Review attached materials 15m prior to start.`;
         if (!user || !title || !time) return;
 
         // Validation
-        if (meetingType === 'VIDEO_MEET' && !meetUrl) {
-            alert('Please enter a Meeting URL');
-            return;
-        }
-        if (meetingType === 'CONFERENCE_CALL' && (!dialInNumber || !accessCode)) {
+        if (!dialInNumber || !accessCode) {
             alert('Please provision a Conference Bridge first');
             return;
         }
@@ -203,18 +189,13 @@ Action Required: Review attached materials 15m prior to start.`;
                 leaderUid: user.uid
             };
 
-            if (meetingType === 'VIDEO_MEET') {
-                payload.meetUrl = meetUrl;
-            } else {
-                payload.dialInNumber = dialInNumber;
-                payload.accessCode = accessCode;
-            }
+            payload.dialInNumber = dialInNumber;
+            payload.accessCode = accessCode;
 
             await createMeetingTicker(payload);
 
             // Reset Form (keep date/time for convenience)
             setTitle('');
-            setMeetUrl('');
             setDialInNumber('');
             setAccessCode('');
             setMessageBody('');
@@ -341,28 +322,10 @@ Action Required: Review attached materials 15m prior to start.`;
                             </div>
                         </div>
 
-                        {/* Meeting Type Toggle */}
-                        <div className="flex p-1 bg-black/40 rounded-xl mb-8 w-fit border border-white/5">
-                            <button
-                                onClick={() => setMeetingType('VIDEO_MEET')}
-                                className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'VIDEO_MEET'
-                                    ? 'bg-emerald-600 text-white shadow-lg'
-                                    : 'text-white/40 hover:text-white/70'
-                                    }`}
-                            >
-                                <Video className="w-4 h-4" />
-                                Video Meet
-                            </button>
-                            <button
-                                onClick={() => setMeetingType('CONFERENCE_CALL')}
-                                className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'CONFERENCE_CALL'
-                                    ? 'bg-purple-600 text-white shadow-lg'
-                                    : 'text-white/40 hover:text-white/70'
-                                    }`}
-                            >
-                                <PhoneCall className="w-4 h-4" />
-                                Conference Call
-                            </button>
+                        {/* Conference Call Mode Indicator */}
+                        <div className="flex items-center gap-2 mb-8 px-4 py-2.5 bg-purple-600/20 rounded-xl w-fit border border-purple-500/30">
+                            <PhoneCall className="w-4 h-4 text-purple-400" />
+                            <span className="text-sm font-bold text-purple-300">Conference Call Mode</span>
                         </div>
 
                         {/* Form Fields */}
@@ -422,62 +385,44 @@ Action Required: Review attached materials 15m prior to start.`;
                             </div>
 
                             <div className="pt-4 border-t border-white/5">
-                                {meetingType === 'VIDEO_MEET' ? (
-                                    <div className="space-y-2 animate-fade-in">
-                                        <label className="text-sm font-medium text-emerald-400 pl-1 flex items-center gap-1.5">
-                                            <Video className="w-3 h-3" /> Video Link
-                                        </label>
-                                        <div className="relative">
-                                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                                            <input
-                                                type="url"
-                                                value={meetUrl}
-                                                onChange={(e) => setMeetUrl(e.target.value)}
-                                                placeholder="https://meet.google.com/..."
-                                                className="w-full glass-input-dark pl-11 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium placeholder:text-white/10"
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4 animate-fade-in">
-                                        <label className="text-sm font-medium text-purple-400 pl-1 flex items-center gap-1.5">
-                                            <PhoneCall className="w-3 h-3" /> Audio Bridge Details
-                                        </label>
+                                <div className="space-y-4 animate-fade-in">
+                                    <label className="text-sm font-medium text-purple-400 pl-1 flex items-center gap-1.5">
+                                        <PhoneCall className="w-3 h-3" /> Audio Bridge Details
+                                    </label>
 
-                                        {!dialInNumber ? (
-                                            <button
-                                                onClick={handleCreateBridge}
-                                                disabled={provisioning}
-                                                className="w-full py-4 border-2 border-dashed border-purple-500/30 rounded-xl flex flex-col items-center justify-center gap-2 text-purple-300 hover:bg-purple-500/10 transition-colors group"
-                                            >
-                                                {provisioning ? (
-                                                    <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
-                                                ) : (
-                                                    <>
-                                                        <Sparkles className="w-6 h-6 text-purple-500 group-hover:scale-110 transition-transform" />
-                                                        <span className="font-semibold">Provision Conference Bridge</span>
-                                                        <span className="text-xs text-white/30">Generates unique dial-in & code</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        ) : (
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1">
-                                                    <span className="text-xs text-white/30 ml-1">Dial-In Number</span>
-                                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 truncate">
-                                                        {dialInNumber}
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <span className="text-xs text-white/30 ml-1">Access Code</span>
-                                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 tracking-wider">
-                                                        {accessCode}
-                                                    </div>
+                                    {!dialInNumber ? (
+                                        <button
+                                            onClick={handleCreateBridge}
+                                            disabled={provisioning}
+                                            className="w-full py-4 border-2 border-dashed border-purple-500/30 rounded-xl flex flex-col items-center justify-center gap-2 text-purple-300 hover:bg-purple-500/10 transition-colors group"
+                                        >
+                                            {provisioning ? (
+                                                <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                                            ) : (
+                                                <>
+                                                    <Sparkles className="w-6 h-6 text-purple-500 group-hover:scale-110 transition-transform" />
+                                                    <span className="font-semibold">Provision Conference Bridge</span>
+                                                    <span className="text-xs text-white/30">Generates unique dial-in & code</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <span className="text-xs text-white/30 ml-1">Dial-In Number</span>
+                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 truncate">
+                                                    {dialInNumber}
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
-                                )}
+                                            <div className="space-y-1">
+                                                <span className="text-xs text-white/30 ml-1">Access Code</span>
+                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 tracking-wider">
+                                                    {accessCode}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Message Composer (CMS) & Gemini Draft */}
@@ -567,11 +512,8 @@ Action Required: Review attached materials 15m prior to start.`;
 
                     <button
                         onClick={handleCreate}
-                        disabled={creating || !title || (meetingType === 'CONFERENCE_CALL' && !dialInNumber) || (meetingType === 'VIDEO_MEET' && !meetUrl)}
-                        className={`w-full mt-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed ${meetingType === 'CONFERENCE_CALL'
-                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/20'
-                            }`}
+                        disabled={creating || !title || !dialInNumber}
+                        className="w-full mt-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20"
                     >
                         {creating ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
                         <span className="text-white">Broadcast Meeting</span>
