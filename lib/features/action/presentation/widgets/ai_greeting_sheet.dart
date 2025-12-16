@@ -86,42 +86,139 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => Dialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Task Completion', style: TextStyle(color: Color(0xFF134E4A), fontWeight: FontWeight.bold)),
-        content: Text('Did you successfully send the ${widget.type.toLowerCase()} wish to ${widget.constituentName}?'),
-        actions: [
-          TextButton(
-            onPressed: () { 
-              Navigator.pop(ctx); // Close dialog
-            },
-            child: const Text('No, keep pending', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF134E4A),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () {
-              // Mark Done
-              context.read<TaskBloc>().add(UpdateTaskStatus(
-                taskId: widget.taskId,
-                status: 'COMPLETED',
-              ));
-              Navigator.pop(ctx); // Close dialog
-              Navigator.pop(context); // Close sheet
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Outcome for ${widget.constituentName}?',
+                      style: const TextStyle(
+                        color: Color(0xFF111827),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Task marked as completed!'),
-                  backgroundColor: Colors.teal,
+              // Action Summary
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            },
-            child: const Text('Yes, Mark Done', style: TextStyle(color: Colors.white)),
+                child: Row(
+                  children: [
+                    const Icon(Icons.person_outline, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Action taken: ${widget.actionType}',
+                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        ),
+                        Text(
+                          widget.constituentName,
+                          style: const TextStyle(
+                            color: Color(0xFF00A896),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Connected/Sent Button
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  // Mark action as sent
+                  context.read<TaskBloc>().add(UpdateActionStatus(
+                    taskId: widget.taskId,
+                    actionType: widget.actionType,
+                  ));
+                  Navigator.pop(ctx);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Action recorded!'),
+                      backgroundColor: Colors.teal,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.check, color: Colors.white),
+                label: const Text('Connected / Sent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 12),
+              
+              // No Answer / Reschedule Row
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red[400],
+                        side: BorderSide(color: Colors.red[200]!),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
+                        // Keep pending, no status update
+                      },
+                      child: const Text('No Answer'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey[600],
+                        side: BorderSide(color: Colors.grey[300]!),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        Navigator.pop(context);
+                        // TODO: Implement reschedule logic
+                      },
+                      icon: const Icon(Icons.schedule, size: 18),
+                      label: const Text('Reschedule'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

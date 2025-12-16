@@ -67,5 +67,11 @@ service cloud.firestore {
       allow read: if isStaffOrLeader();
       allow write: if isStaff();
     }
+
+    // Active Tickers collection (Public Read for App users, Write for Staff/Leader)
+    match /active_tickers/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isStaffOrLeader();
+    }
   }
 }

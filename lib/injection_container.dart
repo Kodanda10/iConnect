@@ -19,6 +19,10 @@ import 'features/settings/data/repositories/firestore_settings_repository.dart';
 import 'features/settings/domain/repositories/settings_repository.dart';
 import 'features/settings/presentation/cubit/settings_cubit.dart';
 
+import 'features/ticker/data/repositories/firestore_ticker_repository.dart';
+import 'features/ticker/domain/repositories/ticker_repository.dart';
+import 'features/ticker/presentation/bloc/ticker_bloc.dart';
+
 final sl = GetIt.instance; // Service Locator
 
 Future<void> init() async {
@@ -56,6 +60,15 @@ Future<void> init() async {
   // Repository
   sl.registerLazySingleton<SettingsRepository>(
     () => FirestoreSettingsRepository(firestore: sl()),
+  );
+
+  //! Features - Ticker
+  // Bloc
+  sl.registerFactory(() => TickerBloc(repository: sl()));
+
+  // Repository
+  sl.registerLazySingleton<TickerRepository>(
+    () => FirestoreTickerRepository(firestore: sl(), auth: sl()),
   );
 
   //! External

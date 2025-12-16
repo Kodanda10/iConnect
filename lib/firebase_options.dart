@@ -7,12 +7,19 @@ class DefaultFirebaseOptions {
     if (kIsWeb) {
       return web;
     }
-    // For mobile (Android/iOS), google-services.json/GoogleService-Info.plist are usually used.
-    // If not found, you can add them here too. 
-    // For this simulation, we prioritize Web.
-    throw UnsupportedError(
-      'DefaultFirebaseOptions are not supported for this platform.',
-    );
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
   }
 
   static const FirebaseOptions web = FirebaseOptions(
@@ -22,5 +29,26 @@ class DefaultFirebaseOptions {
     projectId: 'iconnect-crm',
     authDomain: 'iconnect-crm.firebaseapp.com',
     storageBucket: 'iconnect-crm.firebasestorage.app',
+  );
+
+  // Android config - uses same Firebase project
+  // Note: For production, download google-services.json from Firebase Console
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    appId: '1:887016822564:android:iconnect_mobile_android',
+    messagingSenderId: '887016822564',
+    projectId: 'iconnect-crm',
+    storageBucket: 'iconnect-crm.firebasestorage.app',
+  );
+
+  // iOS config - uses same Firebase project
+  // Note: For production, download GoogleService-Info.plist from Firebase Console
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    appId: '1:887016822564:ios:iconnect_mobile_ios',
+    messagingSenderId: '887016822564',
+    projectId: 'iconnect-crm',
+    storageBucket: 'iconnect-crm.firebasestorage.app',
+    iosBundleId: 'com.iconnect.iconnectMobile',
   );
 }

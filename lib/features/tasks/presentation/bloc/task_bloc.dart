@@ -11,6 +11,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         super(TaskInitial()) {
     on<LoadTasksForDate>(_onLoadTasksForDate);
     on<LoadPendingTasks>(_onLoadPendingTasks);
+    on<LoadCompletedTasks>(_onLoadCompletedTasks);
     on<UpdateTaskStatus>(_onUpdateTaskStatus);
   }
 
@@ -38,19 +39,26 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     );
   }
 
+  Future<void> _onLoadCompletedTasks(
+    LoadCompletedTasks event,
+    Emitter<TaskState> emit,
+  ) async {
+    emit(TaskLoading());
+    final result = await _taskRepository.getCompletedTasks();
+    result.fold(
+      (failure) => emit(TaskError(failure.message)),
+      (tasks) => emit(TaskLoaded(tasks)),
+    );
+  }
+
   Future<void> _onUpdateTaskStatus(
     UpdateTaskStatus event,
     Emitter<TaskState> emit,
   ) async {
-    // Optimistic update could go here, but for now let's just reload
-    // Or we emit loading? No, that clears the list.
-    // Better: emit(TaskLoading()) or handle in UI.
-    // Let's just update and then reload pending tasks for now.
-    
     final result = await _taskRepository.updateTaskStatus(event.taskId, event.status);
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (_) => add(LoadPendingTasks()), // Reload logic
+      (_) => add(LoadPendingTasks()),
     );
   }
 }

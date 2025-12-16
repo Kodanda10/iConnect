@@ -12,6 +12,10 @@ import * as admin from 'firebase-admin';
 import { generateGreetingMessage, GreetingRequest } from './greeting';
 import { scanForTasks, Constituent, Task } from './dailyScan';
 
+export * from "./dailyScan";
+export * from "./greeting";
+export * from "./meeting";
+
 // Initialize Firebase Admin
 admin.initializeApp();
 const db = admin.firestore();
@@ -147,7 +151,8 @@ export const dailyScan = onSchedule({
     }
 });
 
+// Export all functions
+export * from "./meeting";
 // Export types for testing
 export { GreetingRequest } from './greeting';
 export { Constituent, Task, ScanResult } from './dailyScan';
-

@@ -20,8 +20,9 @@ import 'features/auth/presentation/bloc/auth_state.dart';
 
 import 'features/action/presentation/bloc/greeting_bloc.dart';
 
+import 'features/ticker/presentation/bloc/ticker_bloc.dart';
+
 import 'features/tasks/presentation/bloc/task_bloc.dart';
-import 'features/tasks/presentation/bloc/task_event.dart';
 import 'features/tasks/presentation/bloc/task_event.dart';
 import 'features/settings/presentation/cubit/settings_cubit.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -68,6 +69,9 @@ class IConnectApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => di.sl<TaskBloc>()..add(LoadPendingTasks()),
+        ),
+        BlocProvider(
+          create: (_) => di.sl<TickerBloc>()..add(StartTickerListening()),
         ),
         BlocProvider(
           create: (_) => di.sl<GreetingBloc>(),

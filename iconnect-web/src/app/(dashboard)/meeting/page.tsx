@@ -249,9 +249,8 @@ Action Required: Review attached materials 15m prior to start.`;
                 <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl"></div>
                 <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
                 <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 relative z-10">
-                    Command Center <span className="text-white/30 font-light mx-2">|</span> Meeting Gateway
+                    Meetings
                 </h1>
-                <p className="text-white/40 mt-2 relative z-10">Manage live communications and real-time tickers</p>
             </div>
 
             {/* Active Ticker Card (Conditional) */}
@@ -285,7 +284,11 @@ Action Required: Review attached materials 15m prior to start.`;
                                 <div className="flex flex-wrap gap-4 text-sm text-white/60">
                                     <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                                         <Clock className="w-4 h-4 text-emerald-400" />
-                                        <span>{new Date(activeTicker.startTime).toLocaleString()}</span>
+                                        <span>
+                                            {(activeTicker.startTime && typeof (activeTicker.startTime as any).toDate === 'function')
+                                                ? (activeTicker.startTime as any).toDate().toLocaleString()
+                                                : new Date(activeTicker.startTime).toLocaleString()}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                                         {activeTicker.meetingType === 'CONFERENCE_CALL' ? (
@@ -320,261 +323,260 @@ Action Required: Review attached materials 15m prior to start.`;
                 </div>
             )}
 
-            {/* Creation Form (Only if no active ticker) */}
-            {!activeTicker && (
-                <div className="grid lg:grid-cols-12 gap-8 items-stretch h-full">
+            {/* Creation Form (Always visible, allows drafting next meeting) */}
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+                {/* ... existing form content ... */}
 
-                    {/* Left Column: Configuration (Spans 7 cols) */}
-                    <div className="lg:col-span-7 glass-card-light p-8 rounded-3xl relative overflow-visible h-full flex flex-col">
-                        <div className="relative z-10 flex flex-col h-full">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center">
-                                    <Sparkles className="w-6 h-6 text-yellow-300" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-white">Broadcast New Meeting</h2>
-                                    <p className="text-white/40 text-sm">Select format and configure details</p>
-                                </div>
+                {/* Left Column: Configuration (Spans 7 cols) */}
+                <div className="lg:col-span-7 glass-card-light p-8 rounded-3xl relative overflow-visible h-full flex flex-col">
+                    <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center">
+                                <Sparkles className="w-6 h-6 text-yellow-300" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-white">Broadcast New Meeting</h2>
+                                <p className="text-white/40 text-sm">Select format and configure details</p>
+                            </div>
+                        </div>
+
+                        {/* Meeting Type Toggle */}
+                        <div className="flex p-1 bg-black/40 rounded-xl mb-8 w-fit border border-white/5">
+                            <button
+                                onClick={() => setMeetingType('VIDEO_MEET')}
+                                className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'VIDEO_MEET'
+                                    ? 'bg-emerald-600 text-white shadow-lg'
+                                    : 'text-white/40 hover:text-white/70'
+                                    }`}
+                            >
+                                <Video className="w-4 h-4" />
+                                Video Meet
+                            </button>
+                            <button
+                                onClick={() => setMeetingType('CONFERENCE_CALL')}
+                                className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'CONFERENCE_CALL'
+                                    ? 'bg-purple-600 text-white shadow-lg'
+                                    : 'text-white/40 hover:text-white/70'
+                                    }`}
+                            >
+                                <PhoneCall className="w-4 h-4" />
+                                Conference Call
+                            </button>
+                        </div>
+
+                        {/* Form Fields */}
+                        <div className="space-y-6 flex-1">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-white/70 pl-1">Meeting Title</label>
+                                <input
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="e.g. Rapid Response Team Sync"
+                                    className="w-full glass-input-dark px-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium placeholder:text-white/10"
+                                />
                             </div>
 
-                            {/* Meeting Type Toggle */}
-                            <div className="flex p-1 bg-black/40 rounded-xl mb-8 w-fit border border-white/5">
-                                <button
-                                    onClick={() => setMeetingType('VIDEO_MEET')}
-                                    className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'VIDEO_MEET'
-                                        ? 'bg-emerald-600 text-white shadow-lg'
-                                        : 'text-white/40 hover:text-white/70'
-                                        }`}
-                                >
-                                    <Video className="w-4 h-4" />
-                                    Video Meet
-                                </button>
-                                <button
-                                    onClick={() => setMeetingType('CONFERENCE_CALL')}
-                                    className={`px-6 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${meetingType === 'CONFERENCE_CALL'
-                                        ? 'bg-purple-600 text-white shadow-lg'
-                                        : 'text-white/40 hover:text-white/70'
-                                        }`}
-                                >
-                                    <PhoneCall className="w-4 h-4" />
-                                    Conference Call
-                                </button>
-                            </div>
-
-                            {/* Form Fields */}
-                            <div className="space-y-6 flex-1">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-white/70 pl-1">Meeting Title</label>
-                                    <input
-                                        type="text"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        placeholder="e.g. Rapid Response Team Sync"
-                                        className="w-full glass-input-dark px-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium placeholder:text-white/10"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2 relative">
-                                        <label className="text-sm font-medium text-white/70 pl-1">Date</label>
-                                        <div className="relative">
-                                            <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
-                                            <input
-                                                type="text"
-                                                value={dateInput}
-                                                onChange={handleDateInputChange}
-                                                placeholder="DD/MM/YYYY"
-                                                className="w-full glass-input-dark pl-10 pr-10 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
-                                            />
-                                            <button
-                                                onClick={() => setShowCalendar(!showCalendar)}
-                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-lg transition-colors text-white/50 hover:text-white"
-                                            >
-                                                <ChevronDown className="w-4 h-4" />
-                                            </button>
-                                        </div>
-
-                                        {showCalendar && (
-                                            <div className="absolute top-full left-0 mt-2 z-50">
-                                                <GlassCalendar
-                                                    selectedDate={date}
-                                                    onSelect={handleCalendarSelect}
-                                                />
-                                            </div>
-                                        )}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2 relative">
+                                    <label className="text-sm font-medium text-white/70 pl-1">Date</label>
+                                    <div className="relative">
+                                        <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+                                        <input
+                                            type="text"
+                                            value={dateInput}
+                                            onChange={handleDateInputChange}
+                                            placeholder="DD/MM/YYYY"
+                                            className="w-full glass-input-dark pl-10 pr-10 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                        />
+                                        <button
+                                            onClick={() => setShowCalendar(!showCalendar)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-lg transition-colors text-white/50 hover:text-white"
+                                        >
+                                            <ChevronDown className="w-4 h-4" />
+                                        </button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-white/70 pl-1">Time</label>
-                                        <div className="relative">
-                                            <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                                            <input
-                                                type="time"
-                                                value={time}
-                                                onChange={(e) => setTime(e.target.value)}
-                                                className="w-full glass-input-dark pl-10 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+
+                                    {showCalendar && (
+                                        <div className="absolute top-full left-0 mt-2 z-50">
+                                            <GlassCalendar
+                                                selectedDate={date}
+                                                onSelect={handleCalendarSelect}
                                             />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="pt-4 border-t border-white/5">
-                                    {meetingType === 'VIDEO_MEET' ? (
-                                        <div className="space-y-2 animate-fade-in">
-                                            <label className="text-sm font-medium text-emerald-400 pl-1 flex items-center gap-1.5">
-                                                <Video className="w-3 h-3" /> Video Link
-                                            </label>
-                                            <div className="relative">
-                                                <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                                                <input
-                                                    type="url"
-                                                    value={meetUrl}
-                                                    onChange={(e) => setMeetUrl(e.target.value)}
-                                                    placeholder="https://meet.google.com/..."
-                                                    className="w-full glass-input-dark pl-11 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium placeholder:text-white/10"
-                                                />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4 animate-fade-in">
-                                            <label className="text-sm font-medium text-purple-400 pl-1 flex items-center gap-1.5">
-                                                <PhoneCall className="w-3 h-3" /> Audio Bridge Details
-                                            </label>
-
-                                            {!dialInNumber ? (
-                                                <button
-                                                    onClick={handleCreateBridge}
-                                                    disabled={provisioning}
-                                                    className="w-full py-4 border-2 border-dashed border-purple-500/30 rounded-xl flex flex-col items-center justify-center gap-2 text-purple-300 hover:bg-purple-500/10 transition-colors group"
-                                                >
-                                                    {provisioning ? (
-                                                        <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
-                                                    ) : (
-                                                        <>
-                                                            <Sparkles className="w-6 h-6 text-purple-500 group-hover:scale-110 transition-transform" />
-                                                            <span className="font-semibold">Provision Conference Bridge</span>
-                                                            <span className="text-xs text-white/30">Generates unique dial-in & code</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            ) : (
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div className="space-y-1">
-                                                        <span className="text-xs text-white/30 ml-1">Dial-In Number</span>
-                                                        <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 truncate">
-                                                            {dialInNumber}
-                                                        </div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <span className="text-xs text-white/30 ml-1">Access Code</span>
-                                                        <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 tracking-wider">
-                                                            {accessCode}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Message Composer (CMS) & Gemini Draft */}
-                                <div className="pt-4 border-t border-white/5 flex-1 flex flex-col">
-                                    <div className="flex items-center justify-between mb-2 pl-1">
-                                        <label className="text-sm font-medium text-white/70 flex items-center gap-1.5">
-                                            <MessageSquare className="w-3 h-3" /> Compose Message
-                                        </label>
-                                        <button
-                                            onClick={handleGeminiDraft}
-                                            disabled={isDrafting}
-                                            className="text-xs flex items-center gap-1.5 text-purple-300 hover:text-white transition-colors bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/20"
-                                        >
-                                            {isDrafting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-400" />}
-                                            <span className="font-semibold">Draft with Gemini</span>
-                                        </button>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-white/70 pl-1">Time</label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                                        <input
+                                            type="time"
+                                            value={time}
+                                            onChange={(e) => setTime(e.target.value)}
+                                            className="w-full glass-input-dark pl-10 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                                        />
                                     </div>
-                                    <textarea
-                                        value={messageBody}
-                                        onChange={(e) => setMessageBody(e.target.value)}
-                                        className="w-full glass-input-dark p-4 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-sm leading-relaxed resize-none flex-1 min-h-[150px]"
-                                        placeholder="Type manually or ask Gemini to draft..."
-                                    />
                                 </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-white/5">
+                                {meetingType === 'VIDEO_MEET' ? (
+                                    <div className="space-y-2 animate-fade-in">
+                                        <label className="text-sm font-medium text-emerald-400 pl-1 flex items-center gap-1.5">
+                                            <Video className="w-3 h-3" /> Video Link
+                                        </label>
+                                        <div className="relative">
+                                            <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                                            <input
+                                                type="url"
+                                                value={meetUrl}
+                                                onChange={(e) => setMeetUrl(e.target.value)}
+                                                placeholder="https://meet.google.com/..."
+                                                className="w-full glass-input-dark pl-11 pr-4 py-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-medium placeholder:text-white/10"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4 animate-fade-in">
+                                        <label className="text-sm font-medium text-purple-400 pl-1 flex items-center gap-1.5">
+                                            <PhoneCall className="w-3 h-3" /> Audio Bridge Details
+                                        </label>
+
+                                        {!dialInNumber ? (
+                                            <button
+                                                onClick={handleCreateBridge}
+                                                disabled={provisioning}
+                                                className="w-full py-4 border-2 border-dashed border-purple-500/30 rounded-xl flex flex-col items-center justify-center gap-2 text-purple-300 hover:bg-purple-500/10 transition-colors group"
+                                            >
+                                                {provisioning ? (
+                                                    <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="w-6 h-6 text-purple-500 group-hover:scale-110 transition-transform" />
+                                                        <span className="font-semibold">Provision Conference Bridge</span>
+                                                        <span className="text-xs text-white/30">Generates unique dial-in & code</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <span className="text-xs text-white/30 ml-1">Dial-In Number</span>
+                                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 truncate">
+                                                        {dialInNumber}
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-xs text-white/30 ml-1">Access Code</span>
+                                                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl px-4 py-3 font-mono text-purple-200 tracking-wider">
+                                                        {accessCode}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Message Composer (CMS) & Gemini Draft */}
+                            <div className="pt-4 border-t border-white/5 flex-1 flex flex-col">
+                                <div className="flex items-center justify-between mb-2 pl-1">
+                                    <label className="text-sm font-medium text-white/70 flex items-center gap-1.5">
+                                        <MessageSquare className="w-3 h-3" /> Compose Message
+                                    </label>
+                                    <button
+                                        onClick={handleGeminiDraft}
+                                        disabled={isDrafting}
+                                        className="text-xs flex items-center gap-1.5 text-purple-300 hover:text-white transition-colors bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg border border-purple-500/20"
+                                    >
+                                        {isDrafting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-purple-400" />}
+                                        <span className="font-semibold">Draft with Gemini</span>
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={messageBody}
+                                    onChange={(e) => setMessageBody(e.target.value)}
+                                    className="w-full glass-input-dark p-4 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-sm leading-relaxed resize-none flex-1 min-h-[150px]"
+                                    placeholder="Type manually or ask Gemini to draft..."
+                                />
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Right Column: Preview & Action (Spans 5 cols) */}
-                    <div className="lg:col-span-5 glass-card-light p-6 rounded-2xl flex flex-col">
-                        <h2 className="font-bold text-white mb-4 text-center">Live Mobile Preview</h2>
+                {/* Right Column: Preview & Action (Spans 5 cols) */}
+                <div className="lg:col-span-5 glass-card-light p-6 rounded-2xl flex flex-col">
+                    <h2 className="font-bold text-white mb-4 text-center">Live Mobile Preview</h2>
 
-                        {/* Lock Screen Mockup */}
-                        <div className="w-64 mx-auto bg-black rounded-[3rem] border-8 border-gray-900 overflow-hidden shadow-2xl relative flex-1 min-h-[500px]">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-20"></div>
-                            <div className="h-full relative bg-gray-900 w-full overflow-hidden flex flex-col">
-                                {/* Wallpaper */}
-                                <div className="absolute inset-0 z-0">
-                                    <div className="w-full h-full bg-gradient-to-br from-emerald-900 to-black opacity-60"></div>
-                                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60"></div>
+                    {/* Lock Screen Mockup */}
+                    <div className="w-64 mx-auto bg-black rounded-[3rem] border-8 border-gray-900 overflow-hidden shadow-2xl relative flex-1 min-h-[500px]">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-20"></div>
+                        <div className="h-full relative bg-gray-900 w-full overflow-hidden flex flex-col">
+                            {/* Wallpaper */}
+                            <div className="absolute inset-0 z-0">
+                                <div className="w-full h-full bg-gradient-to-br from-emerald-900 to-black opacity-60"></div>
+                                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60"></div>
+                            </div>
+
+                            {/* Lock Screen Items */}
+                            <div className="relative z-10 p-4 flex flex-col h-full">
+                                <div className="mt-12 text-center text-white/90">
+                                    <div className="text-5xl font-thin tracking-tight">09:41</div>
+                                    <div className="text-sm font-medium mt-1">Tuesday, 12 December</div>
                                 </div>
 
-                                {/* Lock Screen Items */}
-                                <div className="relative z-10 p-4 flex flex-col h-full">
-                                    <div className="mt-12 text-center text-white/90">
-                                        <div className="text-5xl font-thin tracking-tight">09:41</div>
-                                        <div className="text-sm font-medium mt-1">Tuesday, 12 December</div>
-                                    </div>
+                                <div className="mt-8 space-y-3 flex-1 overflow-visible">
+                                    {/* Meeting Notification */}
+                                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 animate-slide-up shadow-lg relative group transition-all duration-300">
 
-                                    <div className="mt-8 space-y-3 flex-1 overflow-visible">
-                                        {/* Meeting Notification */}
-                                        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 animate-slide-up shadow-lg relative group transition-all duration-300">
+                                        {/* Gemini Effect Overlay */}
+                                        {isDrafting && (
+                                            <div className="absolute inset-0 bg-purple-500/10 rounded-2xl animate-pulse z-0"></div>
+                                        )}
 
-                                            {/* Gemini Effect Overlay */}
-                                            {isDrafting && (
-                                                <div className="absolute inset-0 bg-purple-500/10 rounded-2xl animate-pulse z-0"></div>
-                                            )}
-
-                                            <div className="relative z-10">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <div className="w-5 h-5 rounded-md gradient-primary flex items-center justify-center"><Database className="w-3 h-3 text-white" /></div>
-                                                        <span className="text-[10px] font-bold text-white/80">iConnect</span>
-                                                    </div>
-                                                    <span className="text-[10px] text-white/60">now</span>
+                                        <div className="relative z-10">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-5 h-5 rounded-md gradient-primary flex items-center justify-center"><Database className="w-3 h-3 text-white" /></div>
+                                                    <span className="text-[10px] font-bold text-white/80">iConnect</span>
                                                 </div>
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                                                        Action Required ⚡️
-                                                    </h4>
-                                                    <p className="text-xs text-white/90 mt-0.5 leading-relaxed whitespace-pre-wrap">
-                                                        {messageBody || "Generating preview..."}
-                                                    </p>
-                                                </div>
+                                                <span className="text-[10px] text-white/60">now</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                                                    Action Required ⚡️
+                                                </h4>
+                                                <p className="text-xs text-white/90 mt-0.5 leading-relaxed whitespace-pre-wrap">
+                                                    {messageBody || "Generating preview..."}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="mt-auto flex justify-between px-4 pb-2">
-                                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"><Smartphone className="w-5 h-5 text-white" /></div>
-                                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"><ImageIcon className="w-5 h-5 text-white" /></div>
-                                    </div>
-                                    <div className="w-24 h-1 bg-white/50 rounded-full mx-auto mb-1"></div>
                                 </div>
+
+                                <div className="mt-auto flex justify-between px-4 pb-2">
+                                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"><Smartphone className="w-5 h-5 text-white" /></div>
+                                    <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"><ImageIcon className="w-5 h-5 text-white" /></div>
+                                </div>
+                                <div className="w-24 h-1 bg-white/50 rounded-full mx-auto mb-1"></div>
                             </div>
                         </div>
-
-                        <button
-                            onClick={handleCreate}
-                            disabled={creating || !title || (meetingType === 'CONFERENCE_CALL' && !dialInNumber) || (meetingType === 'VIDEO_MEET' && !meetUrl)}
-                            className={`w-full mt-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed ${meetingType === 'CONFERENCE_CALL'
-                                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'
-                                : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/20'
-                                }`}
-                        >
-                            {creating ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
-                            <span className="text-white">Broadcast Meeting</span>
-                        </button>
                     </div>
+
+                    <button
+                        onClick={handleCreate}
+                        disabled={creating || !title || (meetingType === 'CONFERENCE_CALL' && !dialInNumber) || (meetingType === 'VIDEO_MEET' && !meetUrl)}
+                        className={`w-full mt-6 py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed ${meetingType === 'CONFERENCE_CALL'
+                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-purple-500/20'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/20'
+                            }`}
+                    >
+                        {creating ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <CheckCircle2 className="w-5 h-5 text-white" />}
+                        <span className="text-white">Broadcast Meeting</span>
+                    </button>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

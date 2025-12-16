@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -15,6 +17,9 @@ import 'package:iconnect_mobile/features/action/presentation/widgets/ai_greeting
 import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_state.dart';
 import 'package:iconnect_mobile/features/settings/domain/entities/app_settings.dart';
+import 'dart:ui';
+import 'package:iconnect_mobile/features/tasks/presentation/widgets/shimmer_task_card.dart';
+import 'package:iconnect_mobile/features/ticker/presentation/widgets/liquid_ticker_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -49,6 +54,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _headerAnim.forward();
     
     // Refresh tasks on load
+    _seedDemoData(); // Auto-seed for demo
     context.read<TaskBloc>().add(LoadPendingTasks());
   }
 
@@ -107,34 +113,94 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background matching React
-      body: Column(
+      backgroundColor: Colors.transparent, // Background handled by mesh gradient
+      body: Stack(
         children: [
-          // Custom Header Section
-          _buildHeader(),
-          
-          // Sub Filters (All / Birthday / Anniversary)
-          _buildSubFilters(),
-          
-          // Task List
-          Expanded(
-            child: BlocBuilder<TaskBloc, TaskState>(
-              builder: (context, state) {
-                if (state is TaskLoading) {
-                  return const Center(child: CircularProgressIndicator(color: Colors.teal));
-                } else if (state is TaskError) {
-                  return _buildErrorState(state.message);
-                } else if (state is TaskLoaded) {
-                  final tasks = _filterTasks(state.tasks);
-                  // Quick hack: Calculate counts based on ALL loaded tasks
-                  // In a real app, counts might come from metadata
-                  return _buildTaskList(tasks);
-                }
-                return const SizedBox.shrink();
-              },
+          // Layer 1: Base Linear Gradient
+          Container(decoration: AppTheme.meshGradient),
+
+          // Layer 2: Top Center Emerald Glow (Radial)
+          Positioned(
+            top: -100,
+            left: 0,
+            right: 0,
+            height: 500,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topCenter,
+                  radius: 0.8,
+                  colors: [
+                    AppColors.primary.withOpacity(0.2), // Reduced opacity
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 1.0],
+                ),
+              ),
             ),
           ),
-        ],
+
+          // Layer 3: Bottom Right Amethyst Glow (Radial)
+          Positioned(
+            bottom: -100,
+            right: -100,
+            width: 400,
+            height: 400,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 0.8,
+                  colors: [
+                    AppColors.secondary.withOpacity(0.25),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Content
+          Column(
+          children: [
+            // Custom Header Section
+            _buildHeader(),
+            
+            // Ticker removed per user request - will add back later
+            
+            // Sub Filters (All / Birthday / Anniversary)
+            _buildSubFilters(),
+            
+            // Task List
+            Expanded(
+              child: BlocBuilder<TaskBloc, TaskState>(
+                builder: (context, state) {
+                  if (state is TaskLoading) {
+                    return const ShimmerTaskList(itemCount: 3);
+                  } else if (state is TaskError) {
+                    return _buildErrorState(state.message);
+                  } else if (state is TaskLoaded) {
+                    final tasks = _filterTasks(state.tasks);
+                    return RefreshIndicator(
+                      color: AppColors.primary,
+                      backgroundColor: Colors.white,
+                      onRefresh: () async {
+                        if (_filterStatus == 'PENDING') {
+                          context.read<TaskBloc>().add(LoadPendingTasks());
+                        } else {
+                          context.read<TaskBloc>().add(LoadCompletedTasks());
+                        }
+                      },
+                      child: _buildTaskList(tasks),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
       ),
     );
   }
@@ -163,9 +229,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             height: 240, // Taller header to match screenshot
             width: double.infinity,
             clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              color: Color(0xFF134E4A), // teal-900 equivalent
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+            decoration: BoxDecoration(
+              // Translucent dark teal for header to blend with mesh gradient
+              color: const Color(0xFF134E4A).withOpacity(0.8), 
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
             ),
             child: Stack(
               children: [
@@ -177,8 +245,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
                         )
-                      : Image.network(
-                          "https://picsum.photos/seed/bg/800/600", // Fallback placeholder
+                      : Image.asset(
+                          "assets/images/header_bg.png",
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
                         ),
@@ -252,6 +320,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                              ),
                            ],
                          ),
+
                          // Logout Button (DP Removed)
                          InkWell(
                            onTap: _signOut,
@@ -281,8 +350,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       child: Row(
                         children: [
-                          _buildMainTab('PENDING', 'Pending', true),
-                          _buildMainTab('COMPLETED', 'History', false),
+                          _buildMainTab('PENDING', 'Today', true),
+                          _buildMainTab('COMPLETED', 'Report', false),
+                          _buildMainTab('MEETING', 'Meeting', false),
                         ],
                       ),
                     ),
@@ -306,6 +376,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           setState(() {
             _filterStatus = key;
           });
+          // Dispatch appropriate BLoC event
+          if (key == 'PENDING') {
+            context.read<TaskBloc>().add(LoadPendingTasks());
+          } else {
+            context.read<TaskBloc>().add(LoadCompletedTasks());
+          }
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -348,11 +424,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildSubFilters() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      // Removed background decoration per user request
       child: BlocBuilder<TaskBloc, TaskState>(
         builder: (context, state) {
           int countAll = 0, countBirthday = 0, countAnniversary = 0;
@@ -363,16 +436,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
              countAnniversary = list.where((t) => t.type == 'ANNIVERSARY').length;
           }
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          return Container(
+            width: double.infinity,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildFilterChip('ALL', 'All', null, countAll),
+                // _buildFilterChip('ALL', 'All', null, countAll), // Removed per requirement
+                _buildFilterChip('BIRTHDAY', 'Birthday', Icons.card_giftcard, countBirthday),
                 const SizedBox(width: 8),
-                _buildFilterChip('BIRTHDAY', 'Birthdays', Icons.card_giftcard, countBirthday),
-                const SizedBox(width: 8),
-                _buildFilterChip('ANNIVERSARY', 'Anniversaries', Icons.favorite, countAnniversary),
+                _buildFilterChip('ANNIVERSARY', 'Anniversary', Icons.favorite, countAnniversary),
               ],
             ),
           );
@@ -395,43 +467,81 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
 
     return GestureDetector(
-      onTap: () => setState(() => _filterType = key),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? activeBg : Colors.white,
+      onTap: () {
+        // Toggle Logic: If already selected, deselect (show all implicitly or empty).
+        // Since "All" tab is removed, deselecting means no specific filter active (effectively All).
+        setState(() {
+            _filterType = isSelected ? 'ALL' : key; 
+            // Note: If 'ALL' is used as default state key when nothing is selected.
+            // Or use null. Logic in _filterTasks handles 'ALL' or empty/null properly?
+            // Existing _filterTasks usually checks if (type == 'BIRTHDAY') etc. 
+            // If type is 'ALL', it returns all. 
+        });
+      },
+      child: AnimatedScale(
+        scale: isSelected ? 1.05 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: isSelected ? activeColor.withOpacity(0.3) : Colors.grey[200]!,
-          ),
-        ),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 14, color: isSelected ? activeColor : Colors.grey[400]),
-              const SizedBox(width: 6),
-            ],
-            Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                color: isSelected ? activeColor : Colors.grey[500],
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? activeColor.withOpacity(0.25) 
+                    : Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(50),
+                border: Border.all(
+                  color: isSelected 
+                      ? activeColor.withOpacity(0.5) 
+                      : Colors.white.withOpacity(0.15),
+                  width: 1,
+                ),
+                boxShadow: isSelected
+                    ? [BoxShadow(color: activeColor.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))]
+                    : [],
+              ),
+              child: Row(
+                children: [
+                  if (icon != null) ...[
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        icon,
+                        key: ValueKey('$key-$isSelected'),
+                        size: 14,
+                        color: isSelected ? activeColor : Colors.white.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    label.toUpperCase(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                      fontSize: 11,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                  if (count > 0) ...[
+                     const SizedBox(width: 4),
+                     Text(
+                       "($count)",
+                       style: TextStyle(
+                         color: isSelected ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.5),
+                         fontSize: 10,
+                         fontWeight: FontWeight.w600,
+                       ),
+                     ),
+                  ]
+                ],
               ),
             ),
-            if (count > 0) ...[
-               const SizedBox(width: 4),
-               Text(
-                 "($count)",
-                 style: TextStyle(
-                   color: isSelected ? activeColor : Colors.grey[400],
-                   fontSize: 11,
-                   fontWeight: FontWeight.bold,
-                 ),
-               ),
-            ]
-          ],
+          ),
         ),
       ),
     );
@@ -448,16 +558,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.check_circle, size: 64, color: Colors.grey[300]),
+              child: Icon(Icons.check_circle, size: 64, color: Colors.white.withOpacity(0.5)),
             ),
             const SizedBox(height: 16),
             Text(
               'No pending tasks',
-              style: TextStyle(color: Colors.grey[500], fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -481,17 +591,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final Color typeBg = isBirthday ? Colors.pink[50]! : Colors.purple[50]!;
     final IconData typeIcon = isBirthday ? Icons.card_giftcard : Icons.favorite;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey[100]!),
-        boxShadow: const [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.04), blurRadius: 16, offset: Offset(0, 4))],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // Match web's 12px blur
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.25)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 32,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Caustic Light Overlay (top-left glow)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 60,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withOpacity(0.15),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Inner Content
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Header
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,8 +644,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 width: 48, 
                 height: 48, 
                 decoration: BoxDecoration(
-                  color: typeBg,
+                  color: typeBg.withOpacity(0.9), // Higher opacity for icon bg
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: typeColor.withOpacity(0.4), blurRadius: 12)]
                 ),
                 child: Icon(typeIcon, color: typeColor, size: 24),
               ),
@@ -510,89 +655,167 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Row 1: Name + Ward (Top Right)
                     Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                       children: [
-                           Expanded(child: Text(
-                             task.name,
-                             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                           )),
-                           Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[50],
-                                border: Border.all(color: Colors.grey[200]!),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                "WARD ${task.ward}",
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey[500]),
-                              ),
-                           ),
-                       ],
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            task.name,
+                            style: const TextStyle(
+                              fontSize: 16, // Slightly smaller than 18 to fit
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white.withOpacity(0.2)),
+                          ),
+                          child: Text(
+                            "Ward ${task.ward}",
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    
                     const SizedBox(height: 4),
-                    const Row(
-                       children: [
-                           Icon(Icons.calendar_today, size: 12, color: Colors.grey),
-                           SizedBox(width: 4),
-                           Text("2025-12-12", style: TextStyle(fontSize: 12, color: Colors.grey)), // Placeholder date
-                       ],
-                    )
+                    
+                    // Row 2: Phone Number (Below Name)
+                    Row(
+                      children: [
+                        Icon(Icons.phone, size: 12, color: Colors.white.withOpacity(0.7)),
+                        const SizedBox(width: 4),
+                        Text(
+                          task.mobile.isNotEmpty ? task.mobile : "No Mobile",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.8),
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // Row 3: Block & GP
+                    Row(
+                      children: [
+                        Icon(Icons.location_city, size: 12, color: Colors.white.withOpacity(0.6)),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            "${task.block.isNotEmpty ? task.block : 'Block N/A'} • ${task.gramPanchayat.isNotEmpty ? task.gramPanchayat : 'GP N/A'}",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.6),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                     const SizedBox(height: 4),
+                     
+                     // Row 4: Date
+                     Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 12, color: Colors.white.withOpacity(0.6)),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateFormat('dd MMM yyyy').format(task.dueDate),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           
-          const SizedBox(height: 8),
-
-          // Address
-          const Padding(
-            padding: EdgeInsets.only(left: 64.0),
-            child: Row(
-               children: [
-                  Icon(Icons.location_on, size: 12, color: Colors.grey),
-                  SizedBox(width: 4),
-                  Text("20, MG Road", style: TextStyle(color: Colors.grey, fontSize: 12)),
-               ],
-            ),
-          ),
-          
           const SizedBox(height: 20),
           
-          // Action Buttons
+          // Action Buttons (Call, SMS, WhatsApp) - Liquid Glass Style with Status
           Row(
             children: [
-              Expanded(child: _buildActionButton("Call", Icons.phone, Colors.grey[50]!, Colors.grey[700]!, () => _launchPhone(task.mobile))),
-              const SizedBox(width: 8),
-              Expanded(child: _buildActionButton("SMS", Icons.message, const Color(0xFFEFF6FF), Colors.blue[600]!, () => _openAiWizard(task, 'SMS'))),
-              const SizedBox(width: 8),
-              Expanded(child: _buildActionButton("WhatsApp", Icons.chat_bubble, const Color(0xFFECFDF5), const Color(0xFF10B981), () => _openAiWizard(task, 'WHATSAPP'))),
+                Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task.mobile))),
+                const SizedBox(width: 10),
+                Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, const Color(0xFF5E548E), task.smsSent, () => _openAiWizard(task, 'SMS'))),
+                const SizedBox(width: 10),
+                Expanded(child: _buildLiquidGlassButton("WhatsApp", Icons.chat_bubble, const Color(0xFF10B981), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
             ],
           )
         ],
       ),
-    );
+              ), // End Padding
+            ], // End Stack children
+          ), // End Stack
+    ),
+  ),
+);
   }
 
-  Widget _buildActionButton(String label, IconData icon, Color bg, Color text, VoidCallback onTap) {
+  /// Liquid Glass Button - Premium Glassmorphism style with completed state
+  Widget _buildLiquidGlassButton(String label, IconData icon, Color iconColor, bool isCompleted, VoidCallback onTap) {
+    // Grey out if action is completed
+    final effectiveIconColor = isCompleted ? Colors.grey[400]! : iconColor;
+    final effectiveTextColor = isCompleted ? Colors.grey[500]! : Colors.white;
+    final effectiveBgOpacity = isCompleted ? 0.05 : 0.10;
+    
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: bg == Colors.grey[50] ? Colors.grey[200]! : Colors.transparent),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: text),
-            const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: text, fontWeight: FontWeight.bold, fontSize: 13)),
-          ],
+      onTap: isCompleted ? null : onTap, // Disable tap if completed
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(effectiveBgOpacity),
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                color: isCompleted 
+                    ? Colors.grey.withOpacity(0.15) 
+                    : Colors.white.withOpacity(0.20), 
+                width: 1,
+              ),
+              boxShadow: isCompleted ? [] : [
+                BoxShadow(
+                  color: iconColor.withOpacity(0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isCompleted) ...[
+                  Icon(Icons.check_circle, size: 14, color: Colors.grey[400]),
+                  const SizedBox(width: 4),
+                ],
+                Icon(icon, size: 16, color: effectiveIconColor),
+                const SizedBox(width: 6),
+                Text(label, style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 12)),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -615,5 +838,67 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget _buildErrorState(String message) {
     return Center(child: Text(message, style: const TextStyle(color: Colors.red)));
+  }
+  Future<void> _seedDemoData() async {
+    final firestore = FirebaseFirestore.instance;
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'leader_pranab'; 
+    
+    // 1. Seed Ticker
+    await firestore.collection('active_tickers').doc(uid).set({
+      'title': 'Shri Pranab Balabantaray Dharmasla Block-Level Meeting',
+      'startTime': Timestamp.fromDate(DateTime.now().add(const Duration(minutes: 30))),
+      'meetUrl': 'https://meet.google.com/abc-defg-hij',
+      'status': 'scheduled',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    
+    // 2. Seed Tasks
+    final batch = firestore.batch();
+    
+    // Birthday Task
+    final taskRef1 = firestore.collection('tasks').doc('demo_task_1');
+    batch.set(taskRef1, {
+      'name': 'Ramesh Kumar',
+      'constituentId': '', 
+      'ward': '12',
+      'type': 'BIRTHDAY',
+      'dueDate': Timestamp.fromDate(DateTime.now()), // Today
+      'status': 'PENDING',
+      'priority': 'HIGH',
+      'createdAt': FieldValue.serverTimestamp(),
+      'mobile': '9876543210',
+      'block': 'Dharmasala', 
+      'gram_panchayat': 'Jaraka',
+    });
+    
+    // Anniversary Task
+    final taskRef2 = firestore.collection('tasks').doc('demo_task_2');
+    batch.set(taskRef2, {
+      'name': 'Sunita & Raj',
+      'constituentId': '',
+      'ward': '05',
+      'type': 'ANNIVERSARY',
+      'dueDate': Timestamp.fromDate(DateTime.now()), // Today
+      'status': 'PENDING',
+      'priority': 'MEDIUM',
+      'createdAt': FieldValue.serverTimestamp(),
+      'mobile': '9876543211',
+      'block': 'Dharmasala',
+      'gram_panchayat': 'Chahata',
+    });
+    
+    await batch.commit();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('✅ Demo Data Seeded! Refreshing...'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    
+    // Trigger Refresh
+    if (context.mounted) {
+       context.read<TaskBloc>().add(LoadPendingTasks());
+    }
   }
 }
