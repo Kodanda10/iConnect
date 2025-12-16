@@ -37,10 +37,10 @@ service cloud.firestore {
     }
     
     // Settings collection - singleton document
-    // TODO: Require authentication in production
+    // SECURITY FIX (2025-12-16): Restricted write access to STAFF only
     match /settings/{docId} {
       allow read: if true; // Allow public read for app config
-      allow write: if true; // Temporarily allow public write for development
+      allow write: if isStaff(); // Only authenticated staff can modify settings
     }
     
     // Constituents collection
