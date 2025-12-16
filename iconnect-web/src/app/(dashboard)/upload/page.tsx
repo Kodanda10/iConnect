@@ -590,11 +590,8 @@ export default function UploadPage() {
                 </form>
             </div>
 
-            {/* --- Data Metrics Dashboard (50% width) --- */}
-            <div className="grid lg:grid-cols-2 gap-6">
-                <DataMetricsCard />
-                <div className="hidden lg:block" /> {/* Spacer for 50% width */}
-            </div>
+            {/* --- Data Metrics Dashboard (50% Total + 50% Blocks) --- */}
+            <DataMetricsCard />
 
             {/* --- Full-Width Database Table --- */}
             <div className="glass-card-light p-6 rounded-2xl">

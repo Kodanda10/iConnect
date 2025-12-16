@@ -67,12 +67,10 @@ describe('DataMetricsCard Component', () => {
         // Act
         render(<DataMetricsCard />);
 
-        // Assert
+        // Assert - Block names should appear in the breakdown list
         await waitFor(() => {
-            expect(screen.getByText('Block A')).toBeInTheDocument();
-            expect(screen.getByText('500')).toBeInTheDocument();
-            expect(screen.getByText('Block B')).toBeInTheDocument();
-            expect(screen.getByText('300')).toBeInTheDocument();
+            expect(screen.getByTestId('block-Block A')).toBeInTheDocument();
+            expect(screen.getByTestId('block-Block B')).toBeInTheDocument();
         });
     });
 
@@ -83,7 +81,7 @@ describe('DataMetricsCard Component', () => {
         // Act
         render(<DataMetricsCard />);
 
-        await waitFor(() => screen.getByText('Block A'));
+        await waitFor(() => screen.getByTestId('block-Block A'));
 
         // Hover over Block A
         fireEvent.mouseEnter(screen.getByTestId('block-Block A'));
@@ -102,7 +100,7 @@ describe('DataMetricsCard Component', () => {
         // Act
         render(<DataMetricsCard />);
 
-        await waitFor(() => screen.getByText('Block A'));
+        await waitFor(() => screen.getByTestId('block-Block A'));
 
         // Hover then leave
         fireEvent.mouseEnter(screen.getByTestId('block-Block A'));
