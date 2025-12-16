@@ -12,9 +12,10 @@ import * as admin from 'firebase-admin';
 import { generateGreetingMessage, GreetingRequest } from './greeting';
 import { scanForTasks, Constituent, Task } from './dailyScan';
 
-export * from "./dailyScan";
-export * from "./greeting";
-export * from "./meeting";
+// Explicit re-exports to avoid ambiguity
+export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailyScan';
+export { generateGreetingMessage, GreetingRequest } from './greeting';
+export { createMeetingTicker, createConferenceBridge } from "./meeting";
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -150,9 +151,3 @@ export const dailyScan = onSchedule({
         throw error;
     }
 });
-
-// Export all functions
-export * from "./meeting";
-// Export types for testing
-export { GreetingRequest } from './greeting';
-export { Constituent, Task, ScanResult } from './dailyScan';
