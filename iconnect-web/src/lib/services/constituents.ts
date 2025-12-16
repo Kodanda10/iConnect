@@ -27,8 +27,18 @@ import { Constituent } from '@/types';
 const COLLECTION_NAME = 'constituents';
 
 /**
- * Get all constituents with optional pagination
+ * Helper to convert Firestore timestamp union types to Date
  */
+function toDate(value: string | Date | { seconds: number; nanoseconds: number }): Date {
+    if (value instanceof Date) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        return new Date(value);
+    }
+    // Firestore Timestamp format { seconds, nanoseconds }
+    return new Date(value.seconds * 1000);
+}
 export async function getConstituents(
     pageSize = 50,
     lastDoc?: DocumentSnapshot
@@ -118,7 +128,7 @@ export async function addConstituent(
     }
 
     if (data.anniversary) {
-        const annDate = new Date(data.anniversary);
+        const annDate = toDate(data.anniversary);
         Object.assign(constituentData, {
             anniversary_month: annDate.getMonth() + 1,
             anniversary_day: annDate.getDate(),
@@ -166,7 +176,7 @@ export async function updateConstituent(
     }
 
     if (data.anniversary) {
-        const annDate = new Date(data.anniversary);
+        const annDate = toDate(data.anniversary);
         updateData.anniversary_month = annDate.getMonth() + 1;
         updateData.anniversary_day = annDate.getDate();
     }
