@@ -93,59 +93,105 @@ export default function DataMetricsCard() {
 
     return (
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
-            {/* LEFT: Total Constituents Card (50%) */}
-            <div className="glass-card-light p-6 rounded-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                        <Database className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-white">
-                            Total Constituents
-                        </h3>
-                        <p className="text-xs text-white/50">
-                            Database overview
-                        </p>
-                    </div>
-                </div>
+            {/* LEFT: Dynamic Info Card (50%) */}
+            {/* Changes based on hover state */}
+            <div className="glass-card-light p-6 rounded-2xl transition-all duration-300 relative overflow-hidden">
+                {hoveredBlock ? (
+                    // BLOCK DETAILS VIEW
+                    <div className="animate-fade-in space-y-4">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+                                <MapPin className="w-5 h-5 text-indigo-400" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white">
+                                    {hoveredBlock} Breakdown
+                                </h3>
+                                <p className="text-xs text-white/50">
+                                    Gram Panchayat Stats
+                                </p>
+                            </div>
+                        </div>
 
-                {/* Big Number Display */}
-                <div className="flex items-end gap-4">
-                    <p
-                        data-testid="total-count"
-                        className="text-6xl font-bold text-white tracking-tight"
-                    >
-                        {metrics.total.toLocaleString()}
-                    </p>
-                    <div className="pb-2">
-                        <span className="text-emerald-400 text-sm font-medium">
-                            across {metrics.blocks.length} blocks
-                        </span>
+                        {gpLoading[hoveredBlock] ? (
+                            <div className="flex flex-col items-center justify-center py-12 gap-3 text-white/50">
+                                <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                                <span className="text-sm">Fetching GP data...</span>
+                            </div>
+                        ) : gpData[hoveredBlock]?.length === 0 ? (
+                            <div className="py-12 text-center text-white/40 text-sm">
+                                No GP data available for {hoveredBlock}
+                            </div>
+                        ) : (
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                    <GPProgressBar
+                                        key={gp.name}
+                                        gp={gp}
+                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        delay={index * 50}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                </div>
+                ) : (
+                    // DEFAULT TOTAL VIEW
+                    <div className="animate-fade-in">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                                <Database className="w-5 h-5 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-white">
+                                    Total Constituents
+                                </h3>
+                                <p className="text-xs text-white/50">
+                                    Database overview
+                                </p>
+                            </div>
+                        </div>
 
-                {/* Quick Stats */}
-                <div className="mt-6 pt-4 border-t border-white/10 grid grid-cols-2 gap-4">
-                    <div className="p-3 rounded-xl bg-white/5">
-                        <p className="text-xs text-white/50 mb-1">Largest Block</p>
-                        <p className="font-bold text-white">
-                            {metrics.blocks[0]?.name || '-'}
-                        </p>
-                        <p className="text-sm text-emerald-400">
-                            {metrics.blocks[0]?.count.toLocaleString() || 0}
-                        </p>
+                        {/* Big Number Display */}
+                        <div className="flex items-end gap-4">
+                            <p
+                                data-testid="total-count"
+                                className="text-6xl font-bold text-white tracking-tight"
+                            >
+                                {metrics.total.toLocaleString()}
+                            </p>
+                            <div className="pb-2">
+                                <span className="text-emerald-400 text-sm font-medium">
+                                    across {metrics.blocks.length} blocks
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="mt-6 pt-4 border-t border-white/10 grid grid-cols-2 gap-4">
+                            <div className="p-3 rounded-xl bg-white/5">
+                                <p className="text-xs text-white/50 mb-1">Largest Block</p>
+                                <p className="font-bold text-white">
+                                    {metrics.blocks[0]?.name || '-'}
+                                </p>
+                                <p className="text-sm text-emerald-400">
+                                    {metrics.blocks[0]?.count.toLocaleString() || 0}
+                                </p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-white/5">
+                                <p className="text-xs text-white/50 mb-1">Average/Block</p>
+                                <p className="font-bold text-white">
+                                    {metrics.blocks.length > 0
+                                        ? Math.round(metrics.total / metrics.blocks.length).toLocaleString()
+                                        : 0
+                                    }
+                                </p>
+                                <p className="text-sm text-white/40">constituents</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-3 rounded-xl bg-white/5">
-                        <p className="text-xs text-white/50 mb-1">Average/Block</p>
-                        <p className="font-bold text-white">
-                            {metrics.blocks.length > 0
-                                ? Math.round(metrics.total / metrics.blocks.length).toLocaleString()
-                                : 0
-                            }
-                        </p>
-                        <p className="text-sm text-white/40">constituents</p>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* RIGHT: Block-wise Breakdown (50%) */}
@@ -159,21 +205,19 @@ export default function DataMetricsCard() {
                             Block-wise Breakdown
                         </h3>
                         <p className="text-xs text-white/50">
-                            Hover for GP details
+                            Hover list to see GP details
                         </p>
                     </div>
                 </div>
 
                 {/* Block List */}
-                <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
+                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
                     {metrics.blocks.map((block) => (
                         <BlockItem
                             key={block.name}
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            gpData={gpData[block.name] || []}
-                            gpLoading={gpLoading[block.name] || false}
                             onMouseEnter={() => handleBlockHover(block.name)}
                             onMouseLeave={() => setHoveredBlock(null)}
                         />
@@ -188,23 +232,20 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    gpData: GPMetric[];
-    gpLoading: boolean;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, gpData, gpLoading, onMouseEnter, onMouseLeave }: BlockItemProps) {
+function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
-    const maxGpCount = gpData.length > 0 ? Math.max(...gpData.map(gp => gp.count)) : 1;
 
     return (
         <div
             data-testid={`block-${block.name}`}
             className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden
+                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
                 ${isHovered
-                    ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30'
+                    ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
@@ -219,8 +260,8 @@ function BlockItem({ block, total, isHovered, gpData, gpLoading, onMouseEnter, o
 
             <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-white/40" />
-                    <span className="font-medium text-white">
+                    <Users className={`w-4 h-4 transition-colors ${isHovered ? 'text-emerald-400' : 'text-white/40'}`} />
+                    <span className={`font-medium transition-colors ${isHovered ? 'text-emerald-300' : 'text-white'}`}>
                         {block.name}
                     </span>
                 </div>
@@ -232,47 +273,11 @@ function BlockItem({ block, total, isHovered, gpData, gpLoading, onMouseEnter, o
                         {percentage}%
                     </span>
                     <ChevronRight
-                        className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90' : ''
+                        className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90 text-emerald-400' : ''
                             }`}
                     />
                 </div>
             </div>
-
-            {/* GP Dropdown on Hover - Animated with Progress Bars */}
-            {isHovered && (
-                <div className="relative mt-3 pt-3 border-t border-white/10 animate-fade-in">
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-3">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-xs font-medium text-white/60 uppercase tracking-wide">
-                            Gram Panchayats in {block.name}
-                        </span>
-                    </div>
-
-                    {gpLoading ? (
-                        <div className="flex items-center gap-2 py-4 justify-center">
-                            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                            <span className="text-sm text-white/50">Loading GPs...</span>
-                        </div>
-                    ) : gpData.length === 0 ? (
-                        <div className="py-3 text-center text-white/40 text-sm">
-                            No GP data available
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {gpData.map((gp, index) => (
-                                <GPProgressBar
-                                    key={gp.name}
-                                    gp={gp}
-                                    maxCount={maxGpCount}
-                                    delay={index * 80}
-                                    index={index}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
@@ -286,8 +291,8 @@ interface GPProgressBarProps {
 
 // Beautiful multi-color palette for GP bars
 const GP_BAR_COLORS = [
+    { from: '#818CF8', to: '#6366F1', shadow: 'rgba(99, 102, 241, 0.5)' },   // Indigo (Primary for Detail View)
     { from: '#10B981', to: '#34D399', shadow: 'rgba(16, 185, 129, 0.5)' },   // Emerald
-    { from: '#6366F1', to: '#818CF8', shadow: 'rgba(99, 102, 241, 0.5)' },   // Indigo
     { from: '#F59E0B', to: '#FBBF24', shadow: 'rgba(245, 158, 11, 0.5)' },   // Amber
     { from: '#EC4899', to: '#F472B6', shadow: 'rgba(236, 72, 153, 0.5)' },   // Pink
     { from: '#8B5CF6', to: '#A78BFA', shadow: 'rgba(139, 92, 246, 0.5)' },   // Violet

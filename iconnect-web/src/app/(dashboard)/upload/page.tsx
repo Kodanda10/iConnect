@@ -125,6 +125,9 @@ export default function UploadPage() {
 
     // Handle manual text input for dates (supports dd/mm/yyyy and yyyy-mm-dd)
     const handleDateTextInput = (field: 'dob' | 'anniversary', value: string) => {
+        // Strictly allow only numbers, '/' and '-'
+        if (!/^[0-9/-]*$/.test(value)) return;
+
         // If user types in dd/mm/yyyy format, convert to yyyy-mm-dd
         const ddmmyyyyMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (ddmmyyyyMatch) {
@@ -212,11 +215,11 @@ export default function UploadPage() {
         try {
             await addConstituent({
                 name: formData.name,
-                mobile_number: formData.mobile,
+                mobileNumber: formData.mobile,
                 dob: formData.dob || undefined,
                 anniversary: formData.anniversary || undefined,
                 block: formData.block || undefined,
-                gp_ulb: formData.gp_ulb || undefined,
+                gpUlb: formData.gp_ulb || undefined,
                 ward: formData.ward || undefined,
                 whatsapp: formData.whatsapp || undefined,
             });
@@ -246,7 +249,8 @@ export default function UploadPage() {
     // Filter constituents
     const filteredConstituents = constituents.filter(c =>
         !searchTerm ||
-        c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.phone?.includes(searchTerm) ||
         c.ward?.includes(searchTerm)
     );
@@ -409,28 +413,59 @@ export default function UploadPage() {
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 Mobile *
                             </label>
-                            <input
-                                type="tel"
-                                value={formData.mobile}
-                                onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                                required
-                                className={`glass-input-dark h-11 w-full px-3 text-sm ${formData.mobile && !isValidIndianMobile(formData.mobile) ? 'border-red-500/50' : ''}`}
-                                placeholder="10-digit number"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="tel"
+                                    value={formData.mobile}
+                                    onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                    required
+                                    className={`
+                                        glass-input-dark h-11 w-full px-3 text-sm transition-colors
+                                        ${formData.mobile && !isValidIndianMobile(formData.mobile) ? '!border-red-500/50 focus:!border-red-500' : ''}
+                                        ${formData.mobile && isValidIndianMobile(formData.mobile) ? '!border-emerald-500/50 focus:!border-emerald-500' : ''}
+                                    `}
+                                    placeholder="10-digit number"
+                                />
+                                {/* Validation Icon */}
+                                {formData.mobile && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        {isValidIndianMobile(formData.mobile) ? (
+                                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                        ) : (
+                                            <AlertCircle className="w-4 h-4 text-red-400" />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* WhatsApp Number */}
+                        {/* WhatsApp Number - With Validation */}
                         <div>
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
                                 WhatsApp
                             </label>
-                            <input
-                                type="tel"
-                                value={formData.whatsapp}
-                                onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                                className={`glass-input-dark h-11 w-full px-3 text-sm ${formData.whatsapp && !isValidWhatsApp(formData.whatsapp) ? 'border-red-500/50' : ''}`}
-                                placeholder="10-digit number"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="tel"
+                                    value={formData.whatsapp}
+                                    onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                    className={`
+                                        glass-input-dark h-11 w-full px-3 text-sm transition-colors
+                                        ${formData.whatsapp && !isValidWhatsApp(formData.whatsapp) ? '!border-red-500/50 focus:!border-red-500' : ''}
+                                        ${formData.whatsapp && isValidWhatsApp(formData.whatsapp) ? '!border-emerald-500/50 focus:!border-emerald-500' : ''}
+                                    `}
+                                    placeholder="10-digit number"
+                                />
+                                {formData.whatsapp && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        {isValidWhatsApp(formData.whatsapp) ? (
+                                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                        ) : (
+                                            <AlertCircle className="w-4 h-4 text-red-400" />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Block */}
@@ -442,7 +477,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.block}
                                     onChange={(e) => setFormData({ ...formData, block: e.target.value })}
-                                    className="glass-input-dark h-11 w-full text-sm appearance-none !pl-3 !pr-10"
+                                    className="glass-input-dark h-12 w-full text-sm appearance-none !pl-3 !pr-10"
                                 >
                                     <option value="">Select Block</option>
                                     <option value="Raipur">Raipur</option>
@@ -464,7 +499,7 @@ export default function UploadPage() {
                                 <select
                                     value={formData.gp_ulb}
                                     onChange={(e) => setFormData({ ...formData, gp_ulb: e.target.value })}
-                                    className="glass-input-dark h-11 w-full text-sm appearance-none !pl-3 !pr-10"
+                                    className="glass-input-dark h-12 w-full text-sm appearance-none !pl-3 !pr-10"
                                 >
                                     <option value="">Select GP/ULB</option>
                                     <option value="GP1">Gram Panchayat 1</option>
@@ -558,12 +593,17 @@ export default function UploadPage() {
                             >
                                 <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
                                     <GlassCalendar
-                                        selectedDate={
-                                            activeDatePicker === 'dob'
-                                                ? (formData.dob ? new Date(formData.dob) : new Date())
-                                                : (formData.anniversary ? new Date(formData.anniversary) : new Date())
-                                        }
-                                        onSelect={(date) => handleDateSelect(activeDatePicker, date)}
+                                        selectedDate={(() => {
+                                            const dateStr = activeDatePicker === 'dob' ? formData.dob : formData.anniversary;
+                                            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date();
+                                            const d = new Date(dateStr);
+                                            return isNaN(d.getTime()) ? new Date() : d;
+                                        })()}
+                                        onSelect={(date) => {
+                                            if (activeDatePicker) {
+                                                handleDateSelect(activeDatePicker, date);
+                                            }
+                                        }}
                                         className="!bg-transparent !p-2 !shadow-none"
                                         minYear={1920}
                                         maxYear={new Date().getFullYear() + 5}
@@ -724,25 +764,25 @@ export default function UploadPage() {
                                         className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}
                                     >
                                         <td className="py-3 px-3 font-medium text-white">
-                                            {c.full_name || c.name}
+                                            {c.fullName || c.name}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.phone || c.mobile_number}
+                                            {c.phone || c.mobileNumber}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.ward || c.ward_number || '-'}
+                                            {c.ward || c.wardNumber || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
                                             {c.block || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.gp_ulb || '-'}
+                                            {c.gpUlb || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.birthday_mmdd || '-'}
+                                            {c.birthdayMmdd || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.anniversary_mmdd || '-'}
+                                            {c.anniversaryMmdd || '-'}
                                         </td>
                                     </tr>
                                 ))

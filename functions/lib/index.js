@@ -40,7 +40,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dailyScan = exports.generateGreeting = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
+exports.dailyScan = exports.generateGreeting = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const admin = __importStar(require("firebase-admin"));
@@ -54,6 +54,8 @@ Object.defineProperty(exports, "generateGreetingMessage", { enumerable: true, ge
 var meeting_1 = require("./meeting");
 Object.defineProperty(exports, "createMeetingTicker", { enumerable: true, get: function () { return meeting_1.createMeetingTicker; } });
 Object.defineProperty(exports, "createConferenceBridge", { enumerable: true, get: function () { return meeting_1.createConferenceBridge; } });
+var triggers_1 = require("./triggers");
+Object.defineProperty(exports, "onMeetingCreated", { enumerable: true, get: function () { return triggers_1.onMeetingCreated; } });
 // Initialize Firebase Admin
 admin.initializeApp();
 const db = admin.firestore();

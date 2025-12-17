@@ -61,8 +61,8 @@ export class SMSProvider implements MessageProvider {
     private senderId?: string;
 
     constructor(config?: { apiKey?: string; senderId?: string }) {
-        this.apiKey = config?.apiKey || process.env.SMS_API_KEY;
-        this.senderId = config?.senderId || process.env.SMS_SENDER_ID;
+        this.apiKey = config?.apiKey;
+        this.senderId = config?.senderId;
     }
 
     async send(payload: MessagePayload): Promise<MessageResult> {
@@ -99,8 +99,8 @@ export class WhatsAppProvider implements MessageProvider {
     private phoneNumberId?: string;
 
     constructor(config?: { apiKey?: string; phoneNumberId?: string }) {
-        this.apiKey = config?.apiKey || process.env.WHATSAPP_API_KEY;
-        this.phoneNumberId = config?.phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID;
+        this.apiKey = config?.apiKey;
+        this.phoneNumberId = config?.phoneNumberId;
     }
 
     async send(payload: MessagePayload): Promise<MessageResult> {

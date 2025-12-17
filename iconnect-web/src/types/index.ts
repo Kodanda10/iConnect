@@ -20,35 +20,35 @@ export interface Constituent {
     id: string;
     // Name fields
     name?: string;
-    full_name?: string;
-    first_name?: string;
-    last_name?: string;
+    fullName?: string; // full_name -> fullName
+    firstName?: string; // first_name -> firstName
+    lastName?: string; // last_name -> lastName
     // Contact
-    mobile_number?: string;
+    mobileNumber?: string; // mobile_number -> mobileNumber
     phone?: string;
     whatsapp?: string;
     // Birthday
     dob?: string; // YYYY-MM-DD
-    dob_month?: number;
-    dob_day?: number;
+    dobMonth?: number; // dob_month -> dobMonth
+    dobDay?: number; // dob_day -> dobDay
     birthday?: Date | { seconds: number; nanoseconds: number }; // Firestore Timestamp
-    birthday_mmdd?: string; // MM-DD format
+    birthdayMmdd?: string; // birthday_mmdd -> birthdayMmdd // MM-DD format
     // Anniversary
     anniversary?: string | Date | { seconds: number; nanoseconds: number }; // YYYY-MM-DD or Timestamp
-    anniversary_month?: number;
-    anniversary_day?: number;
-    anniversary_mmdd?: string; // MM-DD format
+    anniversaryMonth?: number; // anniversary_month -> anniversaryMonth
+    anniversaryDay?: number; // anniversary_day -> anniversaryDay
+    anniversaryMmdd?: string; // anniversary_mmdd -> anniversaryMmdd // MM-DD format
     // Location
     block?: string;
-    gp_ulb?: string; // Gram Panchayat or ULB
-    ward_number?: string;
+    gpUlb?: string; // gp_ulb -> gpUlb // Gram Panchayat or ULB
+    wardNumber?: string; // ward_number -> wardNumber
     ward?: string;
     village?: string;
     address?: string;
     // Metadata
     tags?: string[];
-    created_at?: string | Date | { seconds: number; nanoseconds: number };
-    updated_at?: string | Date | { seconds: number; nanoseconds: number };
+    createdAt?: string | Date | { seconds: number; nanoseconds: number }; // created_at -> createdAt
+    updatedAt?: string | Date | { seconds: number; nanoseconds: number }; // updated_at -> updatedAt
 }
 
 // Task types
@@ -59,15 +59,15 @@ export type CompletedBy = 'LEADER' | 'STAFF';
 
 export interface Task {
     id: string;
-    constituent_id: string;
+    constituentId: string; // constituent_id -> constituentId
     type: TaskType;
-    due_date: string;
+    dueDate: string; // due_date -> dueDate
     status: TaskStatus;
     notes?: string;
-    generated_message?: string;
-    created_at: string;
-    completed_by?: CompletedBy;
-    action_taken?: ActionType;
+    generatedMessage?: string; // generated_message -> generatedMessage
+    createdAt: string; // created_at -> createdAt
+    completedBy?: CompletedBy; // completed_by -> completedBy
+    actionTaken?: ActionType; // action_taken -> actionTaken
 }
 
 // Enriched task with constituent data joined

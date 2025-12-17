@@ -9,6 +9,7 @@ import { GreetingRequest } from './greeting';
 export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailyScan';
 export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
+export { onMeetingCreated } from "./triggers";
 /**
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side

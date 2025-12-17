@@ -94,28 +94,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const auth = getFirebaseAuth();
             const result = await signInWithEmailAndPassword(auth, email, password);
 
-            // Check if profile exists, if not create it (Lazy Provisioning)
-            let userData = await fetchUserRole(result.user.uid);
-            if (!userData) {
-                console.log('User profile missing, creating default profile...');
-                const db = getFirebaseDb();
-                await import('firebase/firestore').then(({ doc, setDoc }) =>
-                    setDoc(doc(db, 'users', result.user.uid), {
-                        email: result.user.email,
-                        role: 'STAFF', // Default role for manual console creations
-                        created_at: new Date().toISOString(),
-                        name: result.user.email?.split('@')[0] || 'Admin'
-                    })
-                );
-                userData = {
-                    uid: result.user.uid,
-                    email: result.user.email || '',
-                    role: 'STAFF',
-                    name: result.user.email?.split('@')[0] || 'Admin'
-                };
+            // Fetch user profile
+            const userData = await fetchUserRole(result.user.uid);
+
+            if (userData) {
+                setUser(userData);
+            } else {
+                // Security Hardening: Deny access if no profile exists
+                // This prevents self-registration. Admins must create users first.
+                await firebaseSignOut(auth);
+                throw new Error('Access Denied: Your account has not been assigned a role. Please contact an administrator.');
             }
 
-            setUser(userData);
             setFirebaseUser(result.user);
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Sign in failed';

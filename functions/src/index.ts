@@ -16,6 +16,7 @@ import { scanForTasks, Constituent, Task } from './dailyScan';
 export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailyScan';
 export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
+export { onMeetingCreated } from "./triggers";
 
 // Initialize Firebase Admin
 admin.initializeApp();

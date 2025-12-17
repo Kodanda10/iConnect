@@ -85,7 +85,8 @@ export async function fetchGPMetricsForBlock(blockName: string): Promise<GPMetri
 
     snapshot.forEach((doc) => {
         const data = doc.data();
-        const gp = data.gp_ulb || 'Unknown';
+        // Schema Alignment: Prefer gpUlb (new), fallback to gp_ulb (legacy)
+        const gp = data.gpUlb || data.gp_ulb || 'Unknown';
         gpCounts[gp] = (gpCounts[gp] || 0) + 1;
     });
 

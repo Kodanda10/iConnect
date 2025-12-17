@@ -34,6 +34,22 @@ export const createMeetingTicker = onCall(
             leaderUid
         } = data;
 
+        // Security: Start
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "User must be authenticated.");
+        }
+
+        // RBAC: Only Leaders can create meetings
+        const callerRole = request.auth.token.role;
+        if (callerRole !== 'LEADER') {
+            throw new HttpsError("permission-denied", "Only Leaders can create meetings.");
+        }
+
+        if (leaderUid !== request.auth.uid) {
+            throw new HttpsError("permission-denied", "Cannot create meeting for another leader.");
+        }
+        // Security: End
+
         if (!data.title || !data.startTime || !data.leaderUid || !data.meetingType) {
             throw new HttpsError(
                 "invalid-argument",
@@ -81,7 +97,17 @@ export const createMeetingTicker = onCall(
  */
 export const createConferenceBridge = onCall(
     { region: "asia-south1" },
-    async (_request: CallableRequest<unknown>) => {
+    async (request: CallableRequest<unknown>) => {
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "User must be authenticated.");
+        }
+
+        // RBAC: Only Leaders can create conference bridges
+        const callerRole = request.auth.token.role;
+        if (callerRole !== 'LEADER') {
+            throw new HttpsError("permission-denied", "Only Leaders can create conference bridges.");
+        }
+
         // In production, this would call Twilio / Zoom / Provider API
 
         // Simulate API latency

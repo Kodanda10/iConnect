@@ -48,6 +48,19 @@ exports.createMeetingTicker = (0, https_1.onCall)({ region: "asia-south1" }, asy
     const data = request.data;
     const { title, startTime, meetingType, // 'VIDEO_MEET' | 'CONFERENCE_CALL'
     meetUrl, dialInNumber, accessCode, leaderUid } = data;
+    // Security: Start
+    if (!request.auth) {
+        throw new https_1.HttpsError("unauthenticated", "User must be authenticated.");
+    }
+    // RBAC: Only Leaders can create meetings
+    const callerRole = request.auth.token.role;
+    if (callerRole !== 'LEADER') {
+        throw new https_1.HttpsError("permission-denied", "Only Leaders can create meetings.");
+    }
+    if (leaderUid !== request.auth.uid) {
+        throw new https_1.HttpsError("permission-denied", "Cannot create meeting for another leader.");
+    }
+    // Security: End
     if (!data.title || !data.startTime || !data.leaderUid || !data.meetingType) {
         throw new https_1.HttpsError("invalid-argument", "Missing required fields: title, startTime, meetingType, leaderUid");
     }
@@ -83,7 +96,15 @@ exports.createMeetingTicker = (0, https_1.onCall)({ region: "asia-south1" }, asy
  * Mocks the creation of a Conference Bridge.
  * Returns a random Dial-In Number and Access Code.
  */
-exports.createConferenceBridge = (0, https_1.onCall)({ region: "asia-south1" }, async (_request) => {
+exports.createConferenceBridge = (0, https_1.onCall)({ region: "asia-south1" }, async (request) => {
+    if (!request.auth) {
+        throw new https_1.HttpsError("unauthenticated", "User must be authenticated.");
+    }
+    // RBAC: Only Leaders can create conference bridges
+    const callerRole = request.auth.token.role;
+    if (callerRole !== 'LEADER') {
+        throw new https_1.HttpsError("permission-denied", "Only Leaders can create conference bridges.");
+    }
     // In production, this would call Twilio / Zoom / Provider API
     // Simulate API latency
     await new Promise(resolve => setTimeout(resolve, 800));

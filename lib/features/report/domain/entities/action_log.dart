@@ -76,4 +76,30 @@ class ActionLog extends Equatable {
         return 'WHATSAPP';
     }
   }
+  /// Create ActionLog from Firestore Map
+  factory ActionLog.fromMap(Map<String, dynamic> map, String id) {
+    // Handle Timestamp or String for executed_at
+    DateTime executedAt;
+    final dateVal = map['executed_at'];
+    if (dateVal != null && dateVal.runtimeType.toString().contains('Timestamp')) {
+      // Dynamic check to avoid importing cloud_firestore in domain
+      executedAt = (dateVal as dynamic).toDate();
+    } else if (dateVal is String) {
+      executedAt = DateTime.parse(dateVal);
+    } else {
+      executedAt = DateTime.now(); // Fallback
+    }
+
+    return ActionLog(
+      id: id,
+      constituentId: map['constituent_id'] ?? '',
+      constituentName: map['constituent_name'] ?? 'Unknown',
+      actionType: actionTypeFromString(map['action_type'] ?? ''),
+      executedAt: executedAt,
+      executedBy: map['executed_by'] ?? '',
+      success: map['success'] ?? false,
+      messagePreview: map['message_preview'],
+      durationSeconds: map['duration_seconds'],
+    );
+  }
 }
