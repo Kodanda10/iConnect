@@ -34,13 +34,13 @@ export function generateCSVContent(constituents: Constituent[]): string {
 
     const dataRows = constituents.map((c) => {
         const fields = [
-            escapeCSVField(c.full_name || c.name),
-            escapeCSVField(c.phone || c.mobile_number),
-            escapeCSVField(c.ward || c.ward_number),
+            escapeCSVField(c.fullName || c.name),
+            escapeCSVField(c.phone || c.mobileNumber),
+            escapeCSVField(c.ward || c.wardNumber),
             escapeCSVField(c.block),
-            escapeCSVField(c.gp_ulb),
-            escapeCSVField(c.birthday_mmdd),
-            escapeCSVField(c.anniversary_mmdd),
+            escapeCSVField(c.gpUlb),
+            escapeCSVField(c.birthdayMmdd),
+            escapeCSVField(c.anniversaryMmdd),
         ];
         return fields.join(',');
     });
@@ -110,13 +110,13 @@ export function downloadConstituentsAsPDF(constituents: Constituent[]): void {
                 <tbody>
                     ${constituents.map(c => `
                         <tr>
-                            <td>${c.full_name || c.name || '-'}</td>
-                            <td>${c.phone || c.mobile_number || '-'}</td>
-                            <td>${c.ward || c.ward_number || '-'}</td>
+                            <td>${c.fullName || c.name || '-'}</td>
+                            <td>${c.phone || c.mobileNumber || '-'}</td>
+                            <td>${c.ward || c.wardNumber || '-'}</td>
                             <td>${c.block || '-'}</td>
-                            <td>${c.gp_ulb || '-'}</td>
-                            <td>${c.birthday_mmdd || '-'}</td>
-                            <td>${c.anniversary_mmdd || '-'}</td>
+                            <td>${c.gpUlb || '-'}</td>
+                            <td>${c.birthdayMmdd || '-'}</td>
+                            <td>${c.anniversaryMmdd || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>

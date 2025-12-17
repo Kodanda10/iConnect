@@ -84,6 +84,52 @@ describe('Firestore Security Rules', () => {
             );
         });
 
+        test('user can create own profile only as UNASSIGNED (or without role)', async () => {
+            const db = testEnv.authenticatedContext('user1').firestore();
+
+            // Allowed: create without role field
+            await assertSucceeds(
+                db.collection('users').doc('user1').set({
+                    email: 'user1@test.com',
+                    name: 'User One',
+                })
+            );
+
+            // Allowed: create with role UNASSIGNED
+            const db2 = testEnv.authenticatedContext('user2').firestore();
+            await assertSucceeds(
+                db2.collection('users').doc('user2').set({
+                    email: 'user2@test.com',
+                    name: 'User Two',
+                    role: 'UNASSIGNED',
+                })
+            );
+        });
+
+        test('user cannot self-assign STAFF role on create', async () => {
+            const db = testEnv.authenticatedContext('user3').firestore();
+
+            await assertFails(
+                db.collection('users').doc('user3').set({
+                    email: 'user3@test.com',
+                    name: 'User Three',
+                    role: 'STAFF',
+                })
+            );
+        });
+
+        test('user cannot self-assign LEADER role on create', async () => {
+            const db = testEnv.authenticatedContext('user4').firestore();
+
+            await assertFails(
+                db.collection('users').doc('user4').set({
+                    email: 'user4@test.com',
+                    name: 'User Four',
+                    role: 'LEADER',
+                })
+            );
+        });
+
         test('LEADER can change user roles', async () => {
             await testEnv.withSecurityRulesDisabled(async (context) => {
                 await context.firestore().collection('users').doc('leader1').set({ role: 'LEADER' });
@@ -173,11 +219,11 @@ describe('Firestore Security Rules', () => {
     describe('settings collection', () => {
         test('anyone can read settings', async () => {
             await testEnv.withSecurityRulesDisabled(async (context) => {
-                await context.firestore().collection('settings').doc('app').set({ appName: 'Test' });
+                await context.firestore().collection('settings').doc('app_config').set({ appName: 'Test' });
             });
 
             const db = testEnv.unauthenticatedContext().firestore();
-            await assertSucceeds(db.collection('settings').doc('app').get());
+            await assertSucceeds(db.collection('settings').doc('app_config').get());
         });
 
         test('only STAFF can write settings', async () => {

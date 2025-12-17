@@ -34,10 +34,14 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
       
-      // Security Hardening (2025-12-17): Prevent Privilege Escalation
-      // 1. Create: Users can only create their own profile with 'STAFF' role
+      // Security Hardening (2025-12-18): Prevent Privilege Escalation
+      // Clients must never be able to self-assign privileged roles (STAFF/LEADER).
+      // Profile provisioning for privileged users should be done by an administrator process.
       allow create: if isSignedIn() && request.auth.uid == userId
-                    && request.resource.data.role == 'STAFF';
+                    && (
+                      !('role' in request.resource.data) ||
+                      request.resource.data.role == 'UNASSIGNED'
+                    );
       
       // 2. Update: Users can update own data but CANNOT change their role
       //    Only LEADER can change roles or update other users
@@ -50,7 +54,9 @@ service cloud.firestore {
     // Settings collection - singleton document
     // SECURITY FIX (2025-12-16): Restricted write access to STAFF only
     match /settings/{docId} {
-      allow read: if true; // Allow public read for app config
+      // Keep the public surface area minimal: only the singleton app config is public-read.
+      // Any additional settings docs require authentication.
+      allow read: if docId == 'app_config' || isSignedIn();
       allow write: if isStaff(); // Only authenticated staff can modify settings
     }
     

@@ -53,6 +53,7 @@ const LANGUAGE_NAMES = {
     ENGLISH: 'English',
     HINDI: 'Hindi',
 };
+let warnedMissingGeminiKey = false;
 /**
  * Build a prompt for Gemini AI
  */
@@ -94,6 +95,10 @@ async function generateGreetingMessage(request) {
     }
     // Try Gemini API if key is configured
     const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey && !warnedMissingGeminiKey) {
+        warnedMissingGeminiKey = true;
+        console.warn('[GREETING] GEMINI_API_KEY is not configured; using templates fallback.');
+    }
     if (apiKey) {
         try {
             const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);

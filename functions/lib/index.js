@@ -40,12 +40,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dailyScan = exports.generateGreeting = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
+exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
+const tasks_1 = require("firebase-functions/v2/tasks");
 const admin = __importStar(require("firebase-admin"));
 const greeting_1 = require("./greeting");
 const dailyScan_1 = require("./dailyScan");
+const notifications_1 = require("./notifications");
+const messaging_1 = require("./messaging");
 // Explicit re-exports to avoid ambiguity
 var dailyScan_2 = require("./dailyScan");
 Object.defineProperty(exports, "scanForTasks", { enumerable: true, get: function () { return dailyScan_2.scanForTasks; } });
@@ -56,8 +59,11 @@ Object.defineProperty(exports, "createMeetingTicker", { enumerable: true, get: f
 Object.defineProperty(exports, "createConferenceBridge", { enumerable: true, get: function () { return meeting_1.createConferenceBridge; } });
 var triggers_1 = require("./triggers");
 Object.defineProperty(exports, "onMeetingCreated", { enumerable: true, get: function () { return triggers_1.onMeetingCreated; } });
+Object.defineProperty(exports, "onConstituentWritten", { enumerable: true, get: function () { return triggers_1.onConstituentWritten; } });
 // Initialize Firebase Admin
-admin.initializeApp();
+if (admin.apps.length === 0) {
+    admin.initializeApp();
+}
 const db = admin.firestore();
 /**
  * Generate greeting message via Gemini API proxy
@@ -79,6 +85,50 @@ exports.generateGreeting = (0, https_1.onCall)({ region: 'asia-south1' }, async 
         }
         throw new https_1.HttpsError('internal', 'Failed to generate greeting');
     }
+});
+/**
+ * Cloud Tasks handler: send meeting SMS notifications in small batches.
+ *
+ * This avoids unbounded fan-out inside Firestore triggers which can time out as
+ * the notified constituent list grows.
+ */
+exports.sendMeetingSmsBatch = (0, tasks_1.onTaskDispatched)({
+    region: "asia-south1",
+    retryConfig: {
+        maxAttempts: 5,
+        minBackoffSeconds: 10,
+        maxBackoffSeconds: 300,
+    },
+    rateLimits: {
+        maxConcurrentDispatches: 10,
+        maxDispatchesPerSecond: 50,
+    },
+    timeoutSeconds: 300,
+}, async (request) => {
+    const { dialInNumber, accessCode, recipients, lang } = request.data || {};
+    if (!dialInNumber || !accessCode || !Array.isArray(recipients) || recipients.length === 0) {
+        // Returning 2xx (no throw) prevents infinite retries on malformed payloads.
+        console.warn("[TASK] sendMeetingSmsBatch: invalid payload, skipping");
+        return;
+    }
+    const message = (0, notifications_1.formatAudioMessage)({ dialInNumber, accessCode, lang: lang !== null && lang !== void 0 ? lang : "HINDI" }, lang !== null && lang !== void 0 ? lang : "HINDI");
+    let sent = 0;
+    let failed = 0;
+    for (const mobile of recipients) {
+        try {
+            await (0, messaging_1.sendSMS)(mobile, message);
+            sent += 1;
+        }
+        catch (e) {
+            failed += 1;
+            console.error("[TASK] SMS send failed:", e);
+        }
+    }
+    if (sent === 0) {
+        // Throw to trigger retry when provider is down.
+        throw new Error("Failed to send any SMS in batch");
+    }
+    console.log(`[TASK] sendMeetingSmsBatch complete. Sent=${sent}, Failed=${failed}`);
 });
 /**
  * Helper: Fetch constituents by indexed date fields (optimized O(1) query)
@@ -127,6 +177,24 @@ exports.dailyScan = (0, scheduler_1.onSchedule)({
             });
             constituents = Array.from(constituentMap.values());
             console.log(`[DAILY_SCAN] Optimized query found ${constituents.length} constituents with events`);
+            // If optimized queries return 0 results, the index fields might not be populated yet.
+            // In that case, fall back to full scan to preserve correctness (and log loudly).
+            if (constituents.length === 0) {
+                const sample = await db.collection('constituents').limit(1).get();
+                if (!sample.empty) {
+                    const sampleData = sample.docs[0].data();
+                    const hasIndexFields = (typeof sampleData.dob_month === 'number' && typeof sampleData.dob_day === 'number') ||
+                        (typeof sampleData.anniversary_month === 'number' && typeof sampleData.anniversary_day === 'number');
+                    if (!hasIndexFields) {
+                        console.warn('[DAILY_SCAN] Index fields missing on constituents; falling back to full scan for correctness.');
+                        const constituentsSnapshot = await db.collection('constituents').get();
+                        constituentsSnapshot.forEach((doc) => {
+                            constituents.push({ id: doc.id, ...doc.data() });
+                        });
+                        console.log(`[DAILY_SCAN] Full scan loaded ${constituents.length} constituents`);
+                    }
+                }
+            }
         }
         catch (indexError) {
             // Fallback to full scan if indexed fields don't exist

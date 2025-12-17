@@ -102,7 +102,7 @@ export async function getEnrichedTasks(
     const enrichedTasks: EnrichedTask[] = [];
 
     for (const task of tasks) {
-        const constituent = await getConstituentById(task.constituent_id);
+        const constituent = await getConstituentById(task.constituentId);
         if (constituent) {
             enrichedTasks.push({
                 ...task,
@@ -168,8 +168,8 @@ export async function completeTask(
 ): Promise<void> {
     await updateTask(id, {
         status: 'COMPLETED',
-        action_taken: action,
-        completed_by: completedBy,
+        actionTaken: action,
+        completedBy: completedBy,
         notes: notes || `Completed via ${action}`,
     });
 }

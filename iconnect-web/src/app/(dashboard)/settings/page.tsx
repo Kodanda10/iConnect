@@ -72,7 +72,6 @@ export default function SettingsPage() {
         const loadSettings = async () => {
             try {
                 const savedSettings = await getSettings();
-                console.log('[DEBUG] Loaded settings:', savedSettings);
                 setSettings({
                     appName: savedSettings.appName || 'iConnect',
                     leaderName: savedSettings.leaderName || 'Political Leader',
@@ -159,9 +158,7 @@ export default function SettingsPage() {
 
             // Upload image if a new one was selected
             if (pendingImageFile) {
-                console.log('[DEBUG] Uploading header image...');
                 newHeaderImageUrl = await uploadHeaderImage(pendingImageFile);
-                console.log('[DEBUG] Upload complete, URL:', newHeaderImageUrl);
                 setPreviewImage(newHeaderImageUrl); // Update preview to the permanent URL
                 setPendingImageFile(null);
             }
@@ -173,7 +170,6 @@ export default function SettingsPage() {
                 alertSettings: settings.alertSettings,
                 headerImageUrl: newHeaderImageUrl,
             };
-            console.log('[DEBUG] Saving settings:', settingsToSave);
             await updateSettings(settingsToSave);
 
             // Update local state with the new URL

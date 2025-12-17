@@ -279,7 +279,7 @@ export default function SchedulerPage() {
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex justify-between items-start">
-                                                <h4 className="font-bold text-white text-sm truncate">{event.constituent.full_name}</h4>
+                                                <h4 className="font-bold text-white text-sm truncate">{event.constituent.fullName}</h4>
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${event.type === 'birthday' ? 'bg-pink-500/20 text-pink-300' : 'bg-purple-500/20 text-purple-300'
                                                     }`}>
                                                     {event.type === 'birthday' ? 'B-Day' : 'Anniv'}
@@ -287,16 +287,16 @@ export default function SchedulerPage() {
                                             </div>
                                             <div className="flex items-center gap-1.5 mt-1 text-white/80 text-xs font-mono">
                                                 <Phone className="w-3 h-3 text-emerald-400" />
-                                                {event.constituent.phone || event.constituent.mobile_number || 'No number'}
+                                                {event.constituent.phone || event.constituent.mobileNumber || 'No number'}
                                             </div>
                                             <div className="flex flex-wrap gap-2 mt-2 text-[10px] text-white/50">
                                                 <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded">
                                                     <MapPin className="w-3 h-3" />
-                                                    Ward {event.constituent.ward || event.constituent.ward_number || 'N/A'}
+                                                    Ward {event.constituent.ward || event.constituent.wardNumber || 'N/A'}
                                                 </span>
-                                                {(event.constituent.block || event.constituent.gp_ulb) && (
+                                                {(event.constituent.block || event.constituent.gpUlb) && (
                                                     <span className="bg-white/5 px-1.5 py-0.5 rounded">
-                                                        {event.constituent.block || event.constituent.gp_ulb}
+                                                        {event.constituent.block || event.constituent.gpUlb}
                                                     </span>
                                                 )}
                                             </div>

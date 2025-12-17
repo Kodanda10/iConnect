@@ -66,6 +66,8 @@ const LANGUAGE_NAMES: Record<Language, string> = {
     HINDI: 'Hindi',
 };
 
+let warnedMissingGeminiKey = false;
+
 /**
  * Build a prompt for Gemini AI
  */
@@ -115,6 +117,11 @@ export async function generateGreetingMessage(
 
     // Try Gemini API if key is configured
     const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey && !warnedMissingGeminiKey) {
+        warnedMissingGeminiKey = true;
+        console.warn('[GREETING] GEMINI_API_KEY is not configured; using templates fallback.');
+    }
+
     if (apiKey) {
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
@@ -133,4 +140,3 @@ export async function generateGreetingMessage(
     // Fallback to templates
     return getTemplateMessage(request);
 }
-

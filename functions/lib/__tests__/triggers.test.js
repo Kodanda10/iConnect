@@ -6,6 +6,8 @@ const messaging_1 = require("../messaging");
 const notifications_1 = require("../notifications");
 // Mock dependencies
 jest.mock('firebase-admin', () => ({
+    apps: [],
+    initializeApp: jest.fn(),
     firestore: jest.fn().mockReturnValue({
         collection: jest.fn().mockReturnThis(),
         doc: jest.fn().mockReturnThis(),

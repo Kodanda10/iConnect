@@ -6,6 +6,8 @@ import { determinePushTimes } from '../notifications';
 
 // Mock dependencies
 jest.mock('firebase-admin', () => ({
+    apps: [],
+    initializeApp: jest.fn(),
     firestore: jest.fn().mockReturnValue({
         collection: jest.fn().mockReturnThis(),
         doc: jest.fn().mockReturnThis(),
