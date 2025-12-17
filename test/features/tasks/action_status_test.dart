@@ -135,9 +135,12 @@ void main() {
       expect: () => [
         isA<ActionStatusUpdating>(),
         isA<ActionStatusUpdated>(),
+        isA<TaskLoading>(),
+        isA<TaskLoaded>(),
       ],
       verify: (_) {
         verify(() => mockTaskRepository.updateActionStatus('task_1', 'SMS')).called(1);
+        verify(() => mockTaskRepository.getPendingTasks()).called(1);
       },
     );
 

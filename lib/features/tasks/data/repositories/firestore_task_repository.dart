@@ -20,8 +20,8 @@ class FirestoreTaskRepository implements TaskRepository {
 
       final querySnapshot = await _firestore
           .collection('tasks')
-          .where('dueDate', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-          .where('dueDate', isLessThanOrEqualTo: Timestamp.fromDate(end))
+          .where('due_date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('due_date', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .get();
 
       return _enrichTasks(querySnapshot.docs);
@@ -41,10 +41,9 @@ class FirestoreTaskRepository implements TaskRepository {
       final querySnapshot = await _firestore
           .collection('tasks')
           .where('status', isEqualTo: 'PENDING')
-          // Assuming we want pending tasks for TODAY (or overdue? User said "Today-only events")
-          // Stick to strict Today match for now per instruction. 
-          .where('dueDate', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-          .where('dueDate', isLessThanOrEqualTo: Timestamp.fromDate(end))
+          // Standardized: Using snake_case for Firestore consistency
+          .where('due_date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('due_date', isLessThanOrEqualTo: Timestamp.fromDate(end))
           .limit(50) 
           .get();
 
@@ -60,8 +59,24 @@ class FirestoreTaskRepository implements TaskRepository {
       final querySnapshot = await _firestore
           .collection('tasks')
           .where('status', isEqualTo: 'COMPLETED')
-          .orderBy('createdAt', descending: true)
+          .orderBy('created_at', descending: true)
           .limit(50)
+          .get();
+
+      return _enrichTasks(querySnapshot.docs);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<EnrichedTask>>> getTasksForDateRange(DateTime start, DateTime end) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('tasks')
+          .where('due_date', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('due_date', isLessThanOrEqualTo: Timestamp.fromDate(end))
+          .orderBy('due_date', descending: true)
           .get();
 
       return _enrichTasks(querySnapshot.docs);
@@ -86,11 +101,11 @@ class FirestoreTaskRepository implements TaskRepository {
   @override
   Future<Either<Failure, void>> updateActionStatus(String taskId, String actionType) async {
     try {
-      // Map action type to field name
+      // Map action type to field name (snake_case for Firestore consistency)
       final fieldMap = {
-        'CALL': 'callSent',
-        'SMS': 'smsSent',
-        'WHATSAPP': 'whatsappSent',
+        'CALL': 'call_sent',
+        'SMS': 'sms_sent',
+        'WHATSAPP': 'whatsapp_sent',
       };
       
       final fieldName = fieldMap[actionType.toUpperCase()];
@@ -127,10 +142,7 @@ class FirestoreTaskRepository implements TaskRepository {
         String gp = data['gram_panchayat'] ?? '';
         String mobile = data['mobile'] ?? '';
 
-        // If 'Unknown' (default from above) and we have a constituentId, try to fetch it
-        // Note: Demo seed might leave constituentId empty or point to nothing.
-        // If data['name'] was present, we skip this lookup or merge? 
-        // Let's prioritizing task-level overrides. If name is 'Unknown', try fetch.
+        // If 'Unknown' (default from above) and we have a constituent_id, try to fetch it
         if ((name == 'Unknown' || name.isEmpty) && task.constituentId.isNotEmpty) {
             final constituentDoc =
                 await _firestore.collection('constituents').doc(task.constituentId).get();
@@ -159,6 +171,9 @@ class FirestoreTaskRepository implements TaskRepository {
             block: block,
             gramPanchayat: gp,
             mobile: mobile,
+            callSent: task.callSent,
+            smsSent: task.smsSent,
+            whatsappSent: task.whatsappSent,
         );
       });
       

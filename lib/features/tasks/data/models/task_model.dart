@@ -9,6 +9,9 @@ class TaskModel extends Task {
     required super.status,
     required super.dueDate,
     required super.createdAt,
+    super.callSent = false,
+    super.smsSent = false,
+    super.whatsappSent = false,
   });
 
   /// Parse Firestore document to TaskModel
@@ -32,6 +35,11 @@ class TaskModel extends Task {
         ? createdAtRaw.toDate() 
         : DateTime.now();
     
+    // Read action flags (snake_case preferred, camelCase fallback)
+    final callSent = data['call_sent'] ?? data['callSent'] ?? false;
+    final smsSent = data['sms_sent'] ?? data['smsSent'] ?? false;
+    final whatsappSent = data['whatsapp_sent'] ?? data['whatsappSent'] ?? false;
+    
     return TaskModel(
       id: doc.id,
       constituentId: constituentId,
@@ -39,6 +47,9 @@ class TaskModel extends Task {
       status: data['status'] ?? 'PENDING',
       dueDate: dueDate,
       createdAt: createdAt,
+      callSent: callSent,
+      smsSent: smsSent,
+      whatsappSent: whatsappSent,
     );
   }
 
@@ -50,6 +61,9 @@ class TaskModel extends Task {
       'status': status,
       'due_date': Timestamp.fromDate(dueDate),
       'created_at': Timestamp.fromDate(createdAt),
+      'call_sent': callSent,
+      'sms_sent': smsSent,
+      'whatsapp_sent': whatsappSent,
     };
   }
 }

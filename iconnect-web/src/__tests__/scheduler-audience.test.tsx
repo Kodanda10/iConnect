@@ -68,59 +68,56 @@ describe('Festival Campaign Wizard Audience Targeting', () => {
         test('displays three audience buttons: All, Block, GP/ULB', async () => {
             render(<SchedulerPage />);
 
-            // Open campaign wizard first (click a festival "Send Greetings")
-            await waitFor(() => {
-                const sendButton = screen.queryByText(/send greetings/i);
-                if (sendButton) fireEvent.click(sendButton);
-            });
+            // Open campaign wizard
+            const startButton = await screen.findByRole('button', { name: /festival greetings/i });
+            fireEvent.click(startButton);
+
+            // Wait for modal and select a festival (Diwali) to move to audience step
+            await screen.findByText(/Select Festival/i);
+            const diwaliOption = (await screen.findAllByText(/Diwali/i)).pop()!;
+            fireEvent.click(diwaliOption);
 
             // After selecting festival, should see audience step
             await waitFor(() => {
                 expect(screen.getByText('All')).toBeInTheDocument();
                 expect(screen.getByText('Block')).toBeInTheDocument();
-                expect(screen.getByText(/GP/i)).toBeInTheDocument();
+                expect(screen.getByText(/GP\/ULB/i)).toBeInTheDocument();
             }, { timeout: 3000 });
         });
 
         test('Block button shows block dropdown when clicked', async () => {
             render(<SchedulerPage />);
 
-            await waitFor(() => {
-                const sendButton = screen.queryByText(/send greetings/i);
-                if (sendButton) fireEvent.click(sendButton);
-            });
+            const startButton = await screen.findByRole('button', { name: /festival greetings/i });
+            fireEvent.click(startButton);
+
+            await screen.findByText(/Select Festival/i);
+            const diwaliOption = (await screen.findAllByText(/Diwali/i)).pop()!;
+            fireEvent.click(diwaliOption);
 
             // Click Block button
-            await waitFor(async () => {
-                const blockButton = screen.queryByText('Block');
-                if (blockButton) {
-                    fireEvent.click(blockButton);
-                    // Should show block dropdown
-                    await waitFor(() => {
-                        expect(screen.getByText(/select block/i)).toBeInTheDocument();
-                    });
-                }
-            });
+            const blockButton = await screen.findByText('Block');
+            fireEvent.click(blockButton);
+
+            // Should show block dropdown
+            expect(await screen.findByText('-- Select Block --')).toBeInTheDocument();
         });
 
         test('GP button shows both Block and GP dropdowns', async () => {
             render(<SchedulerPage />);
 
-            await waitFor(() => {
-                const sendButton = screen.queryByText(/send greetings/i);
-                if (sendButton) fireEvent.click(sendButton);
-            });
+            const startButton = await screen.findByRole('button', { name: /festival greetings/i });
+            fireEvent.click(startButton);
 
-            await waitFor(async () => {
-                const gpButton = screen.queryByText(/GP/i);
-                if (gpButton) {
-                    fireEvent.click(gpButton);
-                    await waitFor(() => {
-                        expect(screen.getByText(/select block/i)).toBeInTheDocument();
-                        expect(screen.getByText(/select gp/i)).toBeInTheDocument();
-                    });
-                }
-            });
+            await screen.findByText(/Select Festival/i);
+            const diwaliOption = (await screen.findAllByText(/Diwali/i)).pop()!;
+            fireEvent.click(diwaliOption);
+
+            const gpButton = await screen.findByText(/GP\/ULB/i);
+            fireEvent.click(gpButton);
+
+            expect(await screen.findByText('-- Select Block --')).toBeInTheDocument();
+            expect(await screen.findByText('-- Select GP --')).toBeInTheDocument();
         });
     });
 
@@ -137,45 +134,38 @@ describe('Festival Campaign Wizard Audience Targeting', () => {
         test('block dropdown shows options from database', async () => {
             render(<SchedulerPage />);
 
-            await waitFor(() => {
-                const sendButton = screen.queryByText(/send greetings/i);
-                if (sendButton) fireEvent.click(sendButton);
-            });
+            const startButton = await screen.findByRole('button', { name: /festival greetings/i });
+            fireEvent.click(startButton);
 
-            await waitFor(async () => {
-                const blockButton = screen.queryByText('Block');
-                if (blockButton) {
-                    fireEvent.click(blockButton);
-                    await waitFor(() => {
-                        // Should see block names from mock data
-                        expect(screen.getByText(/cuttack/i)).toBeInTheDocument();
-                    });
-                }
-            });
+            await screen.findByText(/Select Festival/i);
+            const diwaliOption = (await screen.findAllByText(/Diwali/i)).pop()!;
+            fireEvent.click(diwaliOption);
+
+            const blockButton = await screen.findByText('Block');
+            fireEvent.click(blockButton);
+
+            expect(await screen.findByText(/cuttack/i)).toBeInTheDocument();
         });
 
         test('selecting block fetches GPs for that block', async () => {
             render(<SchedulerPage />);
 
+            const startButton = await screen.findByRole('button', { name: /festival greetings/i });
+            fireEvent.click(startButton);
+
+            await screen.findByText(/Select Festival/i);
+            const diwaliOption = (await screen.findAllByText(/Diwali/i)).pop()!;
+            fireEvent.click(diwaliOption);
+
+            const gpButton = await screen.findByText(/GP\/ULB/i);
+            fireEvent.click(gpButton);
+
+            // Select a block
+            const blockSelect = await screen.findByDisplayValue(/select block/i);
+            fireEvent.change(blockSelect, { target: { value: 'Cuttack' } });
+
             await waitFor(() => {
-                const sendButton = screen.queryByText(/send greetings/i);
-                if (sendButton) fireEvent.click(sendButton);
-            });
-
-            await waitFor(async () => {
-                const gpButton = screen.queryByText(/GP/i);
-                if (gpButton) {
-                    fireEvent.click(gpButton);
-
-                    // Select a block
-                    const blockSelect = screen.queryByDisplayValue(/select block/i);
-                    if (blockSelect) {
-                        fireEvent.change(blockSelect, { target: { value: 'Cuttack' } });
-                        await waitFor(() => {
-                            expect(fetchGPMetricsForBlock).toHaveBeenCalledWith('Cuttack');
-                        });
-                    }
-                }
+                expect(fetchGPMetricsForBlock).toHaveBeenCalledWith('Cuttack');
             });
         });
     });

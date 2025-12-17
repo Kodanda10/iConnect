@@ -31,6 +31,8 @@ class UpdateTaskStatus extends TaskEvent {
 
 class LoadCompletedTasks extends TaskEvent {}
 
+class LoadHistory extends TaskEvent {}
+
 /// Event to update a specific action status (CALL, SMS, WHATSAPP)
 class UpdateActionStatus extends TaskEvent {
   final String taskId;

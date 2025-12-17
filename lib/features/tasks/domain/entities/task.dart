@@ -7,6 +7,11 @@ class Task extends Equatable {
   final String status; // PENDING, COMPLETED, SKIPPED
   final DateTime dueDate;
   final DateTime createdAt;
+  
+  // Action status tracking
+  final bool callSent;
+  final bool smsSent;
+  final bool whatsappSent;
 
   const Task({
     required this.id,
@@ -15,10 +20,13 @@ class Task extends Equatable {
     required this.status,
     required this.dueDate,
     required this.createdAt,
+    this.callSent = false,
+    this.smsSent = false,
+    this.whatsappSent = false,
   });
 
   @override
-  List<Object?> get props => [id, constituentId, type, status, dueDate, createdAt];
+  List<Object?> get props => [id, constituentId, type, status, dueDate, createdAt, callSent, smsSent, whatsappSent];
 }
 
 class EnrichedTask extends Task {
@@ -27,11 +35,6 @@ class EnrichedTask extends Task {
   final String block;
   final String gramPanchayat;
   final String mobile;
-  
-  // Action status tracking
-  final bool callSent;
-  final bool smsSent;
-  final bool whatsappSent;
 
   const EnrichedTask({
     required super.id,
@@ -45,12 +48,12 @@ class EnrichedTask extends Task {
     this.block = '',
     this.gramPanchayat = '',
     required this.mobile,
-    this.callSent = false,
-    this.smsSent = false,
-    this.whatsappSent = false,
+    super.callSent = false,
+    super.smsSent = false,
+    super.whatsappSent = false,
   });
 
   @override
-  List<Object?> get props => [...super.props, name, ward, block, gramPanchayat, mobile, callSent, smsSent, whatsappSent];
+  List<Object?> get props => [...super.props, name, ward, block, gramPanchayat, mobile];
 }
 

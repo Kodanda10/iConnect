@@ -12,6 +12,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<LoadTasksForDate>(_onLoadTasksForDate);
     on<LoadPendingTasks>(_onLoadPendingTasks);
     on<LoadCompletedTasks>(_onLoadCompletedTasks);
+    on<LoadHistory>(_onLoadHistory);
     on<UpdateTaskStatus>(_onUpdateTaskStatus);
     on<UpdateActionStatus>(_onUpdateActionStatus);
   }
@@ -34,6 +35,23 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   ) async {
     emit(TaskLoading());
     final result = await _taskRepository.getPendingTasks();
+    result.fold(
+      (failure) => emit(TaskError(failure.message)),
+      (tasks) => emit(TaskLoaded(tasks)),
+    );
+  }
+
+  Future<void> _onLoadHistory(
+    LoadHistory event,
+    Emitter<TaskState> emit,
+  ) async {
+    emit(TaskLoading());
+    // Fetch last 7 days including today
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    
+    final result = await _taskRepository.getTasksForDateRange(start, end);
     result.fold(
       (failure) => emit(TaskError(failure.message)),
       (tasks) => emit(TaskLoaded(tasks)),

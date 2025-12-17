@@ -177,30 +177,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Expanded(
               child: _filterStatus == 'MEETING'
                 ? _buildMeetingTab()
-                : BlocBuilder<TaskBloc, TaskState>(
-                    builder: (context, state) {
-                      if (state is TaskLoading) {
-                        return const ShimmerTaskList(itemCount: 3);
-                      } else if (state is TaskError) {
-                        return _buildErrorState(state.message);
-                      } else if (state is TaskLoaded) {
-                        final tasks = _filterTasks(state.tasks);
-                        return RefreshIndicator(
-                          color: AppColors.primary,
-                          backgroundColor: Colors.white,
-                          onRefresh: () async {
-                            if (_filterStatus == 'PENDING') {
+                : _filterStatus == 'COMPLETED'
+                  ? _buildReportTab()
+                  : BlocBuilder<TaskBloc, TaskState>(
+                      builder: (context, state) {
+                        if (state is TaskLoading) {
+                          return const ShimmerTaskList(itemCount: 3);
+                        } else if (state is TaskError) {
+                          return _buildErrorState(state.message);
+                        } else if (state is TaskLoaded) {
+                          final tasks = state.tasks.where((t) => t.status == 'PENDING').toList();
+                          return RefreshIndicator(
+                            color: AppColors.primary,
+                            backgroundColor: Colors.white,
+                            onRefresh: () async {
                               context.read<TaskBloc>().add(LoadPendingTasks());
-                            } else {
-                              context.read<TaskBloc>().add(LoadCompletedTasks());
-                            }
-                          },
-                          child: _buildTaskList(tasks),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                            },
+                            child: _buildTaskList(tasks),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
             ),
           ],
         ),
@@ -581,6 +579,159 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
   
+  // --- Report Tab ---
+  
+  Widget _buildReportTab() {
+    return BlocBuilder<TaskBloc, TaskState>(
+      builder: (context, state) {
+        if (state is TaskLoading) {
+          return const ShimmerTaskList(itemCount: 3);
+        }
+        
+        List<EnrichedTask> completedTasks = [];
+        if (state is TaskLoaded) {
+          completedTasks = state.tasks.where((t) => t.status == 'COMPLETED').toList();
+        }
+        
+        return RefreshIndicator(
+          onRefresh: () async {
+            context.read<TaskBloc>().add(LoadHistory());
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              _buildReportStats(completedTasks),
+              const SizedBox(height: 32),
+              const Text(
+                '7-DAY PERFORMANCE TIMELINE',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (completedTasks.isEmpty)
+                _buildEmptyHistory()
+              else
+                ..._buildGroupedTimeline(completedTasks),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildGroupedTimeline(List<EnrichedTask> tasks) {
+    // Group tasks by date
+    Map<String, List<EnrichedTask>> grouped = {};
+    for (var task in tasks) {
+      final dateStr = DateFormat('EEEE, dd MMM').format(task.dueDate);
+      grouped.putIfAbsent(dateStr, () => []).add(task);
+    }
+
+    List<Widget> items = [];
+    grouped.forEach((date, dayTasks) {
+      items.add(_buildDailyDetailHeader(date, dayTasks));
+      items.add(const SizedBox(height: 12));
+      for (var task in dayTasks) {
+        items.add(Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildTaskCard(task),
+        ));
+      }
+      items.add(const SizedBox(height: 24));
+    });
+    return items;
+  }
+
+  Widget _buildDailyDetailHeader(String date, List<EnrichedTask> tasks) {
+    final wishesSent = tasks.where((t) => t.callSent || t.smsSent || t.whatsappSent).length;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            date,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          Text(
+            "$wishesSent Wishes Sent / ${tasks.length} Total",
+            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportStats(List<EnrichedTask> tasks) {
+    final calls = tasks.where((t) => t.callSent).length;
+    final chats = tasks.where((t) => t.smsSent || t.whatsappSent).length;
+    final totalWishes = tasks.where((t) => t.callSent || t.smsSent || t.whatsappSent).length;
+    
+    return Row(
+      children: [
+        Expanded(child: _buildStatCard('Calls', calls.toString(), Icons.call, Colors.tealAccent)),
+        const SizedBox(width: 12),
+        Expanded(child: _buildStatCard('Chat', chats.toString(), Icons.chat_bubble, Colors.purpleAccent)),
+        const SizedBox(width: 12),
+        Expanded(child: _buildStatCard('Performance', "${totalWishes == 0 ? 0 : (totalWishes / tasks.length * 100).toInt()}%", Icons.trending_up, Colors.orangeAccent)),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyHistory() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withOpacity(0.1), style: BorderStyle.solid),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.history, color: Colors.white24, size: 48),
+          const SizedBox(height: 16),
+          const Text('No completed tasks yet', style: TextStyle(color: Colors.white38)),
+        ],
+      ),
+    );
+  }
+  
   Widget _buildNoMeetingState() {
     return Center(
       child: Column(
@@ -589,26 +740,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withOpacity(0.05),
               shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
-            child: Icon(Icons.phone_disabled, size: 64, color: Colors.white.withOpacity(0.4)),
+            child: Icon(Icons.event_busy, size: 64, color: Colors.white.withOpacity(0.3)),
           ),
-          const SizedBox(height: 20),
-          Text(
-            'No conference call scheduled',
+          const SizedBox(height: 24),
+          const Text(
+            'No meetings scheduled',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
-            'Schedule a call from the web dashboard',
+            'Active conference calls will appear here\nwhen scheduled via the dashboard.',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 13,
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 14,
+              height: 1.5,
             ),
           ),
         ],
@@ -793,23 +947,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ],
                     ),
                   ),
+                                   const SizedBox(height: 24),
                   
-                  const SizedBox(height: 20),
-                  
-                  // Join Call Button
-                  SizedBox(
+                  // Join Call Button (Vibrant & Animated Style)
+                  Container(
                     width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
                     child: ElevatedButton.icon(
                       onPressed: () => _launchPhone(dialInNumber),
-                      icon: const Icon(Icons.call),
-                      label: const Text('Join Conference Call'),
+                      icon: const Icon(Icons.call, size: 24),
+                      label: const Text(
+                        'JOIN CALL NOW',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, letterSpacing: 1),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
+                        elevation: 0,
                       ),
                     ),
                   ),
@@ -1082,11 +1249,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 if (isCompleted) ...[
                   Icon(Icons.check_circle, size: 14, color: Colors.grey[400]),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
+                  Text("$label Sent", style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 11)),
+                ] else ...[
+                  Icon(icon, size: 16, color: effectiveIconColor),
+                  const SizedBox(width: 6),
+                  Text(label, style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 12)),
                 ],
-                Icon(icon, size: 16, color: effectiveIconColor),
-                const SizedBox(width: 6),
-                Text(label, style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 12)),
               ],
             ),
           ),
