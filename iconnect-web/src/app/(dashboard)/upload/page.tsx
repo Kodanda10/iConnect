@@ -106,10 +106,10 @@ export default function UploadPage() {
 
     const formatDateForInput = (dateStr: string) => {
         if (!dateStr) return '';
-        // Only format if it matches YYYY-MM-DD exactly
+        // Convert YYYY-MM-DD to MM/DD/YYYY for display
         if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
             const [y, m, d] = dateStr.split('-');
-            return `${d}/${m}/${y}`;
+            return `${m}/${d}/${y}`;
         }
         return dateStr;
     };
@@ -123,25 +123,53 @@ export default function UploadPage() {
         setActiveDatePicker(null);
     };
 
-    // Handle manual text input for dates (supports dd/mm/yyyy and yyyy-mm-dd)
+    // Handle manual text input for dates - MM/DD/YYYY format with validation
     const handleDateTextInput = (field: 'dob' | 'anniversary', value: string) => {
-        // Strictly allow only numbers, '/' and '-'
-        if (!/^[0-9/-]*$/.test(value)) return;
+        // Only allow numbers and forward slashes
+        const cleaned = value.replace(/[^0-9/]/g, '');
 
-        // If user types in dd/mm/yyyy format, convert to yyyy-mm-dd
-        const ddmmyyyyMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (ddmmyyyyMatch) {
-            const [, d, m, y] = ddmmyyyyMatch;
-            const dateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-            setFormData(prev => ({ ...prev, [field]: dateStr }));
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            // Already in yyyy-mm-dd format
-            setFormData(prev => ({ ...prev, [field]: value }));
-        } else {
-            // Allow partial input while typing
-            // Store as-is in a display format, will be validated on submit
-            setFormData(prev => ({ ...prev, [field]: value }));
+        // Auto-format as user types: MM/DD/YYYY
+        let formatted = cleaned;
+        if (cleaned.length >= 2 && !cleaned.includes('/')) {
+            formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
         }
+        if (cleaned.length >= 5 && cleaned.split('/').length === 2) {
+            const parts = formatted.split('/');
+            formatted = parts[0] + '/' + parts[1] + '/' + cleaned.slice(5);
+        }
+
+        // Limit to MM/DD/YYYY length (10 chars)
+        if (formatted.length > 10) {
+            formatted = formatted.slice(0, 10);
+        }
+
+        // Validate complete date in MM/DD/YYYY format
+        const mmddyyyyMatch = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (mmddyyyyMatch) {
+            const [, m, d, y] = mmddyyyyMatch;
+            const month = parseInt(m);
+            const day = parseInt(d);
+            const year = parseInt(y);
+
+            // Validation rules
+            const isValidMonth = month >= 1 && month <= 12;
+            const isValidDay = day >= 1 && day <= 31;
+            const isValidYear = year >= 1900 && year <= new Date().getFullYear();
+
+            // Check actual date validity (e.g., Feb 30 is invalid)
+            const testDate = new Date(year, month - 1, day);
+            const isRealDate = testDate.getMonth() === month - 1 && testDate.getDate() === day;
+
+            if (isValidMonth && isValidDay && isValidYear && isRealDate) {
+                // Convert to YYYY-MM-DD for storage
+                const dateStr = `${y}-${m}-${d}`;
+                setFormData(prev => ({ ...prev, [field]: dateStr }));
+                return;
+            }
+        }
+
+        // Allow partial input while typing
+        setFormData(prev => ({ ...prev, [field]: formatted }));
     };
 
     // Open date picker and calculate position

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Festival, Language } from '@/types';
 import { DEFAULT_FESTIVALS } from '@/lib/services/festivals';
+import GlassCalendar from '@/components/ui/GlassCalendar';
 
 type WizardStep = 'select' | 'audience' | 'generate' | 'preview';
 
@@ -40,9 +41,78 @@ export default function FestivalsPage() {
     // New festival form
     const [newFestival, setNewFestival] = useState({
         name: '',
-        date: '',
+        date: '', // Stored as YYYY-MM-DD
         description: '',
     });
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
+    const dateInputRef = React.useRef<HTMLInputElement>(null);
+
+    const formatDateForInput = (dateStr: string) => {
+        if (!dateStr) return '';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            const [y, m, d] = dateStr.split('-');
+            return `${m}/${d}/${y}`;
+        }
+        return dateStr;
+    };
+
+    const handleDateTextInput = (value: string) => {
+        const cleaned = value.replace(/[^0-9/]/g, '');
+        let formatted = cleaned;
+        if (cleaned.length >= 2 && !cleaned.includes('/')) {
+            formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
+        }
+        if (cleaned.length >= 5 && cleaned.split('/').length === 2) {
+            const parts = formatted.split('/');
+            formatted = parts[0] + '/' + parts[1] + '/' + cleaned.slice(5);
+        }
+        if (formatted.length > 10) {
+            formatted = formatted.slice(0, 10);
+        }
+
+        const mmddyyyyMatch = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (mmddyyyyMatch) {
+            const [, m, d, y] = mmddyyyyMatch;
+            const month = parseInt(m);
+            const day = parseInt(d);
+            const year = parseInt(y);
+
+            const isValidMonth = month >= 1 && month <= 12;
+            const isValidDay = day >= 1 && day <= 31;
+            const isValidYear = year >= 1900 && year <= new Date().getFullYear() + 10;
+
+            const testDate = new Date(year, month - 1, day);
+            const isRealDate = testDate.getMonth() === month - 1 && testDate.getDate() === day;
+
+            if (isValidMonth && isValidDay && isValidYear && isRealDate) {
+                const dateStr = `${y}-${m}-${d}`;
+                setNewFestival({ ...newFestival, date: dateStr });
+                return;
+            }
+        }
+        setNewFestival({ ...newFestival, date: formatted });
+    };
+
+    const handleDateSelect = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        setNewFestival({ ...newFestival, date: `${year}-${month}-${day}` });
+        setShowDatePicker(false);
+    };
+
+    const openDatePicker = () => {
+        if (dateInputRef.current) {
+            const rect = dateInputRef.current.getBoundingClientRect();
+            setCalendarPosition({
+                top: rect.bottom + window.scrollY + 8,
+                left: rect.left + window.scrollX,
+            });
+            setShowDatePicker(true);
+        }
+    };
 
     // Campaign wizard state
     const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
@@ -228,12 +298,43 @@ export default function FestivalsPage() {
                                 <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
                                     Date *
                                 </label>
-                                <input
-                                    type="date"
-                                    value={newFestival.date}
-                                    onChange={(e) => setNewFestival({ ...newFestival, date: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl border border-black/10 bg-white/50 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-                                />
+                                <div className="relative">
+                                    <div
+                                        onClick={openDatePicker}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                    >
+                                        <Calendar className="w-5 h-5" />
+                                    </div>
+                                    <input
+                                        ref={dateInputRef}
+                                        type="text"
+                                        value={formatDateForInput(newFestival.date)}
+                                        onChange={(e) => handleDateTextInput(e.target.value)}
+                                        onFocus={openDatePicker}
+                                        placeholder="MM/DD/YYYY"
+                                        className="w-full pl-11 px-4 py-3 rounded-xl border border-black/10 bg-white/50 focus:outline-none focus:ring-2focus:ring-[var(--color-primary)]"
+                                    />
+                                    {showDatePicker && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setShowDatePicker(false)}
+                                            />
+                                            <div
+                                                className="fixed z-50 glass-card-light p-4 rounded-2xl shadow-xl"
+                                                style={{
+                                                    top: `${calendarPosition.top}px`,
+                                                    left: `${calendarPosition.left}px`,
+                                                }}
+                                            >
+                                                <GlassCalendar
+                                                    selectedDate={newFestival.date ? new Date(newFestival.date) : undefined}
+                                                    onSelect={handleDateSelect}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
