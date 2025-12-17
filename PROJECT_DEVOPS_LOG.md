@@ -7,5 +7,5 @@
     - **Web**: Standardized `scheduler-audience.test.tsx` using `findByRole`, `findAllByText`, and label-based selectors to resolve selection ambiguity in Campaign Wizard. Verified all 179 tests pass.
     - **Wiring**: Finalized `HomeTab` action persistence logic. Buttons now grey out and show "Sent" status across sessions.
     - **History**: Implemented 7-day performance history timeline in the mobile app.
-- **Status**: 100% CI pass rate. Production build verified locally (`flutter build web`).
-- **Next Steps**: Vercel deployment and GitHub sync.
+- **Status**: 100% Local CI Pass. GitHub CI blocked by account billing/spending limit issues.
+- **Next Steps**: User to resolve GitHub billing/link payment. Push verified locally.
