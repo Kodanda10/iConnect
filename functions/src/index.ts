@@ -25,8 +25,10 @@ const db = admin.firestore();
 /**
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side
+ * Region: asia-south1 (matches Flutter client)
  */
 export const generateGreeting = onCall<GreetingRequest>(
+    { region: 'asia-south1' },
     async (request) => {
         // Verify authentication
         if (!request.auth) {
@@ -69,10 +71,12 @@ async function fetchConstituentsByDateFields(
  * Daily scan cron job - runs at 00:01 AM IST every day
  * Scans constituents for birthdays/anniversaries and creates tasks
  * OPTIMIZED: Uses indexed date fields if available, falls back to full scan
+ * Region: asia-south1
  */
 export const dailyScan = onSchedule({
     schedule: '1 0 * * *',
     timeZone: 'Asia/Kolkata',
+    region: 'asia-south1',
 }, async () => {
     console.log('[DAILY_SCAN] Starting at', new Date().toISOString());
 
