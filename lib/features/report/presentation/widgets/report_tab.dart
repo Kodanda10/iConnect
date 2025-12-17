@@ -1,7 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:dartz/dartz.dart' show Either;
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -97,7 +97,7 @@ class _ReportTabState extends State<ReportTab> {
 
   Future<void> _refreshAll() async {
     await _loadToday();
-    context.read<ReportBloc>().add(const RefreshReport());
+    context.read<ReportBloc>().add(RefreshReport());
   }
 
   @override

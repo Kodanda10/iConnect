@@ -188,7 +188,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     if (shouldMarkCalled == true && mounted) {
-      context.read<TaskBloc>().add(UpdateActionStatus(task.id, 'CALL'));
+      context.read<TaskBloc>().add(
+        UpdateActionStatus(taskId: task.id, actionType: 'CALL'),
+      );
     }
   }
 
