@@ -193,4 +193,58 @@ describe('Firestore Security Rules', () => {
             await assertSucceeds(staffDb.collection('settings').doc('app').set({ appName: 'Official' }));
         });
     });
+
+    describe('action_logs collection', () => {
+        test('LEADER can create action logs', async () => {
+            await testEnv.withSecurityRulesDisabled(async (context) => {
+                await context.firestore().collection('users').doc('leader1').set({ role: 'LEADER' });
+            });
+
+            const db = testEnv.authenticatedContext('leader1').firestore();
+            await assertSucceeds(
+                db.collection('action_logs').doc('log1').set({
+                    action_type: 'CALL',
+                    constituent_id: 'c1',
+                    success: true
+                })
+            );
+        });
+
+        test('STAFF cannot create action logs (only LEADER)', async () => {
+            await testEnv.withSecurityRulesDisabled(async (context) => {
+                await context.firestore().collection('users').doc('staff1').set({ role: 'STAFF' });
+            });
+
+            const db = testEnv.authenticatedContext('staff1').firestore();
+            await assertFails(
+                db.collection('action_logs').doc('log1').set({
+                    action_type: 'SMS',
+                    constituent_id: 'c1',
+                    success: true
+                })
+            );
+        });
+    });
+
+    describe('scheduled_meetings collection', () => {
+        test('LEADER can create scheduled meetings', async () => {
+            await testEnv.withSecurityRulesDisabled(async (context) => {
+                await context.firestore().collection('users').doc('leader1').set({ role: 'LEADER' });
+            });
+
+            const db = testEnv.authenticatedContext('leader1').firestore();
+            await assertSucceeds(
+                db.collection('scheduled_meetings').doc('meeting1').set({
+                    title: 'Town Hall',
+                    dial_in_number: '+911234567890',
+                    access_code: '1234'
+                })
+            );
+        });
+
+        test('unauthenticated user cannot read scheduled meetings', async () => {
+            const db = testEnv.unauthenticatedContext().firestore();
+            await assertFails(db.collection('scheduled_meetings').doc('meeting1').get());
+        });
+    });
 });

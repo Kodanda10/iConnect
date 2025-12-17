@@ -84,5 +84,21 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if isStaffOrLeader();
     }
+
+    // Action Logs collection - Leaders log their actions, Staff can read/modify
+    // P0 Security (2025-12-17): Added per implementation_plan.md
+    match /action_logs/{logId} {
+      allow read: if isStaffOrLeader();
+      allow create: if isLeader(); // Leaders log their own actions
+      allow update, delete: if isStaff(); // Only staff can modify logs
+    }
+
+    // Scheduled Meetings collection - For conference call scheduling
+    // P0 Feature (2025-12-17): Added per implementation_plan.md
+    match /scheduled_meetings/{meetingId} {
+      allow read: if isStaffOrLeader();
+      allow create: if isStaffOrLeader(); // Both can create meetings
+      allow update, delete: if isStaff(); // Only staff can modify/cancel
+    }
   }
 }
