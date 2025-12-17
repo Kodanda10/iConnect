@@ -11,25 +11,46 @@ class TaskModel extends Task {
     required super.createdAt,
   });
 
+  /// Parse Firestore document to TaskModel
+  /// SCHEMA: Uses snake_case for Firestore consistency
+  /// Backwards compatible: checks both snake_case and camelCase
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    
+    // Read constituent ID (snake_case preferred, camelCase fallback)
+    final constituentId = data['constituent_id'] ?? data['constituentId'] ?? '';
+    
+    // Read due date (snake_case preferred, camelCase fallback)
+    final dueDateRaw = data['due_date'] ?? data['dueDate'];
+    final dueDate = dueDateRaw is Timestamp 
+        ? dueDateRaw.toDate() 
+        : DateTime.now();
+    
+    // Read created at (snake_case preferred, camelCase fallback)
+    final createdAtRaw = data['created_at'] ?? data['createdAt'];
+    final createdAt = createdAtRaw is Timestamp 
+        ? createdAtRaw.toDate() 
+        : DateTime.now();
+    
     return TaskModel(
       id: doc.id,
-      constituentId: data['constituentId'] ?? '',
+      constituentId: constituentId,
       type: data['type'] ?? 'UNKNOWN',
       status: data['status'] ?? 'PENDING',
-      dueDate: (data['dueDate'] as Timestamp).toDate(),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      dueDate: dueDate,
+      createdAt: createdAt,
     );
   }
 
+  /// Write to Firestore in snake_case format
   Map<String, dynamic> toFirestore() {
     return {
-      'constituentId': constituentId,
+      'constituent_id': constituentId,
       'type': type,
       'status': status,
-      'dueDate': Timestamp.fromDate(dueDate),
-      'createdAt': Timestamp.fromDate(createdAt),
+      'due_date': Timestamp.fromDate(dueDate),
+      'created_at': Timestamp.fromDate(createdAt),
     };
   }
 }
+

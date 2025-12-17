@@ -123,15 +123,15 @@ export async function addConstituent(
 
     if (data.dob) {
         const dobDate = new Date(data.dob);
-        constituentData.dobMonth = dobDate.getMonth() + 1;
-        constituentData.dobDay = dobDate.getDate();
+        constituentData.dob_month = dobDate.getMonth() + 1;
+        constituentData.dob_day = dobDate.getDate();
     }
 
     if (data.anniversary) {
         const annDate = toDate(data.anniversary);
         Object.assign(constituentData, {
-            anniversaryMonth: annDate.getMonth() + 1,
-            anniversaryDay: annDate.getDate(),
+            anniversary_month: annDate.getMonth() + 1,
+            anniversary_day: annDate.getDate(),
         });
     }
 
@@ -171,14 +171,14 @@ export async function updateConstituent(
 
     if (data.dob) {
         const dobDate = new Date(data.dob);
-        updateData.dobMonth = dobDate.getMonth() + 1;
-        updateData.dobDay = dobDate.getDate();
+        updateData.dob_month = dobDate.getMonth() + 1;
+        updateData.dob_day = dobDate.getDate();
     }
 
     if (data.anniversary) {
         const annDate = toDate(data.anniversary);
-        updateData.anniversaryMonth = annDate.getMonth() + 1;
-        updateData.anniversaryDay = annDate.getDate();
+        updateData.anniversary_month = annDate.getMonth() + 1;
+        updateData.anniversary_day = annDate.getDate();
     }
 
     await updateDoc(docRef, updateData);
@@ -202,8 +202,8 @@ export async function getConstituentsForDate(
     type: 'birthday' | 'anniversary' = 'birthday'
 ): Promise<Constituent[]> {
     const db = getFirebaseDb();
-    const fieldMonth = type === 'birthday' ? 'dobMonth' : 'anniversaryMonth';
-    const fieldDay = type === 'birthday' ? 'dobDay' : 'anniversaryDay';
+    const fieldMonth = type === 'birthday' ? 'dob_month' : 'anniversary_month';
+    const fieldDay = type === 'birthday' ? 'dob_day' : 'anniversary_day';
 
     const q = query(
         collection(db, COLLECTION_NAME),

@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import { getConstituentsForDateMMDD } from '@/lib/services/constituents';
 import { getUpcomingFestivals, addFestival, deleteFestival, DEFAULT_FESTIVALS } from '@/lib/services/festivals';
+import { fetchConstituentMetrics, fetchGPMetricsForBlock } from '@/lib/services/metrics';
 import { Constituent, Festival, Language } from '@/types';
 import GlassCalendar from '@/components/ui/GlassCalendar';
 import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
@@ -30,6 +31,8 @@ import {
     Loader2,
     Trash2,
     AlertTriangle,
+    Building2,
+    ChevronDown,
 } from 'lucide-react';
 
 // --- Types ---
@@ -62,10 +65,18 @@ export default function SchedulerPage() {
     // --- State: Campaign Wizard ---
     const [wizardStep, setWizardStep] = useState<WizardStep>('select');
     const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
-    const [campaignAudience, setCampaignAudience] = useState<'ALL' | 'WARD'>('ALL');
+    const [campaignAudience, setCampaignAudience] = useState<'ALL' | 'BLOCK' | 'GP'>('ALL');
     const [campaignLanguage, setCampaignLanguage] = useState<Language>('ODIA');
     const [generatedMessages, setGeneratedMessages] = useState<string[]>([]);
     const [selectedMessage, setSelectedMessage] = useState<string>('');
+
+    // --- State: Audience Targeting (Database-Connected) ---
+    const [targetBlock, setTargetBlock] = useState('');
+    const [targetGP, setTargetGP] = useState('');
+    const [blocks, setBlocks] = useState<{ name: string; count: number }[]>([]);
+    const [gps, setGps] = useState<{ name: string; count: number }[]>([]);
+    const [loadingBlocks, setLoadingBlocks] = useState(false);
+    const [loadingGPs, setLoadingGPs] = useState(false);
     const [newFestivalData, setNewFestivalData] = useState({ name: '', date: '', description: '' });
 
     // --- Calendar Helpers for Mock Events ---
@@ -139,6 +150,40 @@ export default function SchedulerPage() {
         };
         fetchFestivals();
     }, []);
+
+    // Fetch blocks from database
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            setLoadingBlocks(true);
+            try {
+                const metrics = await fetchConstituentMetrics();
+                setBlocks(metrics.blocks);
+            } catch (err) {
+                console.error('Failed to fetch blocks:', err);
+            } finally {
+                setLoadingBlocks(false);
+            }
+        };
+        fetchBlocks();
+    }, []);
+
+    // Fetch GPs when block changes
+    useEffect(() => {
+        if (campaignAudience === 'GP' && targetBlock) {
+            const fetchGPs = async () => {
+                setLoadingGPs(true);
+                try {
+                    const gpData = await fetchGPMetricsForBlock(targetBlock);
+                    setGps(gpData);
+                } catch (err) {
+                    console.error('Failed to fetch GPs:', err);
+                } finally {
+                    setLoadingGPs(false);
+                }
+            };
+            fetchGPs();
+        }
+    }, [campaignAudience, targetBlock]);
 
     // --- Handlers ---
 
@@ -431,17 +476,85 @@ export default function SchedulerPage() {
                         {wizardStep === 'audience' && (
                             <div className="space-y-6">
                                 <div>
-                                    <label className="text-sm font-bold text-white mb-3 block">Target Audience</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button onClick={() => setCampaignAudience('ALL')} className={`p-4 rounded-xl border-2 flex items-center gap-3 text-left ${campaignAudience === 'ALL' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10'}`}>
-                                            <Users className="text-emerald-400" />
-                                            <div><p className="text-white font-bold">All</p><p className="text-xs text-white/50">Everyone</p></div>
+                                    <label className="text-sm font-bold text-emerald-400 mb-3 block flex items-center gap-1.5">
+                                        <Users className="w-3 h-3" /> Target Audience
+                                    </label>
+
+                                    {/* 3-Button Layout */}
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setCampaignAudience('ALL'); setTargetBlock(''); setTargetGP(''); }}
+                                            className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${campaignAudience === 'ALL' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 hover:border-white/20'}`}
+                                        >
+                                            <Users className={`w-5 h-5 ${campaignAudience === 'ALL' ? 'text-emerald-400' : 'text-white/40'}`} />
+                                            <span className={`text-sm font-bold ${campaignAudience === 'ALL' ? 'text-emerald-300' : 'text-white/60'}`}>All</span>
+                                            <span className="text-[10px] text-white/30">Full Assembly</span>
                                         </button>
-                                        <button onClick={() => setCampaignAudience('WARD')} className={`p-4 rounded-xl border-2 flex items-center gap-3 text-left ${campaignAudience === 'WARD' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10'}`}>
-                                            <MapPin className="text-emerald-400" />
-                                            <div><p className="text-white font-bold">Ward</p><p className="text-xs text-white/50">Specific Areas</p></div>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setCampaignAudience('BLOCK'); setTargetGP(''); }}
+                                            className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${campaignAudience === 'BLOCK' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 hover:border-white/20'}`}
+                                        >
+                                            <MapPin className={`w-5 h-5 ${campaignAudience === 'BLOCK' ? 'text-emerald-400' : 'text-white/40'}`} />
+                                            <span className={`text-sm font-bold ${campaignAudience === 'BLOCK' ? 'text-emerald-300' : 'text-white/60'}`}>Block</span>
+                                            <span className="text-[10px] text-white/30">Specific Area</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setCampaignAudience('GP')}
+                                            className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${campaignAudience === 'GP' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 hover:border-white/20'}`}
+                                        >
+                                            <Building2 className={`w-5 h-5 ${campaignAudience === 'GP' ? 'text-emerald-400' : 'text-white/40'}`} />
+                                            <span className={`text-sm font-bold ${campaignAudience === 'GP' ? 'text-emerald-300' : 'text-white/60'}`}>GP/ULB</span>
+                                            <span className="text-[10px] text-white/30">Panchayat</span>
                                         </button>
                                     </div>
+
+                                    {/* Conditional Dropdowns */}
+                                    {campaignAudience !== 'ALL' && (
+                                        <div className="grid grid-cols-2 gap-4 mt-4 animate-fade-in">
+                                            {/* Block Dropdown */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs text-white/40 pl-1">Select Block</label>
+                                                <div className="relative">
+                                                    <select
+                                                        value={targetBlock}
+                                                        onChange={(e) => { setTargetBlock(e.target.value); setTargetGP(''); }}
+                                                        className="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none cursor-pointer"
+                                                        disabled={loadingBlocks}
+                                                    >
+                                                        <option value="">-- Select Block --</option>
+                                                        {blocks.map((b) => (
+                                                            <option key={b.name} value={b.name}>{b.name} ({b.count})</option>
+                                                        ))}
+                                                    </select>
+                                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+                                                </div>
+                                            </div>
+
+                                            {/* GP Dropdown (only for GP mode) */}
+                                            {campaignAudience === 'GP' && (
+                                                <div className="space-y-1 animate-fade-in">
+                                                    <label className="text-xs text-white/40 pl-1">Select GP/ULB</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            value={targetGP}
+                                                            onChange={(e) => setTargetGP(e.target.value)}
+                                                            className="w-full bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-white outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none cursor-pointer"
+                                                            disabled={loadingGPs || !targetBlock}
+                                                        >
+                                                            <option value="">-- Select GP --</option>
+                                                            {gps.map((g) => (
+                                                                <option key={g.name} value={g.name}>{g.name} ({g.count})</option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="text-sm font-bold text-white mb-3 block">Language</label>

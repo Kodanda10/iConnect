@@ -18,6 +18,10 @@ export interface MeetingTickerData {
     dialInNumber?: string; // Optional for Video
     accessCode?: string; // Optional for Video
     leaderUid: string;
+    // Audience Targeting
+    targetAudience?: 'ALL' | 'BLOCK' | 'GP';
+    targetBlock?: string;
+    targetGP?: string;
 }
 
 export interface ActiveTicker {

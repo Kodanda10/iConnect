@@ -21,6 +21,15 @@ export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
 export { onMeetingCreated, onConstituentWritten } from "./triggers";
 
+// P0 System Integrity: New exports
+export { processPushNotifications } from "./pushProcessor";
+export { createMessagingProvider, MessagingProvider, SMSResult } from "./messagingProvider";
+export { queryConstituentsByAudience, sendBulkSMS } from "./audienceQuery";
+export { schedulePushForLeader, determinePushTimes, formatAudioMessage } from "./notifications";
+
+// P1 RBAC: Custom claims sync
+export { syncRoleToClaims, setUserRole, getUserClaims } from "./auth";
+
 // Initialize Firebase Admin
 if (admin.apps.length === 0) {
     admin.initializeApp();

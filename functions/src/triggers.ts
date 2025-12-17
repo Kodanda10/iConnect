@@ -10,6 +10,26 @@ if (admin.apps.length === 0) {
 
 type MonthDay = { month: number; day: number };
 
+/**
+ * Helper to get maximum days in a month (considers leap years for February)
+ */
+function getDaysInMonth(month: number, year?: number): number {
+    // Use a safe year for validation; leap years only affect February
+    const safeYear = year ?? 2000; // 2000 is a leap year
+    // Create date for first day of next month, then go back one day
+    return new Date(safeYear, month, 0).getDate();
+}
+
+/**
+ * Validates if day is valid for the given month
+ */
+function isValidDayForMonth(month: number, day: number): boolean {
+    if (month < 1 || month > 12) return false;
+    if (day < 1) return false;
+    // Check against maximum days in that month (using leap year to be lenient for Feb)
+    return day <= getDaysInMonth(month);
+}
+
 function parseMonthDay(value: unknown): MonthDay | null {
     if (!value) return null;
 
@@ -30,9 +50,13 @@ function parseMonthDay(value: unknown): MonthDay | null {
         if (match) {
             const month = Number(match[2]);
             const day = Number(match[3]);
-            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            // FIX: Validate days per month instead of fixed 1-31
+            if (isValidDayForMonth(month, day)) {
                 return { month, day };
             }
+            // Invalid date like Feb 30 - reject it
+            console.warn(`[parseMonthDay] Rejected invalid date: month=${month}, day=${day}`);
+            return null;
         }
 
         const parsed = new Date(value);

@@ -6,6 +6,9 @@ interface MeetingTickerData {
     dialInNumber?: string;
     accessCode?: string;
     leaderUid: string;
+    targetAudience?: 'ALL' | 'BLOCK' | 'GP';
+    targetBlock?: string;
+    targetGP?: string;
 }
 /**
  * Creates a new meeting ticker in Firestore.

@@ -43,6 +43,26 @@ const messaging_1 = require("./messaging");
 if (admin.apps.length === 0) {
     admin.initializeApp();
 }
+/**
+ * Helper to get maximum days in a month (considers leap years for February)
+ */
+function getDaysInMonth(month, year) {
+    // Use a safe year for validation; leap years only affect February
+    const safeYear = year !== null && year !== void 0 ? year : 2000; // 2000 is a leap year
+    // Create date for first day of next month, then go back one day
+    return new Date(safeYear, month, 0).getDate();
+}
+/**
+ * Validates if day is valid for the given month
+ */
+function isValidDayForMonth(month, day) {
+    if (month < 1 || month > 12)
+        return false;
+    if (day < 1)
+        return false;
+    // Check against maximum days in that month (using leap year to be lenient for Feb)
+    return day <= getDaysInMonth(month);
+}
 function parseMonthDay(value) {
     if (!value)
         return null;
@@ -62,9 +82,13 @@ function parseMonthDay(value) {
         if (match) {
             const month = Number(match[2]);
             const day = Number(match[3]);
-            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            // FIX: Validate days per month instead of fixed 1-31
+            if (isValidDayForMonth(month, day)) {
                 return { month, day };
             }
+            // Invalid date like Feb 30 - reject it
+            console.warn(`[parseMonthDay] Rejected invalid date: month=${month}, day=${day}`);
+            return null;
         }
         const parsed = new Date(value);
         if (!Number.isNaN(parsed.getTime())) {

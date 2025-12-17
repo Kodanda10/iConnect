@@ -169,37 +169,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // Custom Header Section
             _buildHeader(),
             
-            // Ticker removed per user request - will add back later
+            // Sub Filters (hide for Meeting tab)
+            if (_filterStatus != 'MEETING')
+              _buildSubFilters(),
             
-            // Sub Filters (All / Birthday / Anniversary)
-            _buildSubFilters(),
-            
-            // Task List
+            // Main Content Area - Conditional based on tab
             Expanded(
-              child: BlocBuilder<TaskBloc, TaskState>(
-                builder: (context, state) {
-                  if (state is TaskLoading) {
-                    return const ShimmerTaskList(itemCount: 3);
-                  } else if (state is TaskError) {
-                    return _buildErrorState(state.message);
-                  } else if (state is TaskLoaded) {
-                    final tasks = _filterTasks(state.tasks);
-                    return RefreshIndicator(
-                      color: AppColors.primary,
-                      backgroundColor: Colors.white,
-                      onRefresh: () async {
-                        if (_filterStatus == 'PENDING') {
-                          context.read<TaskBloc>().add(LoadPendingTasks());
-                        } else {
-                          context.read<TaskBloc>().add(LoadCompletedTasks());
-                        }
-                      },
-                      child: _buildTaskList(tasks),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+              child: _filterStatus == 'MEETING'
+                ? _buildMeetingTab()
+                : BlocBuilder<TaskBloc, TaskState>(
+                    builder: (context, state) {
+                      if (state is TaskLoading) {
+                        return const ShimmerTaskList(itemCount: 3);
+                      } else if (state is TaskError) {
+                        return _buildErrorState(state.message);
+                      } else if (state is TaskLoaded) {
+                        final tasks = _filterTasks(state.tasks);
+                        return RefreshIndicator(
+                          color: AppColors.primary,
+                          backgroundColor: Colors.white,
+                          onRefresh: () async {
+                            if (_filterStatus == 'PENDING') {
+                              context.read<TaskBloc>().add(LoadPendingTasks());
+                            } else {
+                              context.read<TaskBloc>().add(LoadCompletedTasks());
+                            }
+                          },
+                          child: _buildTaskList(tasks),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
             ),
           ],
         ),
@@ -550,6 +551,276 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+
+  // --- Meeting Tab ---
+  
+  Widget _buildMeetingTab() {
+    // Get current user's UID for ticker lookup
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return _buildNoMeetingState();
+    }
+    
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('active_tickers')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Colors.white));
+        }
+        
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _buildNoMeetingState();
+        }
+        
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        return _buildMeetingCard(data);
+      },
+    );
+  }
+  
+  Widget _buildNoMeetingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.phone_disabled, size: 64, color: Colors.white.withOpacity(0.4)),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'No conference call scheduled',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Schedule a call from the web dashboard',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.4),
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildMeetingCard(Map<String, dynamic> data) {
+    final title = data['title'] ?? 'Conference Call';
+    final dialInNumber = data['dialInNumber'] ?? '';
+    final accessCode = data['accessCode'] ?? '';
+    final startTime = data['startTime'];
+    final targetAudience = data['targetAudience'] ?? 'ALL';
+    
+    // Parse start time
+    String formattedTime = 'Scheduled';
+    if (startTime != null) {
+      final DateTime dt = startTime is Timestamp 
+          ? startTime.toDate() 
+          : DateTime.parse(startTime.toString());
+      formattedTime = DateFormat('MMM d, yyyy • h:mm a').format(dt);
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 32,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8, height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            shape: BoxShape.circle,
+                            boxShadow: [BoxShadow(color: Colors.green, blurRadius: 6)],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'SCHEDULED',
+                          style: TextStyle(
+                            color: Colors.greenAccent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Title
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Time
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, size: 16, color: Colors.white.withOpacity(0.6)),
+                      const SizedBox(width: 6),
+                      Text(
+                        formattedTime,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 4),
+                  
+                  // Target Audience
+                  Row(
+                    children: [
+                      Icon(Icons.group, size: 16, color: Colors.white.withOpacity(0.6)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Target: $targetAudience',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Dial-in Details Card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'DIAL-IN DETAILS',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Icon(Icons.phone, size: 18, color: Colors.tealAccent),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                dialInNumber,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.dialpad, size: 18, color: Colors.tealAccent),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Access Code: $accessCode',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Join Call Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _launchPhone(dialInNumber),
+                      icon: const Icon(Icons.call),
+                      label: const Text('Join Conference Call'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   // --- Task List ---
 

@@ -14,6 +14,10 @@ interface MeetingTickerData {
     dialInNumber?: string;
     accessCode?: string;
     leaderUid: string;
+    // Audience Targeting
+    targetAudience?: 'ALL' | 'BLOCK' | 'GP';
+    targetBlock?: string;
+    targetGP?: string;
 }
 
 /**
@@ -74,16 +78,48 @@ export const createMeetingTicker = onCall(
             } else if (meetingType === 'CONFERENCE_CALL') {
                 tickerData.dialInNumber = dialInNumber || "";
                 tickerData.accessCode = accessCode || "";
+
+                // Store audience targeting info
+                tickerData.targetAudience = data.targetAudience || 'ALL';
+                if (data.targetBlock) tickerData.targetBlock = data.targetBlock;
+                if (data.targetGP) tickerData.targetGP = data.targetGP;
             }
 
             await tickerRef.set(tickerData);
 
             console.log(`Ticker created for leader ${leaderUid} [${meetingType}]`);
 
-            // Placeholder: Broadcast Notification Logic (BCG) would go here
-            // if (meetingType === 'CONFERENCE_CALL') { sendSMS(...) }
+            // === BROADCAST TRIGGER (Conference Calls Only) ===
+            if (meetingType === 'CONFERENCE_CALL') {
+                const { queryConstituentsByAudience, sendBulkSMS } = await import('./audienceQuery');
+                const { formatAudioMessage, schedulePushForLeader } = await import('./notifications');
 
-            return { success: true, message: "Ticker created successfully." };
+                const targetAudience = data.targetAudience || 'ALL';
+                const targetBlock = data.targetBlock;
+                const targetGP = data.targetGP;
+
+                // 1. Query constituents based on audience targeting
+                const constituents = await queryConstituentsByAudience(
+                    targetAudience,
+                    targetBlock,
+                    targetGP
+                );
+
+                // 2. Send bulk SMS with dial-in details
+                const message = formatAudioMessage({
+                    dialInNumber: dialInNumber || '',
+                    accessCode: accessCode || '',
+                }, 'HINDI');
+
+                await sendBulkSMS(constituents, message);
+
+                // 3. Schedule push notifications for Leader
+                await schedulePushForLeader(leaderUid, title, new Date(startTime));
+
+                console.log(`[BROADCAST] SMS sent to ${constituents.length} constituents, push notifications scheduled`);
+            }
+
+            return { success: true, message: "Ticker created and broadcast initiated." };
 
         } catch (error) {
             console.error("Error creating meeting ticker:", error);

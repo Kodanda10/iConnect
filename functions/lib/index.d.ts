@@ -10,6 +10,10 @@ export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailySc
 export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
 export { onMeetingCreated, onConstituentWritten } from "./triggers";
+export { processPushNotifications } from "./pushProcessor";
+export { createMessagingProvider, MessagingProvider, SMSResult } from "./messagingProvider";
+export { queryConstituentsByAudience, sendBulkSMS } from "./audienceQuery";
+export { schedulePushForLeader, determinePushTimes, formatAudioMessage } from "./notifications";
 /**
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side

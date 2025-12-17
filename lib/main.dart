@@ -4,14 +4,17 @@
 /// 
 /// @changelog
 /// - 2024-12-11: Initial implementation with Firebase
+/// - 2025-12-17: Added FCM push notification initialization (P0.2)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/services/fcm_service.dart';
 import 'firebase_options.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -35,6 +38,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Register background message handler (must be before FCM init)
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  
+  // Initialize FCM for push notifications
+  await FCMService().initialize();
 
   // Initialize Dependency Injection
   await di.init();

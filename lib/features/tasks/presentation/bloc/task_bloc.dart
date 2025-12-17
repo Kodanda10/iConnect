@@ -80,10 +80,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (_) => emit(ActionStatusUpdated(
-        taskId: event.taskId,
-        actionType: event.actionType,
-      )),
+      (_) {
+        emit(ActionStatusUpdated(
+          taskId: event.taskId,
+          actionType: event.actionType,
+        ));
+        // Refresh the task list so the UI reflects persisted action flags
+        add(LoadPendingTasks());
+      },
     );
   }
 }

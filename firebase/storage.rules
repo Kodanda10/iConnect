@@ -1,17 +1,34 @@
 rules_version = '2';
 
+// Storage Rules - Hardened (2025-12-18)
+// P2 Security Fix: Restrict access by path
 service firebase.storage {
   match /b/{bucket}/o {
-    match /{allPaths=**} {
-      // Allow access by default for now if auth is valid
-      // In production, we'd want to be more specific, e.g.
-      // match /users/{userId}/{fileName} { ... }
-      
-      // READ: Allow public read (for leader headers, profile pics)
+    
+    // Public assets: Leader headers, app branding (read-only for all)
+    match /public/{allPaths=**} {
       allow read: if true;
-      
-      // WRITE: Allow authenticated users only (Staff/Leaders)
       allow write: if request.auth != null;
+    }
+    
+    // User uploads: Profile pics, documents (authenticated only)
+    match /users/{userId}/{allPaths=**} {
+      // Users can read/write their own files
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Staff can read all user files
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'STAFF';
+    }
+    
+    // Constituent documents: Staff/Leader access only
+    match /constituents/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Default: Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
+

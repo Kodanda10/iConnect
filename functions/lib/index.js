@@ -40,7 +40,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
+exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.formatAudioMessage = exports.determinePushTimes = exports.schedulePushForLeader = exports.sendBulkSMS = exports.queryConstituentsByAudience = exports.createMessagingProvider = exports.processPushNotifications = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const tasks_1 = require("firebase-functions/v2/tasks");
@@ -60,6 +60,18 @@ Object.defineProperty(exports, "createConferenceBridge", { enumerable: true, get
 var triggers_1 = require("./triggers");
 Object.defineProperty(exports, "onMeetingCreated", { enumerable: true, get: function () { return triggers_1.onMeetingCreated; } });
 Object.defineProperty(exports, "onConstituentWritten", { enumerable: true, get: function () { return triggers_1.onConstituentWritten; } });
+// P0 System Integrity: New exports
+var pushProcessor_1 = require("./pushProcessor");
+Object.defineProperty(exports, "processPushNotifications", { enumerable: true, get: function () { return pushProcessor_1.processPushNotifications; } });
+var messagingProvider_1 = require("./messagingProvider");
+Object.defineProperty(exports, "createMessagingProvider", { enumerable: true, get: function () { return messagingProvider_1.createMessagingProvider; } });
+var audienceQuery_1 = require("./audienceQuery");
+Object.defineProperty(exports, "queryConstituentsByAudience", { enumerable: true, get: function () { return audienceQuery_1.queryConstituentsByAudience; } });
+Object.defineProperty(exports, "sendBulkSMS", { enumerable: true, get: function () { return audienceQuery_1.sendBulkSMS; } });
+var notifications_2 = require("./notifications");
+Object.defineProperty(exports, "schedulePushForLeader", { enumerable: true, get: function () { return notifications_2.schedulePushForLeader; } });
+Object.defineProperty(exports, "determinePushTimes", { enumerable: true, get: function () { return notifications_2.determinePushTimes; } });
+Object.defineProperty(exports, "formatAudioMessage", { enumerable: true, get: function () { return notifications_2.formatAudioMessage; } });
 // Initialize Firebase Admin
 if (admin.apps.length === 0) {
     admin.initializeApp();
