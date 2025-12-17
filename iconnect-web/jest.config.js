@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const nextJest = require('next/jest.js');
 
 const createJestConfig = nextJest({
