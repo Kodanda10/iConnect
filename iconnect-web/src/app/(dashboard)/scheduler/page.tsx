@@ -14,6 +14,7 @@ import { getConstituentsForDateMMDD } from '@/lib/services/constituents';
 import { getUpcomingFestivals, addFestival, deleteFestival, DEFAULT_FESTIVALS } from '@/lib/services/festivals';
 import { Constituent, Festival, Language } from '@/types';
 import GlassCalendar from '@/components/ui/GlassCalendar';
+import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
 import {
     Gift,
     Heart,
@@ -58,9 +59,6 @@ export default function SchedulerPage() {
     const [deletingFestivalId, setDeletingFestivalId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // --- State: Date Picker (Add Festival) ---
-    const [showDatePicker, setShowDatePicker] = useState(false);
-
     // --- State: Campaign Wizard ---
     const [wizardStep, setWizardStep] = useState<WizardStep>('select');
     const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
@@ -91,11 +89,7 @@ export default function SchedulerPage() {
         return `${month}-${day}`;
     };
 
-    const formatDateForInput = (dateStr: string) => {
-        if (!dateStr) return '';
-        const [y, m, d] = dateStr.split('-');
-        return `${d}/${m}/${y}`;
-    };
+
 
     // --- Effects ---
 
@@ -156,7 +150,6 @@ export default function SchedulerPage() {
                 setUpcomingFestivals(fetched.slice(0, 3));
                 setShowAddFestivalModal(false);
                 setNewFestivalData({ name: '', date: '', description: '' });
-                setShowDatePicker(false);
             } catch (e) {
                 console.error("Add festival failed", e);
             }
@@ -178,16 +171,7 @@ export default function SchedulerPage() {
         }
     };
 
-    const handleDateSelect = (date: Date) => {
-        // Javascript Date to YYYY-MM-DD local
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
 
-        setNewFestivalData({ ...newFestivalData, date: dateStr });
-        setShowDatePicker(false);
-    };
 
     const startCampaignWizard = () => {
         if (upcomingFestivals.length > 0) {
@@ -368,7 +352,7 @@ export default function SchedulerPage() {
                     <div className="glass-card-light p-6 rounded-2xl w-full max-w-sm mx-auto relative z-50">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-white font-bold text-lg">Add New Festival</h3>
-                            <button onClick={() => { setShowAddFestivalModal(false); setShowDatePicker(false); }}><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
+                            <button onClick={() => setShowAddFestivalModal(false)}><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
                         </div>
                         <div className="space-y-4">
                             {/* Name Input */}
@@ -385,35 +369,13 @@ export default function SchedulerPage() {
                                 />
                             </div>
 
-                            {/* Date Picker Input */}
-                            <div className="relative group">
-                                <div
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
-                                    onClick={() => setShowDatePicker(!showDatePicker)}
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="text"
-                                    readOnly
-                                    placeholder="dd/mm/yyyy"
-                                    className="w-full glass-input-dark pl-11 pr-4 py-3 rounded-xl text-white outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer transition-all font-medium"
-                                    value={formatDateForInput(newFestivalData.date)}
-                                    onClick={() => setShowDatePicker(!showDatePicker)}
-                                />
-
-                                {showDatePicker && (
-                                    <div className="mt-4 animate-in fade-in zoom-in-95 duration-200">
-                                        <div className="bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-inner p-1">
-                                            <GlassCalendar
-                                                selectedDate={newFestivalData.date ? new Date(newFestivalData.date) : new Date()}
-                                                onSelect={handleDateSelect}
-                                                className="!bg-transparent !p-2 !shadow-none"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Date Picker Input - Using ValidatedDateInput for consistency */}
+                            <ValidatedDateInput
+                                label="Festival Date"
+                                value={newFestivalData.date}
+                                onChange={(val) => setNewFestivalData({ ...newFestivalData, date: val })}
+                                allowFuture={true}
+                            />
 
                             <button onClick={handleAddFestival} className="w-full btn-primary py-3 mt-4 text-sm font-bold shadow-lg shadow-emerald-500/20">
                                 Add to Calendar

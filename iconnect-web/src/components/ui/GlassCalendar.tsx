@@ -20,14 +20,14 @@ interface GlassCalendarProps {
 }
 
 export default function GlassCalendar({
-    selectedDate = new Date(),
+    selectedDate,
     onSelect,
     eventDates = [],
     className = '',
     minYear = 1920,
     maxYear = new Date().getFullYear() + 5
 }: GlassCalendarProps) {
-    const [viewDate, setViewDate] = useState(selectedDate);
+    const [viewDate, setViewDate] = useState(selectedDate || new Date());
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
@@ -76,6 +76,7 @@ export default function GlassCalendar({
     };
 
     const isSelected = (day: number) => {
+        if (!selectedDate) return false;
         return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
     };
 

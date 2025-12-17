@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { getConstituents, addConstituent } from '@/lib/services/constituents';
 import { downloadConstituentsAsCSV, downloadConstituentsAsPDF } from '@/lib/utils/download';
 import { Constituent } from '@/types';
+import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
 import {
     Upload,
     FileText,
@@ -29,10 +30,10 @@ import {
     Download,
     FileDown,
     User,
-    Calendar,
 } from 'lucide-react';
-import GlassCalendar from '@/components/ui/GlassCalendar';
 import { isValidIndianMobile, isValidWhatsApp } from '@/lib/utils/validation';
+import { validateConstituentDates } from '@/lib/utils/dateRequirements';
+import { validateCsvData, CsvDataValidation, CsvRowData } from '@/lib/utils/csvValidation';
 import DataMetricsCard from '@/components/dashboard/DataMetricsCard';
 
 export default function UploadPage() {
@@ -48,6 +49,10 @@ export default function UploadPage() {
     const [isLoadingConstituents, setIsLoadingConstituents] = useState(true);
     const [isSeeding, setIsSeeding] = useState(false);
     const [seedStatus, setSeedStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+    // CSV validation state
+    const [csvValidation, setCsvValidation] = useState<CsvDataValidation | null>(null);
+    const [showCsvErrors, setShowCsvErrors] = useState(false);
 
     // Fetch constituents on mount
     useEffect(() => {
@@ -99,91 +104,9 @@ export default function UploadPage() {
     // Search
     const [searchTerm, setSearchTerm] = useState('');
 
-    const [activeDatePicker, setActiveDatePicker] = useState<'dob' | 'anniversary' | null>(null);
-    const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0, width: 0 });
-    const dobInputRef = React.useRef<HTMLInputElement>(null);
-    const anniversaryInputRef = React.useRef<HTMLInputElement>(null);
-
-    const formatDateForInput = (dateStr: string) => {
-        if (!dateStr) return '';
-        // Convert YYYY-MM-DD to MM/DD/YYYY for display
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-            const [y, m, d] = dateStr.split('-');
-            return `${m}/${d}/${y}`;
-        }
-        return dateStr;
-    };
-
-    const handleDateSelect = (field: 'dob' | 'anniversary', date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
-        setFormData(prev => ({ ...prev, [field]: dateStr }));
-        setActiveDatePicker(null);
-    };
-
-    // Handle manual text input for dates - MM/DD/YYYY format with validation
-    const handleDateTextInput = (field: 'dob' | 'anniversary', value: string) => {
-        // Only allow numbers and forward slashes
-        const cleaned = value.replace(/[^0-9/]/g, '');
-
-        // Auto-format as user types: MM/DD/YYYY
-        let formatted = cleaned;
-        if (cleaned.length >= 2 && !cleaned.includes('/')) {
-            formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2);
-        }
-        if (cleaned.length >= 5 && cleaned.split('/').length === 2) {
-            const parts = formatted.split('/');
-            formatted = parts[0] + '/' + parts[1] + '/' + cleaned.slice(5);
-        }
-
-        // Limit to MM/DD/YYYY length (10 chars)
-        if (formatted.length > 10) {
-            formatted = formatted.slice(0, 10);
-        }
-
-        // Validate complete date in MM/DD/YYYY format
-        const mmddyyyyMatch = formatted.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        if (mmddyyyyMatch) {
-            const [, m, d, y] = mmddyyyyMatch;
-            const month = parseInt(m);
-            const day = parseInt(d);
-            const year = parseInt(y);
-
-            // Validation rules
-            const isValidMonth = month >= 1 && month <= 12;
-            const isValidDay = day >= 1 && day <= 31;
-            const isValidYear = year >= 1900 && year <= new Date().getFullYear();
-
-            // Check actual date validity (e.g., Feb 30 is invalid)
-            const testDate = new Date(year, month - 1, day);
-            const isRealDate = testDate.getMonth() === month - 1 && testDate.getDate() === day;
-
-            if (isValidMonth && isValidDay && isValidYear && isRealDate) {
-                // Convert to YYYY-MM-DD for storage
-                const dateStr = `${y}-${m}-${d}`;
-                setFormData(prev => ({ ...prev, [field]: dateStr }));
-                return;
-            }
-        }
-
-        // Allow partial input while typing
-        setFormData(prev => ({ ...prev, [field]: formatted }));
-    };
-
-    // Open date picker and calculate position
-    const openDatePicker = (field: 'dob' | 'anniversary') => {
-        const inputRef = field === 'dob' ? dobInputRef : anniversaryInputRef;
-        if (inputRef.current) {
-            const rect = inputRef.current.getBoundingClientRect();
-            setCalendarPosition({
-                top: rect.bottom + 8, // 8px gap below input
-                left: rect.left,
-                width: rect.width,
-            });
-        }
-        setActiveDatePicker(field);
+    const normalizeStorageDate = (value: string): string => {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+        return '';
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -222,12 +145,89 @@ export default function UploadPage() {
         reader.readAsText(file);
     };
 
+    /**
+     * Parse CSV content into row objects
+     */
+    const parseCsvToRows = (content: string): CsvRowData[] => {
+        const lines = content.trim().split('\n');
+        if (lines.length < 2) return [];
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const rows: CsvRowData[] = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const row: CsvRowData = {};
+
+            headers.forEach((header, index) => {
+                const value = values[index] || '';
+                // Map common header variations
+                if (header === 'name' || header === 'full_name' || header === 'fullname') {
+                    row.name = value;
+                } else if (header === 'mobile' || header === 'mobile_number' || header === 'phone') {
+                    row.mobile = value;
+                } else if (header === 'whatsapp' || header === 'whatsapp_number') {
+                    row.whatsapp = value;
+                } else if (header === 'dob' || header === 'date_of_birth' || header === 'birthday') {
+                    row.dob = value;
+                } else if (header === 'anniversary') {
+                    row.anniversary = value;
+                } else if (header === 'block') {
+                    row.block = value;
+                } else if (header === 'gp_ulb' || header === 'gp' || header === 'ulb') {
+                    row.gp_ulb = value;
+                } else if (header === 'ward' || header === 'ward_number') {
+                    row.ward = value;
+                }
+            });
+
+            rows.push(row);
+        }
+
+        return rows;
+    };
+
     const handleCsvUpload = async () => {
+        if (!csvContent) return;
+
+        // Parse and validate CSV
+        const rows = parseCsvToRows(csvContent);
+        const validation = validateCsvData(rows);
+        setCsvValidation(validation);
+
+        // If there are invalid rows, show error summary but don't block valid rows
+        if (!validation.isAllValid) {
+            setShowCsvErrors(true);
+            // Don't proceed with upload yet - let user review errors
+            return;
+        }
+
+        // All rows valid - proceed with upload
+        await uploadValidRows(rows);
+    };
+
+    const uploadValidRows = async (rows: CsvRowData[]) => {
         setIsLoading(true);
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            // Add each valid constituent
+            for (const row of rows) {
+                await addConstituent({
+                    name: row.name || '',
+                    mobileNumber: row.mobile || '',
+                    dob: row.dob || undefined,
+                    anniversary: row.anniversary || undefined,
+                    block: row.block || undefined,
+                    gpUlb: row.gp_ulb || undefined,
+                    ward: row.ward || undefined,
+                    whatsapp: row.whatsapp || undefined,
+                });
+            }
+
             setUploadStatus('success');
             setCsvContent('');
+            setCsvValidation(null);
+            setShowCsvErrors(false);
+            await fetchConstituents();
         } catch (error) {
             console.error(error);
             setUploadStatus('error');
@@ -239,13 +239,25 @@ export default function UploadPage() {
 
     const handleManualSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate that at least DOB or Anniversary is provided
+        const normalizedDob = normalizeStorageDate(formData.dob);
+        const normalizedAnniversary = normalizeStorageDate(formData.anniversary);
+        const dateValidation = validateConstituentDates(normalizedDob, normalizedAnniversary);
+        if (!dateValidation.isValid) {
+            setUploadStatus('error');
+            // Allow the error toast to show
+            setTimeout(() => setUploadStatus('idle'), 3000);
+            return;
+        }
+
         setIsLoading(true);
         try {
             await addConstituent({
                 name: formData.name,
                 mobileNumber: formData.mobile,
-                dob: formData.dob || undefined,
-                anniversary: formData.anniversary || undefined,
+                dob: normalizedDob || undefined,
+                anniversary: normalizedAnniversary || undefined,
                 block: formData.block || undefined,
                 gpUlb: formData.gp_ulb || undefined,
                 ward: formData.ward || undefined,
@@ -382,6 +394,66 @@ export default function UploadPage() {
                             <pre className="text-xs text-white/60 overflow-x-auto max-h-24">
                                 {csvContent.slice(0, 400)}...
                             </pre>
+                        </div>
+                    )}
+
+                    {/* CSV Validation Errors */}
+                    {showCsvErrors && csvValidation && !csvValidation.isAllValid && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl animate-slide-up space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="w-5 h-5 text-red-400" />
+                                    <span className="font-bold text-white">
+                                        {csvValidation.invalidCount} row{csvValidation.invalidCount !== 1 ? 's' : ''} have errors
+                                    </span>
+                                </div>
+                                <span className="text-sm text-emerald-400">
+                                    {csvValidation.validCount} valid
+                                </span>
+                            </div>
+
+                            {/* Error list - collapsed by default, expandable */}
+                            <div className="max-h-32 overflow-y-auto space-y-1">
+                                {csvValidation.invalidRows.slice(0, 10).map((row) => (
+                                    <div key={row.rowNumber} className="text-xs text-red-300 bg-red-500/10 px-2 py-1 rounded">
+                                        <span className="font-bold">Row {row.rowNumber}</span>
+                                        {row.name && <span className="text-white/60"> ({row.name})</span>}: {row.errors.join(', ')}
+                                    </div>
+                                ))}
+                                {csvValidation.invalidRows.length > 10 && (
+                                    <div className="text-xs text-white/50 italic">
+                                        ...and {csvValidation.invalidRows.length - 10} more errors
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Action buttons */}
+                            <div className="flex gap-2 pt-2 border-t border-white/10">
+                                {csvValidation.validCount > 0 && (
+                                    <button
+                                        onClick={() => {
+                                            const rows = parseCsvToRows(csvContent);
+                                            const validRows = rows.filter((_, i) =>
+                                                !csvValidation.invalidRows.some(r => r.rowNumber === i + 1)
+                                            );
+                                            uploadValidRows(validRows);
+                                        }}
+                                        className="flex-1 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm font-bold hover:bg-emerald-500/30 transition-colors"
+                                    >
+                                        Upload {csvValidation.validCount} Valid Rows
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        setShowCsvErrors(false);
+                                        setCsvValidation(null);
+                                        setCsvContent('');
+                                    }}
+                                    className="flex-1 py-2 bg-white/5 text-white/70 rounded-lg text-sm font-bold hover:bg-white/10 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -554,98 +626,27 @@ export default function UploadPage() {
                         </div>
 
                         {/* Date of Birth */}
-                        <div>
-                            <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Date of Birth
-                            </label>
-                            <div className="relative group">
-                                <div
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
-                                    onClick={() => openDatePicker('dob')}
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                </div>
-                                <input
-                                    ref={dobInputRef}
-                                    type="text"
-                                    value={formatDateForInput(formData.dob)}
-                                    onChange={(e) => handleDateTextInput('dob', e.target.value)}
-                                    onFocus={() => openDatePicker('dob')}
-                                    placeholder="dd/mm/yyyy"
-                                    className="glass-input-dark pl-10 h-12 w-full"
-                                />
-                            </div>
-                        </div>
+                        <ValidatedDateInput
+                            label="Date of Birth"
+                            value={formData.dob}
+                            onChange={(val) => setFormData(prev => ({ ...prev, dob: val }))}
+                            allowFuture={false}
+                        />
 
-                        {/* Anniversary */}
-                        <div>
-                            <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Anniversary
-                            </label>
-                            <div className="relative group">
-                                <div
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 cursor-pointer hover:text-emerald-400 transition-colors z-10"
-                                    onClick={() => openDatePicker('anniversary')}
-                                >
-                                    <Calendar className="w-4 h-4" />
-                                </div>
-                                <input
-                                    ref={anniversaryInputRef}
-                                    type="text"
-                                    value={formatDateForInput(formData.anniversary)}
-                                    onChange={(e) => handleDateTextInput('anniversary', e.target.value)}
-                                    onFocus={() => openDatePicker('anniversary')}
-                                    placeholder="dd/mm/yyyy"
-                                    className="glass-input-dark pl-10 h-12 w-full"
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    {/* Anniversary */}
+                    <ValidatedDateInput
+                        label="Anniversary"
+                        value={formData.anniversary}
+                        onChange={(val) => setFormData(prev => ({ ...prev, anniversary: val }))}
+                        allowFuture={false}
+                    />
+                </div>
 
-                    {/* Fixed position calendar portal */}
-                    {activeDatePicker && (
-                        <>
-                            {/* Backdrop to close calendar */}
-                            <div
-                                className="fixed inset-0 z-[9998]"
-                                onClick={() => setActiveDatePicker(null)}
-                            />
-                            {/* Calendar dropdown */}
-                            <div
-                                className="fixed z-[9999] animate-in fade-in zoom-in-95 duration-200"
-                                style={{
-                                    top: calendarPosition.top,
-                                    left: calendarPosition.left,
-                                    width: Math.max(calendarPosition.width, 300),
-                                }}
-                            >
-                                <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1">
-                                    <GlassCalendar
-                                        selectedDate={(() => {
-                                            const dateStr = activeDatePicker === 'dob' ? formData.dob : formData.anniversary;
-                                            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return new Date();
-                                            const d = new Date(dateStr);
-                                            return isNaN(d.getTime()) ? new Date() : d;
-                                        })()}
-                                        onSelect={(date) => {
-                                            if (activeDatePicker) {
-                                                handleDateSelect(activeDatePicker, date);
-                                            }
-                                        }}
-                                        className="!bg-transparent !p-2 !shadow-none"
-                                        minYear={1920}
-                                        maxYear={new Date().getFullYear() + 5}
-                                    />
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full py-2.5 flex items-center justify-center gap-2 font-semibold text-white text-sm rounded-full transition-all duration-300 disabled:opacity-50"
-                        style={{ background: 'linear-gradient(135deg, #00A896 0%, #00C4A7 100%)', boxShadow: '0 4px 16px rgba(0, 168, 150, 0.4)' }}
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-2.5 flex items-center justify-center gap-2 font-semibold text-white text-sm rounded-full transition-all duration-300 disabled:opacity-50"
+                    style={{ background: 'linear-gradient(135deg, #00A896 0%, #00C4A7 100%)', boxShadow: '0 4px 16px rgba(0, 168, 150, 0.4)' }}
                     >
                         {isLoading ? (
                             <>

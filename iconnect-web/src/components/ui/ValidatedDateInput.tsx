@@ -8,13 +8,13 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, Check, AlertCircle } from 'lucide-react';
 import {
     formatDateForDisplay,
     formatDateInput,
     getValidationState,
     parseDateInput,
-    ValidationState
 } from '@/lib/utils/dateValidation';
 import GlassCalendar from './GlassCalendar';
 
@@ -43,7 +43,6 @@ export default function ValidatedDateInput({
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
     const inputRef = useRef<HTMLInputElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
     // Sync external value changes
     useEffect(() => {
@@ -82,19 +81,33 @@ export default function ValidatedDateInput({
         setIsCalendarOpen(false);
     };
 
-    // Open calendar with positioning
+    // Calculate position on open
     const openCalendar = () => {
         if (disabled || !showCalendar) return;
 
         if (inputRef.current) {
             const rect = inputRef.current.getBoundingClientRect();
+            // Use fixed positioning relative to viewport since we are portaling to body
             setCalendarPosition({
-                top: rect.bottom + window.scrollY + 8,
-                left: rect.left + window.scrollX,
+                top: rect.bottom + 8,
+                left: rect.left,
             });
             setIsCalendarOpen(true);
         }
     };
+
+    // Handle scroll/resize to close calendar to avoid detached popup
+    useEffect(() => {
+        const handleScroll = () => {
+            if (isCalendarOpen) setIsCalendarOpen(false);
+        };
+        window.addEventListener('scroll', handleScroll, true);
+        window.addEventListener('resize', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll, true);
+            window.removeEventListener('resize', handleScroll);
+        };
+    }, [isCalendarOpen]);
 
     // Get border/icon styles based on validation state
     const getBorderClass = (): string => {
@@ -120,7 +133,7 @@ export default function ValidatedDateInput({
     };
 
     return (
-        <div ref={containerRef} className={`relative ${className}`}>
+        <div className={`relative ${className}`}>
             {label && (
                 <label className="block text-sm font-medium text-white/80 mb-2">
                     {label}
@@ -155,25 +168,20 @@ export default function ValidatedDateInput({
                     maxLength={10}
                     className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
                 />
-
-                {/* Validation status indicator */}
-                {validationState === 'success' && (
-                    <span className="text-xs text-emerald-400 font-medium">Valid</span>
-                )}
-                {validationState === 'error' && displayValue.length > 0 && (
-                    <span className="text-xs text-red-400 font-medium">Invalid</span>
-                )}
             </div>
 
-            {/* Calendar Popup */}
-            {isCalendarOpen && showCalendar && (
-                <>
+            {/* Calendar Portal - Renders at root level to ensure Z-Index top */}
+            {isCalendarOpen && showCalendar && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[99999] isolate">
+                    {/* Backdrop */}
                     <div
-                        className="fixed inset-0 z-40"
+                        className="fixed inset-0 bg-transparent"
                         onClick={() => setIsCalendarOpen(false)}
                     />
+
+                    {/* Popup */}
                     <div
-                        className="fixed z-50 glass-card-light p-4 rounded-2xl shadow-xl"
+                        className="fixed z-[99999] w-[320px] animate-in fade-in zoom-in-95 duration-100"
                         style={{
                             top: `${calendarPosition.top}px`,
                             left: `${calendarPosition.left}px`,
@@ -186,7 +194,8 @@ export default function ValidatedDateInput({
                             maxYear={allowFuture ? 2100 : new Date().getFullYear()}
                         />
                     </div>
-                </>
+                </div>,
+                document.body
             )}
         </div>
     );
