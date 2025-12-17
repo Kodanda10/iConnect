@@ -111,11 +111,7 @@ class _ReportTabState extends State<ReportTab> {
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            sliver: SliverToBoxAdapter(child: _buildTodayCard()),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            sliver: SliverToBoxAdapter(child: _buildTodayActions()),
+            sliver: SliverToBoxAdapter(child: _buildTodaySection()),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -191,35 +187,56 @@ class _ReportTabState extends State<ReportTab> {
     );
   }
 
-  Widget _buildTodayCard() {
-    if (_loadingToday) {
-      return const GlassCard(
-        child: SizedBox(
-          height: 92,
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
+  Widget _buildTodaySection() {
+    final stats =
+        _todayStats ??
+        const TodaySummaryStats(
+          wishesSent: 0,
+          totalEvents: 0,
+          callsMade: 0,
+          smsCount: 0,
+          whatsappCount: 0,
+        );
 
-    if (_todayError != null) {
-      return GlassCard(
-        overlayGradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.error.withOpacity(0.18), Colors.transparent],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Today',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-              ),
+    final hasError = _todayError != null;
+
+    return GlassCard(
+      surfaceGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withOpacity(0.12),
+          Colors.white.withOpacity(0.06),
+        ],
+      ),
+      overlayGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: hasError
+            ? [AppColors.error.withOpacity(0.18), Colors.transparent]
+            : [
+                AppColors.primary.withOpacity(0.18),
+                AppColors.secondary.withOpacity(0.12),
+              ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Today',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
             ),
-            const SizedBox(height: 8),
+          ),
+          const SizedBox(height: 10),
+          if (_loadingToday)
+            const SizedBox(
+              height: 92,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (hasError) ...[
             Text(
               _todayError!,
               style: TextStyle(color: Colors.white.withOpacity(0.8)),
@@ -235,98 +252,53 @@ class _ReportTabState extends State<ReportTab> {
               ),
               child: const Text('Retry'),
             ),
-          ],
-        ),
-      );
-    }
-
-    final stats =
-        _todayStats ??
-        const TodaySummaryStats(
-          wishesSent: 0,
-          totalEvents: 0,
-          callsMade: 0,
-          smsCount: 0,
-          whatsappCount: 0,
-        );
-
-    return GlassCard(
-      overlayGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          AppColors.primary.withOpacity(0.18),
-          AppColors.secondary.withOpacity(0.12),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Today',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _MetricTile(
+                    label: 'Wishes Sent',
+                    value: '${stats.wishesSent}',
+                    accent: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _MetricTile(
+                    label: 'Total Events',
+                    value: '${stats.totalEvents}',
+                    accent: AppColors.secondary,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricTile(
-                  label: 'Wishes Sent',
-                  value: '${stats.wishesSent}',
-                  accent: AppColors.primary,
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _MiniChip(
+                  icon: Icons.call,
+                  label: 'Call',
+                  value: stats.callsMade,
+                  color: AppColors.primaryLight,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _MetricTile(
-                  label: 'Total Events',
-                  value: '${stats.totalEvents}',
-                  accent: AppColors.secondary,
+                _MiniChip(
+                  icon: Icons.message,
+                  label: 'SMS',
+                  value: stats.smsCount,
+                  color: AppColors.secondary,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _MiniChip(
-                icon: Icons.call,
-                label: 'Call',
-                value: stats.callsMade,
-                color: AppColors.primaryLight,
-              ),
-              _MiniChip(
-                icon: Icons.message,
-                label: 'SMS',
-                value: stats.smsCount,
-                color: AppColors.secondary,
-              ),
-              _MiniChip(
-                icon: Icons.chat_bubble,
-                label: 'WhatsApp',
-                value: stats.whatsappCount,
-                color: AppColors.success,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTodayActions() {
-    return GlassCard(
-      padding: const EdgeInsets.all(16),
-      blurSigma: 0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+                _MiniChip(
+                  icon: Icons.chat_bubble,
+                  label: 'WhatsApp',
+                  value: stats.whatsappCount,
+                  color: AppColors.success,
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 16),
           Row(
             children: [
               const Expanded(
@@ -355,6 +327,11 @@ class _ReportTabState extends State<ReportTab> {
               'Loading…',
               style: TextStyle(color: Colors.white.withOpacity(0.7)),
             )
+          else if (hasError)
+            Text(
+              'Unable to load actions for today.',
+              style: TextStyle(color: Colors.white.withOpacity(0.75)),
+            )
           else if (_todayActions.isEmpty)
             Text(
               'No wishes sent yet today',
@@ -364,7 +341,10 @@ class _ReportTabState extends State<ReportTab> {
               ),
             )
           else
-            ..._todayActions.map((a) => _ActionRow(action: a)),
+            _ActionsTable(
+              actions: (_todayActions.toList()
+                ..sort((a, b) => b.executedAt.compareTo(a.executedAt))),
+            ),
         ],
       ),
     );
@@ -522,6 +502,121 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
+class _ActionsTable extends StatelessWidget {
+  final List<ActionLog> actions;
+
+  const _ActionsTable({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
+      ),
+      child: Column(
+        children: [
+          _ActionsTableHeader(),
+          for (final action in actions) _ActionsTableRow(action: action),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionsTableHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      child: DefaultTextStyle(
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.70),
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
+        ),
+        child: Row(
+          children: const [
+            SizedBox(width: 62, child: Text('TIME')),
+            Expanded(child: Text('CONSTITUENT')),
+            SizedBox(
+              width: 92,
+              child: Text('ACTION', textAlign: TextAlign.end),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionsTableRow extends StatelessWidget {
+  final ActionLog action;
+
+  const _ActionsTableRow({required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final time = DateFormat('jm').format(action.executedAt);
+    final typeLabel = ActionLog.actionTypeToString(action.actionType);
+    final accent = switch (action.actionType) {
+      ActionType.call => AppColors.primaryLight,
+      ActionType.sms => AppColors.secondary,
+      ActionType.whatsapp => AppColors.success,
+    };
+
+    return Column(
+      children: [
+        Divider(height: 1, color: Colors.white.withOpacity(0.10)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 62,
+                child: Text(
+                  time,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.70),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  action.constituentName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 92,
+                child: Text(
+                  typeLabel,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color: accent.withOpacity(0.95),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _DaySummaryCard extends StatefulWidget {
   final DaySummary summary;
 
@@ -546,6 +641,8 @@ class _DaySummaryCardState extends State<_DaySummaryCard> {
     final wa = widget.summary.actions
         .where((a) => a.actionType == ActionType.whatsapp)
         .length;
+    final sorted = widget.summary.actions.toList()
+      ..sort((a, b) => b.executedAt.compareTo(a.executedAt));
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: GlassCard(
@@ -582,11 +679,7 @@ class _DaySummaryCardState extends State<_DaySummaryCard> {
             ),
             const SizedBox(height: 10),
             if (_expanded)
-              Column(
-                children: widget.summary.actions
-                    .map((a) => _ActionRow(action: a))
-                    .toList(),
-              )
+              _ActionsTable(actions: sorted)
             else
               Text(
                 'Call $calls · SMS $sms · WA $wa',
