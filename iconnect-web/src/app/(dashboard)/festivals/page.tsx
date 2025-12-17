@@ -25,6 +25,7 @@ import {
 import { Festival, Language } from '@/types';
 import { DEFAULT_FESTIVALS } from '@/lib/services/festivals';
 import GlassCalendar from '@/components/ui/GlassCalendar';
+import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
 
 type WizardStep = 'select' | 'audience' | 'generate' | 'preview';
 
@@ -295,46 +296,12 @@ export default function FestivalsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
-                                    Date *
-                                </label>
-                                <div className="relative">
-                                    <div
-                                        onClick={openDatePicker}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                                    >
-                                        <Calendar className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        ref={dateInputRef}
-                                        type="text"
-                                        value={formatDateForInput(newFestival.date)}
-                                        onChange={(e) => handleDateTextInput(e.target.value)}
-                                        onFocus={openDatePicker}
-                                        placeholder="MM/DD/YYYY"
-                                        className="w-full pl-11 px-4 py-3 rounded-xl border border-black/10 bg-white/50 focus:outline-none focus:ring-2focus:ring-[var(--color-primary)]"
-                                    />
-                                    {showDatePicker && (
-                                        <>
-                                            <div
-                                                className="fixed inset-0 z-40"
-                                                onClick={() => setShowDatePicker(false)}
-                                            />
-                                            <div
-                                                className="fixed z-50 glass-card-light p-4 rounded-2xl shadow-xl"
-                                                style={{
-                                                    top: `${calendarPosition.top}px`,
-                                                    left: `${calendarPosition.left}px`,
-                                                }}
-                                            >
-                                                <GlassCalendar
-                                                    selectedDate={newFestival.date ? new Date(newFestival.date) : undefined}
-                                                    onSelect={handleDateSelect}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
+                                <ValidatedDateInput
+                                    label="Date *"
+                                    value={newFestival.date}
+                                    onChange={(val) => setNewFestival({ ...newFestival, date: val })}
+                                    allowFuture={true}
+                                />
                             </div>
 
                             <div>

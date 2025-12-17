@@ -84,7 +84,7 @@ describe('Firestore Security Rules', () => {
             );
         });
 
-        test('user can create own profile only as UNASSIGNED (or without role)', async () => {
+        test('user can create own profile only without role field', async () => {
             const db = testEnv.authenticatedContext('user1').firestore();
 
             // Allowed: create without role field
@@ -92,16 +92,6 @@ describe('Firestore Security Rules', () => {
                 db.collection('users').doc('user1').set({
                     email: 'user1@test.com',
                     name: 'User One',
-                })
-            );
-
-            // Allowed: create with role UNASSIGNED
-            const db2 = testEnv.authenticatedContext('user2').firestore();
-            await assertSucceeds(
-                db2.collection('users').doc('user2').set({
-                    email: 'user2@test.com',
-                    name: 'User Two',
-                    role: 'UNASSIGNED',
                 })
             );
         });

@@ -38,10 +38,7 @@ service cloud.firestore {
       // Clients must never be able to self-assign privileged roles (STAFF/LEADER).
       // Profile provisioning for privileged users should be done by an administrator process.
       allow create: if isSignedIn() && request.auth.uid == userId
-                    && (
-                      !('role' in request.resource.data) ||
-                      request.resource.data.role == 'UNASSIGNED'
-                    );
+                    && !('role' in request.resource.data);
       
       // 2. Update: Users can update own data but CANNOT change their role
       //    Only LEADER can change roles or update other users
