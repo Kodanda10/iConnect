@@ -1,7 +1,7 @@
+import 'package:dartz/dartz.dart' show Either;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:dartz/dartz.dart' show Either;
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -109,27 +109,42 @@ class _ReportTabState extends State<ReportTab> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-            sliver: SliverToBoxAdapter(child: _buildTodaySection()),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
+            sliver: SliverToBoxAdapter(child: _HistoryHeader()),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            padding: const EdgeInsets.fromLTRB(24, 14, 24, 0),
+            sliver: SliverToBoxAdapter(
+              child: _TodayOverviewCard(
+                loading: _loadingToday,
+                error: _todayError,
+                stats: _todayStats,
+                actions: _todayActions,
+                onRetry: _loadToday,
+              ),
+            ),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(24, 16, 24, 10),
+            sliver: SliverToBoxAdapter(child: _SectionTitle('Previous 7 Days')),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
             sliver: BlocBuilder<ReportBloc, ReportState>(
               builder: (context, state) {
                 if (state is ReportLoading) {
                   return const SliverToBoxAdapter(
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
-                      ),
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Center(child: CircularProgressIndicator()),
                     ),
                   );
                 }
                 if (state is ReportError) {
                   return SliverToBoxAdapter(
                     child: GlassCard(
+                      blurSigma: 0,
                       overlayGradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -145,8 +160,8 @@ class _ReportTabState extends State<ReportTab> {
                             'History',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -168,7 +183,7 @@ class _ReportTabState extends State<ReportTab> {
                 final items = state.daySummaries;
                 return SliverList.separated(
                   itemCount: items.length + (state.loadingMore ? 1 : 0),
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     if (index >= items.length) {
                       return const Padding(
@@ -176,7 +191,7 @@ class _ReportTabState extends State<ReportTab> {
                         child: Center(child: CircularProgressIndicator()),
                       );
                     }
-                    return _DaySummaryCard(summary: items[index]);
+                    return _DayAccordionCard(summary: items[index]);
                   },
                 );
               },
@@ -186,10 +201,80 @@ class _ReportTabState extends State<ReportTab> {
       ),
     );
   }
+}
 
-  Widget _buildTodaySection() {
-    final stats =
-        _todayStats ??
+class _HistoryHeader extends StatelessWidget {
+  const _HistoryHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      blurSigma: 0,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      surfaceGradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withOpacity(0.14),
+          Colors.white.withOpacity(0.08),
+        ],
+      ),
+      overlayGradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.white.withOpacity(0.06), Colors.transparent],
+      ),
+      child: const Center(
+        child: Text(
+          'History',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+  }
+}
+
+class _TodayOverviewCard extends StatelessWidget {
+  final bool loading;
+  final String? error;
+  final TodaySummaryStats? stats;
+  final List<ActionLog> actions;
+  final VoidCallback onRetry;
+
+  const _TodayOverviewCard({
+    required this.loading,
+    required this.error,
+    required this.stats,
+    required this.actions,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeStats =
+        stats ??
         const TodaySummaryStats(
           wishesSent: 0,
           totalEvents: 0,
@@ -198,9 +283,16 @@ class _ReportTabState extends State<ReportTab> {
           whatsappCount: 0,
         );
 
-    final hasError = _todayError != null;
+    final hasError = error != null;
+    final progress = safeStats.totalEvents <= 0
+        ? 0.0
+        : (safeStats.wishesSent / safeStats.totalEvents).clamp(0.0, 1.0);
+
+    final sortedActions = actions.toList()
+      ..sort((a, b) => a.executedAt.compareTo(b.executedAt));
 
     return GlassCard(
+      blurSigma: 0,
       surfaceGradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -209,96 +301,92 @@ class _ReportTabState extends State<ReportTab> {
           Colors.white.withOpacity(0.06),
         ],
       ),
-      overlayGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: hasError
-            ? [AppColors.error.withOpacity(0.18), Colors.transparent]
-            : [
-                AppColors.primary.withOpacity(0.18),
-                AppColors.secondary.withOpacity(0.12),
-              ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Today',
+            'Today’s Overview',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 10),
-          if (_loadingToday)
-            const SizedBox(
-              height: 92,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (hasError) ...[
-            Text(
-              _todayError!,
-              style: TextStyle(color: Colors.white.withOpacity(0.8)),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _loadToday,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(
+                color: AppColors.primaryLight.withOpacity(0.65),
+                width: 1.2,
               ),
-              child: const Text('Retry'),
-            ),
-          ] else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _MetricTile(
-                    label: 'Wishes Sent',
-                    value: '${stats.wishesSent}',
-                    accent: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _MetricTile(
-                    label: 'Total Events',
-                    value: '${stats.totalEvents}',
-                    accent: AppColors.secondary,
-                  ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryLight.withOpacity(0.18),
+                  blurRadius: 22,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _MiniChip(
-                  icon: Icons.call,
-                  label: 'Call',
-                  value: stats.callsMade,
-                  color: AppColors.primaryLight,
-                ),
-                _MiniChip(
-                  icon: Icons.message,
-                  label: 'SMS',
-                  value: stats.smsCount,
-                  color: AppColors.secondary,
-                ),
-                _MiniChip(
-                  icon: Icons.chat_bubble,
-                  label: 'WhatsApp',
-                  value: stats.whatsappCount,
-                  color: AppColors.success,
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 16),
+            child: loading
+                ? const SizedBox(
+                    height: 86,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : hasError
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        error!,
+                        style: TextStyle(color: Colors.white.withOpacity(0.8)),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: onRetry,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: _OverviewMetricCard(
+                          title: 'Wishes Sent',
+                          leadingIcons: const [
+                            Icons.call,
+                            Icons.message,
+                            Icons.chat_bubble,
+                          ],
+                          value:
+                              '${safeStats.wishesSent} / ${safeStats.totalEvents}',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      _ProgressRing(
+                        value: progress,
+                        color: AppColors.primaryLight,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _OverviewMetricCard(
+                          title: 'Total Events',
+                          leadingIcons: const [Icons.cake],
+                          value: '${safeStats.totalEvents}',
+                          alignRight: true,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 14),
           Row(
             children: [
               const Expanded(
@@ -307,22 +395,22 @@ class _ReportTabState extends State<ReportTab> {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              if (!_loadingToday)
+              if (!loading)
                 Text(
-                  '${_todayActions.length}',
+                  '${actions.length}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
-                    fontWeight: FontWeight.w800,
+                    color: Colors.white.withOpacity(0.70),
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
             ],
           ),
           const SizedBox(height: 10),
-          if (_loadingToday)
+          if (loading)
             Text(
               'Loading…',
               style: TextStyle(color: Colors.white.withOpacity(0.7)),
@@ -332,107 +420,66 @@ class _ReportTabState extends State<ReportTab> {
               'Unable to load actions for today.',
               style: TextStyle(color: Colors.white.withOpacity(0.75)),
             )
-          else if (_todayActions.isEmpty)
-            Text(
-              'No wishes sent yet today',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                height: 1.35,
-              ),
-            )
           else
-            _ActionsTable(
-              actions: (_todayActions.toList()
-                ..sort((a, b) => b.executedAt.compareTo(a.executedAt))),
-            ),
+            _TimelineList(actions: sortedActions),
         ],
       ),
     );
   }
 }
 
-class _MetricTile extends StatelessWidget {
-  final String label;
+class _OverviewMetricCard extends StatelessWidget {
+  final String title;
+  final List<IconData> leadingIcons;
   final String value;
-  final Color accent;
+  final bool alignRight;
 
-  const _MetricTile({
-    required this.label,
+  const _OverviewMetricCard({
+    required this.title,
+    required this.leadingIcons,
     required this.value,
-    required this.accent,
+    this.alignRight = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.10),
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Colors.white.withOpacity(0.14)),
+        border: Border.all(color: Colors.white.withOpacity(0.16)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: alignRight
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            title,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.75),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.80),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            children: leadingIcons
+                .map(
+                  (i) =>
+                      Icon(i, size: 16, color: Colors.white.withOpacity(0.85)),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 10),
           Text(
             value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              shadows: [
-                Shadow(color: accent.withOpacity(0.25), blurRadius: 10),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final int value;
-  final Color color;
-
-  const _MiniChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: color.withOpacity(0.35)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Colors.white),
-          const SizedBox(width: 8),
-          Text(
-            '$label • $value',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
             ),
           ),
         ],
@@ -441,213 +488,90 @@ class _MiniChip extends StatelessWidget {
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  final ActionLog action;
+class _ProgressRing extends StatelessWidget {
+  final double value;
+  final Color color;
 
-  const _ActionRow({required this.action});
-
-  @override
-  Widget build(BuildContext context) {
-    final time = DateFormat('jm').format(action.executedAt);
-    final typeLabel = ActionLog.actionTypeToString(action.actionType);
-    final icon = switch (action.actionType) {
-      ActionType.call => Icons.call,
-      ActionType.sms => Icons.message,
-      ActionType.whatsapp => Icons.chat_bubble,
-    };
-    final accent = switch (action.actionType) {
-      ActionType.call => AppColors.primaryLight,
-      ActionType.sms => AppColors.secondary,
-      ActionType.whatsapp => AppColors.success,
-    };
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: accent.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: accent.withOpacity(0.35)),
-            ),
-            child: Icon(icon, size: 16, color: Colors.white),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '${action.constituentName} — $typeLabel',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            time,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.65),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionsTable extends StatelessWidget {
-  final List<ActionLog> actions;
-
-  const _ActionsTable({required this.actions});
+  const _ProgressRing({required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Colors.white.withOpacity(0.14)),
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(color: Colors.white.withOpacity(0.18)),
       ),
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          _ActionsTableHeader(),
-          for (final action in actions) _ActionsTableRow(action: action),
+          SizedBox(
+            width: 42,
+            height: 42,
+            child: CircularProgressIndicator(
+              value: value,
+              strokeWidth: 5.5,
+              backgroundColor: Colors.white.withOpacity(0.12),
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+          Text(
+            '${(value * 100).round()}%',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _ActionsTableHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      child: DefaultTextStyle(
-        style: TextStyle(
-          color: Colors.white.withOpacity(0.70),
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.3,
-        ),
-        child: Row(
-          children: const [
-            SizedBox(width: 62, child: Text('TIME')),
-            Expanded(child: Text('CONSTITUENT')),
-            SizedBox(
-              width: 92,
-              child: Text('ACTION', textAlign: TextAlign.end),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionsTableRow extends StatelessWidget {
-  final ActionLog action;
-
-  const _ActionsTableRow({required this.action});
-
-  @override
-  Widget build(BuildContext context) {
-    final time = DateFormat('jm').format(action.executedAt);
-    final typeLabel = ActionLog.actionTypeToString(action.actionType);
-    final accent = switch (action.actionType) {
-      ActionType.call => AppColors.primaryLight,
-      ActionType.sms => AppColors.secondary,
-      ActionType.whatsapp => AppColors.success,
-    };
-
-    return Column(
-      children: [
-        Divider(height: 1, color: Colors.white.withOpacity(0.10)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 62,
-                child: Text(
-                  time,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.70),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  action.constituentName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 92,
-                child: Text(
-                  typeLabel,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    color: accent.withOpacity(0.95),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DaySummaryCard extends StatefulWidget {
+class _DayAccordionCard extends StatefulWidget {
   final DaySummary summary;
 
-  const _DaySummaryCard({required this.summary});
+  const _DayAccordionCard({required this.summary});
 
   @override
-  State<_DaySummaryCard> createState() => _DaySummaryCardState();
+  State<_DayAccordionCard> createState() => _DayAccordionCardState();
 }
 
-class _DaySummaryCardState extends State<_DaySummaryCard> {
+class _DayAccordionCardState extends State<_DayAccordionCard> {
   bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('EEE, dd MMM').format(widget.summary.date);
-    final calls = widget.summary.actions
-        .where((a) => a.actionType == ActionType.call)
-        .length;
-    final sms = widget.summary.actions
-        .where((a) => a.actionType == ActionType.sms)
-        .length;
-    final wa = widget.summary.actions
-        .where((a) => a.actionType == ActionType.whatsapp)
-        .length;
+    final isToday = DateUtils.isSameDay(widget.summary.date, DateTime.now());
+    final isYesterday = DateUtils.isSameDay(
+      widget.summary.date,
+      DateTime.now().subtract(const Duration(days: 1)),
+    );
+    final dateStr = isToday
+        ? 'Today, ${DateFormat('MMM d').format(widget.summary.date)}'
+        : isYesterday
+        ? 'Yesterday, ${DateFormat('MMM d').format(widget.summary.date)}'
+        : DateFormat('EEE, MMM d').format(widget.summary.date);
+
     final sorted = widget.summary.actions.toList()
-      ..sort((a, b) => b.executedAt.compareTo(a.executedAt));
+      ..sort((a, b) => a.executedAt.compareTo(b.executedAt));
+
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: GlassCard(
-        padding: const EdgeInsets.all(16),
         blurSigma: 0,
+        padding: const EdgeInsets.all(14),
+        surfaceGradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withOpacity(0.12),
+            Colors.white.withOpacity(0.06),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -663,30 +587,136 @@ class _DaySummaryCardState extends State<_DaySummaryCard> {
                     ),
                   ),
                 ),
-                Text(
-                  '${widget.summary.successCount}/${widget.summary.totalCount}',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 Icon(
                   _expanded ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.75),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            if (_expanded)
-              _ActionsTable(actions: sorted)
-            else
-              Text(
-                'Call $calls · SMS $sms · WA $wa',
-                style: TextStyle(color: Colors.white.withOpacity(0.7)),
+            const SizedBox(height: 4),
+            Text(
+              '${widget.summary.successCount} Wishes Sent • ${widget.summary.totalCount} Events',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.70),
+                fontWeight: FontWeight.w700,
               ),
+            ),
+            if (_expanded) ...[
+              const SizedBox(height: 12),
+              _TimelineList(actions: sorted),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TimelineList extends StatelessWidget {
+  final List<ActionLog> actions;
+
+  const _TimelineList({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    if (actions.isEmpty) {
+      return Text(
+        'No actions recorded',
+        style: TextStyle(color: Colors.white.withOpacity(0.7)),
+      );
+    }
+
+    return Column(
+      children: [
+        for (int i = 0; i < actions.length; i++)
+          _TimelineRow(action: actions[i], isLast: i == actions.length - 1),
+      ],
+    );
+  }
+}
+
+class _TimelineRow extends StatelessWidget {
+  final ActionLog action;
+  final bool isLast;
+
+  const _TimelineRow({required this.action, required this.isLast});
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = switch (action.actionType) {
+      ActionType.call => AppColors.primaryLight,
+      ActionType.sms => AppColors.secondary,
+      ActionType.whatsapp => AppColors.success,
+    };
+    final icon = switch (action.actionType) {
+      ActionType.call => Icons.call,
+      ActionType.sms => Icons.message,
+      ActionType.whatsapp => Icons.chat_bubble,
+    };
+    final typeLabel = ActionLog.actionTypeToString(action.actionType);
+    final time = DateFormat('hh:mm a').format(action.executedAt);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 42,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                if (!isLast)
+                  Positioned(
+                    top: 34,
+                    bottom: 0,
+                    child: Container(
+                      width: 2,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(0.20),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: accent.withOpacity(0.40)),
+                  ),
+                  child: Icon(icon, size: 16, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$time  -  ${action.constituentName}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  typeLabel,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.72),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
