@@ -23,14 +23,14 @@ export interface Constituent {
 
 export interface Task {
     id: string;
-    constituent_id: string;
+    constituentId: string;  // Schema alignment: camelCase to match Flutter
     type: TaskType;
-    due_date: string;
+    dueDate: string;        // Schema alignment: camelCase
     status: TaskStatus;
     notes?: string;
-    action_taken?: 'CALL' | 'SMS' | 'WHATSAPP';
-    completed_by?: 'LEADER' | 'STAFF';
-    created_at: string;
+    actionTaken?: 'CALL' | 'SMS' | 'WHATSAPP';  // camelCase
+    completedBy?: 'LEADER' | 'STAFF';            // camelCase
+    createdAt: string;                           // camelCase
 }
 
 export interface ScanResult {
@@ -61,11 +61,11 @@ function createTask(
 ): Task {
     return {
         id: uuidv4(),
-        constituent_id: constituentId,
+        constituentId: constituentId,
         type,
-        due_date: dueDate.toISOString().split('T')[0],
+        dueDate: dueDate.toISOString().split('T')[0],
         status: 'PENDING',
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
     };
 }
 
@@ -80,9 +80,9 @@ function taskExists(
 ): boolean {
     return existingTasks.some(
         (task) =>
-            task.constituent_id === constituentId &&
+            task.constituentId === constituentId &&
             task.type === type &&
-            task.due_date === dueDate
+            task.dueDate === dueDate
     );
 }
 

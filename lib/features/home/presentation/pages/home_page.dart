@@ -54,7 +54,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _headerAnim.forward();
     
     // Refresh tasks on load
-    _seedDemoData(); // Auto-seed for demo
+    // SECURITY FIX (2025-12-17): Only seed demo data in debug mode
+    if (const bool.fromEnvironment('dart.vm.product') == false) {
+      _seedDemoData(); // Auto-seed for demo - DEBUG ONLY
+    }
     context.read<TaskBloc>().add(LoadPendingTasks());
   }
 

@@ -24,20 +24,20 @@ function isDateMatch(dateStr, targetDate) {
 function createTask(constituentId, type, dueDate) {
     return {
         id: (0, uuid_1.v4)(),
-        constituent_id: constituentId,
+        constituentId: constituentId,
         type,
-        due_date: dueDate.toISOString().split('T')[0],
+        dueDate: dueDate.toISOString().split('T')[0],
         status: 'PENDING',
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
     };
 }
 /**
  * Check if a task already exists for this constituent, type, and date
  */
 function taskExists(existingTasks, constituentId, type, dueDate) {
-    return existingTasks.some((task) => task.constituent_id === constituentId &&
+    return existingTasks.some((task) => task.constituentId === constituentId &&
         task.type === type &&
-        task.due_date === dueDate);
+        task.dueDate === dueDate);
 }
 /**
  * Scan constituents for upcoming birthdays and anniversaries

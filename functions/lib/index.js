@@ -70,7 +70,7 @@ exports.generateGreeting = (0, https_1.onCall)(async (request) => {
     }
     try {
         const message = await (0, greeting_1.generateGreetingMessage)(request.data);
-        return { message };
+        return { greeting: message };
     }
     catch (error) {
         if (error instanceof Error) {

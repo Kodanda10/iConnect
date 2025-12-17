@@ -38,7 +38,7 @@ export const generateGreeting = onCall<GreetingRequest>(
 
         try {
             const message = await generateGreetingMessage(request.data);
-            return { message };
+            return { greeting: message };
         } catch (error) {
             if (error instanceof Error) {
                 throw new HttpsError('invalid-argument', error.message);

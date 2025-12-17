@@ -18,14 +18,14 @@ export interface Constituent {
 }
 export interface Task {
     id: string;
-    constituent_id: string;
+    constituentId: string;
     type: TaskType;
-    due_date: string;
+    dueDate: string;
     status: TaskStatus;
     notes?: string;
-    action_taken?: 'CALL' | 'SMS' | 'WHATSAPP';
-    completed_by?: 'LEADER' | 'STAFF';
-    created_at: string;
+    actionTaken?: 'CALL' | 'SMS' | 'WHATSAPP';
+    completedBy?: 'LEADER' | 'STAFF';
+    createdAt: string;
 }
 export interface ScanResult {
     count: number;

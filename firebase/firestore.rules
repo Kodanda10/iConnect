@@ -65,11 +65,14 @@ service cloud.firestore {
     // Tasks collection
     match /tasks/{taskId} {
       allow read: if isStaffOrLeader();
-      // Staff can do full CRUD, Leader can only update status/notes
+      // Staff can do full CRUD, Leader can update status/notes + action flags
       allow create: if isStaff();
+      // Security Fix (2025-12-17): Expanded LEADER permissions to match client writes
       allow update: if isStaff() || (isLeader() && 
         request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'notes', 'action_taken', 'completed_by']));
+          .hasOnly(['status', 'notes', 'action_taken', 'completed_by', 
+                    'callSent', 'callSentAt', 'smsSent', 'smsSentAt', 
+                    'whatsappSent', 'whatsappSentAt', 'updatedAt']));
       allow delete: if isStaff();
     }
     
