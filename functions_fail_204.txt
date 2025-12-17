@@ -1,0 +1,364 @@
+Cloud Functions Build	Set up job	﻿2025-12-17T20:22:44.8524359Z Current runner version: '2.330.0'
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8559781Z ##[group]Runner Image Provisioner
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8561093Z Hosted Compute Agent
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8561985Z Version: 20251211.462
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8562992Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8564153Z Build Date: 2025-12-11T16:28:49Z
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8565194Z Worker ID: {f2c21fd2-edb9-4ae3-b00a-84de3b4b8fe4}
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8566836Z ##[endgroup]
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8567728Z ##[group]Operating System
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8568749Z Ubuntu
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8569493Z 24.04.3
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8570336Z LTS
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8571031Z ##[endgroup]
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8571785Z ##[group]Runner Image
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8572780Z Image: ubuntu-24.04
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8573577Z Version: 20251215.174.1
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8575281Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8577961Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8580148Z ##[endgroup]
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8582007Z ##[group]GITHUB_TOKEN Permissions
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8584565Z Contents: read
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8585568Z Metadata: read
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8586705Z Packages: read
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8587647Z ##[endgroup]
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8590571Z Secret source: Actions
+Cloud Functions Build	Set up job	2025-12-17T20:22:44.8591693Z Prepare workflow directory
+Cloud Functions Build	Set up job	2025-12-17T20:22:45.0534779Z Prepare all required actions
+Cloud Functions Build	Set up job	2025-12-17T20:22:45.0590715Z Getting action download info
+Cloud Functions Build	Set up job	2025-12-17T20:22:45.4151266Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Cloud Functions Build	Set up job	2025-12-17T20:22:46.0162160Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Cloud Functions Build	Set up job	2025-12-17T20:22:46.2514575Z Complete job name: Cloud Functions Build
+Cloud Functions Build	Run actions/checkout@v4	﻿2025-12-17T20:22:46.3209979Z ##[group]Run actions/checkout@v4
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3210920Z with:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3211369Z   repository: Kodanda10/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3212092Z   token: ***
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3212517Z   ssh-strict: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3212943Z   ssh-user: git
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3213376Z   persist-credentials: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3213861Z   clean: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3214293Z   sparse-checkout-cone-mode: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3214811Z   fetch-depth: 1
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3215236Z   fetch-tags: false
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3215666Z   show-progress: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3216291Z   lfs: false
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3216726Z   submodules: false
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3217162Z   set-safe-directory: true
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.3217898Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4397481Z Syncing repository: Kodanda10/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4400026Z ##[group]Getting Git version info
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4401391Z Working directory is '/home/runner/work/iConnect/iConnect'
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4403100Z [command]/usr/bin/git version
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4487156Z git version 2.52.0
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4516864Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4533864Z Temporarily overriding HOME='/home/runner/work/_temp/6ac31e64-ff65-4046-9b17-234be9eb10ff' before making global git config changes
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4539005Z Adding repository directory to the temporary git global config as a safe directory
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4551462Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4602740Z Deleting the contents of '/home/runner/work/iConnect/iConnect'
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4604817Z ##[group]Initializing the repository
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4609686Z [command]/usr/bin/git init /home/runner/work/iConnect/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4718116Z hint: Using 'master' as the name for the initial branch. This default branch name
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4719996Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4721742Z hint: to use in all of your new repositories, which will suppress this warning,
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4723126Z hint: call:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4724279Z hint:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4725157Z hint: 	git config --global init.defaultBranch <name>
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4726569Z hint:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4727743Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4729600Z hint: 'development'. The just-created branch can be renamed via this command:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4731070Z hint:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4731905Z hint: 	git branch -m <name>
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4732845Z hint:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4733968Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4738202Z Initialized empty Git repository in /home/runner/work/iConnect/iConnect/.git/
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4742550Z [command]/usr/bin/git remote add origin https://github.com/Kodanda10/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4779525Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4781261Z ##[group]Disabling automatic garbage collection
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4783761Z [command]/usr/bin/git config --local gc.auto 0
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4816987Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4818426Z ##[group]Setting up auth
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4825100Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.4859725Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5212596Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5248112Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5480658Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5513380Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5760785Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5797244Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5799887Z ##[group]Fetching the repository
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:46.5807834Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0fca6af33790da59c3350bbc2f0b5cbd34fbe703:refs/remotes/origin/main
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1701187Z From https://github.com/Kodanda10/iConnect
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1704072Z  * [new ref]         0fca6af33790da59c3350bbc2f0b5cbd34fbe703 -> origin/main
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1738060Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1739906Z ##[group]Determining the checkout info
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1744056Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1750337Z [command]/usr/bin/git sparse-checkout disable
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1793440Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1824061Z ##[group]Checking out the ref
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.1828999Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.2228266Z Switched to a new branch 'main'
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.2234483Z branch 'main' set up to track 'origin/main'.
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.2244330Z ##[endgroup]
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.2285758Z [command]/usr/bin/git log -1 --format=%H
+Cloud Functions Build	Run actions/checkout@v4	2025-12-17T20:22:47.2311639Z 0fca6af33790da59c3350bbc2f0b5cbd34fbe703
+Cloud Functions Build	Run actions/setup-node@v4	﻿2025-12-17T20:22:47.2623721Z ##[group]Run actions/setup-node@v4
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2624911Z with:
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2625724Z   node-version: 18
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2626802Z   cache: npm
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2627858Z   cache-dependency-path: functions/package-lock.json
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2629232Z   always-auth: false
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2630161Z   check-latest: false
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2631406Z   token: ***
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.2632228Z ##[endgroup]
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:47.4711828Z Attempting to download 18...
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:48.0958103Z Acquiring 18.20.8 - x64 from https://github.com/actions/node-versions/releases/download/18.20.8-14110393767/node-18.20.8-linux-x64.tar.gz
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:48.7663848Z Extracting ...
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:48.7779428Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/e1fd35ab-f3cf-4379-8daa-e4f50e7fceba -f /home/runner/work/_temp/4a841788-3547-471e-95e2-f64a0288bc63
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:49.9406675Z Adding to the cache ...
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.2841062Z ##[group]Environment details
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.5896290Z node: v18.20.8
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.5906718Z npm: 10.8.2
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.5907486Z yarn: 1.22.22
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.5908628Z ##[endgroup]
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.5931615Z [command]/opt/hostedtoolcache/node/18.20.8/x64/bin/npm config get cache
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.7130236Z /home/runner/.npm
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:52.9548109Z Cache hit for: node-cache-Linux-x64-npm-56da109fa03c5f18ce40026f4fc9abbe21e1214f8ea2b6a9df84548dd249aaa2
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:53.7412456Z Received 22717695 of 22717695 (100.0%), 34.3 MBs/sec
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:53.7420095Z Cache Size: ~22 MB (22717695 B)
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:53.7447050Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d0bf5848-5ffb-4cec-bd52-73e59d53073a/cache.tzst -P -C /home/runner/work/iConnect/iConnect --use-compress-program unzstd
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:53.9356988Z Cache restored successfully
+Cloud Functions Build	Run actions/setup-node@v4	2025-12-17T20:22:53.9433132Z Cache restored from key: node-cache-Linux-x64-npm-56da109fa03c5f18ce40026f4fc9abbe21e1214f8ea2b6a9df84548dd249aaa2
+Cloud Functions Build	Install Dependencies	﻿2025-12-17T20:22:53.9619629Z ##[group]Run npm ci
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:53.9619937Z [36;1mnpm ci[0m
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:53.9658607Z shell: /usr/bin/bash -e {0}
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:53.9658886Z ##[endgroup]
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:56.5999548Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:56.7308863Z npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:56.7392978Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:56.8230412Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:56.8319641Z npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.2983808Z npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6766550Z 
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6770331Z added 593 packages, and audited 594 packages in 5s
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6776292Z 
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6776661Z 85 packages are looking for funding
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6777175Z   run `npm fund` for details
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6796476Z 
+Cloud Functions Build	Install Dependencies	2025-12-17T20:22:58.6797064Z found 0 vulnerabilities
+Cloud Functions Build	Run Unit Tests	﻿2025-12-17T20:22:58.7167586Z ##[group]Run npm test
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.7168086Z [36;1mnpm test[0m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.7206359Z shell: /usr/bin/bash -e {0}
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.7206623Z ##[endgroup]
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.8565506Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.8568189Z > iconnect-functions@1.0.0 test
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.8571848Z > jest
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:22:58.8572052Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1887626Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1892417Z     [BULK SMS] Starting send to 3 recipients
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1893259Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1893787Z       at sendBulkSMS (src/audienceQuery.ts:85:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1894335Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1894473Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1894833Z     [BULK SMS] Complete. Sent=3, Failed=0
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1895124Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1895363Z       at sendBulkSMS (src/audienceQuery.ts:110:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1895694Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1942893Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1966875Z     [BULK SMS] Starting send to 2 recipients
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1967384Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1967694Z       at sendBulkSMS (src/audienceQuery.ts:85:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.1968141Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2166414Z   console.error
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2170827Z     [BULK SMS] Failed for 9876543211: Error: SMS failed
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2174969Z         at /home/runner/work/iConnect/iConnect/functions/src/__tests__/audienceQuery.test.ts:66:44
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2179727Z         at Runtime.requireMock (/home/runner/work/iConnect/iConnect/functions/node_modules/jest-runtime/build/index.js:940:55)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2184772Z         at Runtime.requireModuleOrMock (/home/runner/work/iConnect/iConnect/functions/node_modules/jest-runtime/build/index.js:1046:21)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2186604Z         at /home/runner/work/iConnect/iConnect/functions/src/audienceQuery.ts:76:25
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2187865Z         at sendBulkSMS (/home/runner/work/iConnect/iConnect/functions/src/audienceQuery.ts:76:25)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2189356Z         at Object.<anonymous> (/home/runner/work/iConnect/iConnect/functions/src/__tests__/audienceQuery.test.ts:76:28)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2191856Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2192529Z     [0m [90m  97 |[39m                 [36mreturn[39m [36mtrue[39m[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2193257Z      [90m  98 |[39m             } [36mcatch[39m (e) {
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2194387Z     [31m[1m>[22m[39m[90m  99 |[39m                 console[33m.[39merror([32m`[BULK SMS] Failed for ${mobile}:`[39m[33m,[39m e)[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2195406Z      [90m     |[39m                         [31m[1m^[22m[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2196292Z      [90m 100 |[39m                 [36mreturn[39m [36mfalse[39m[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2196910Z      [90m 101 |[39m             }
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2197451Z      [90m 102 |[39m         }))[33m;[39m[0m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2197748Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2197943Z       at src/audienceQuery.ts:99:25
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2198399Z           at async Promise.all (index 1)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2198917Z       at sendBulkSMS (src/audienceQuery.ts:94:25)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2199591Z       at Object.<anonymous> (src/__tests__/audienceQuery.test.ts:76:28)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2200013Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2207313Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2207924Z     [BULK SMS] Complete. Sent=1, Failed=1
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2208246Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2208500Z       at sendBulkSMS (src/audienceQuery.ts:110:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2208831Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2266750Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2267390Z     [BULK SMS] Starting send to 2 recipients
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2267729Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2267979Z       at sendBulkSMS (src/audienceQuery.ts:85:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2268313Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2268449Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2270781Z     [BULK SMS] Complete. Sent=2, Failed=0
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2271362Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2271779Z       at sendBulkSMS (src/audienceQuery.ts:110:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2274855Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2317128Z PASS src/__tests__/audienceQuery.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2317882Z   audienceQuery
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2318940Z     queryConstituentsByAudience
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2319990Z       ✓ exports queryConstituentsByAudience function (291 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2320731Z       ✓ accepts ALL, BLOCK, and GP audience types
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2321186Z     sendBulkSMS
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2321661Z       ✓ sends SMS to all constituents (32 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2324476Z       ✓ counts failed SMS attempts separately (32 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2346933Z       ✓ filters out empty mobile numbers (5 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.2347302Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6267331Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6267946Z     [MOCK SMS] To: +919876543210 | Message: Test message
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6268336Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6268698Z       at MockProvider.sendSMS (src/messagingProvider.ts:57:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6269144Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6279822Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6297062Z     [MOCK WhatsApp] To: +919876543210 | Template: greeting_template | Params: {"name":"Test"}
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6298234Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6298697Z       at MockProvider.sendWhatsApp (src/messagingProvider.ts:66:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6299150Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6330444Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6331454Z     [MOCK SMS] To: +919876543210 | Message: Bulk test
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6331983Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6332456Z       at MockProvider.sendSMS (src/messagingProvider.ts:57:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6333035Z           at Array.map (<anonymous>)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6333326Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6379809Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6396928Z     [MOCK SMS] To: +919876543211 | Message: Bulk test
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6397445Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6397948Z       at MockProvider.sendSMS (src/messagingProvider.ts:57:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6398756Z           at Array.map (<anonymous>)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6399044Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6399172Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6399583Z     [MOCK SMS] To: +919876543212 | Message: Bulk test
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6399904Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6400221Z       at MockProvider.sendSMS (src/messagingProvider.ts:57:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6400810Z           at Array.map (<anonymous>)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6401075Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6727062Z PASS src/__tests__/messagingProvider.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6728386Z   Messaging Provider Abstraction
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6730460Z     createMessagingProvider
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6731398Z       ✓ returns mock provider when SMS_PROVIDER=mock (1 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6732179Z       ✓ returns twilio provider when SMS_PROVIDER=twilio
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6732924Z       ✓ returns msg91 provider when SMS_PROVIDER=msg91
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6733686Z       ✓ defaults to mock when provider unknown (1 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6734161Z     MockProvider
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6734770Z       ✓ sendSMS returns success with mock messageId (12 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6742408Z       ✓ sendWhatsApp returns success with mock messageId (6 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6743195Z       ✓ sendBulkSMS processes all recipients (9 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6766461Z     TwilioProvider
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6767226Z       ✓ sendSMS throws when credentials missing (23 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6767732Z     MSG91Provider
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6768346Z       ✓ sendSMS throws when credentials missing (2 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:04.6768718Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1068932Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1073655Z     [TRIGGER] New Meeting: meeting-123 | Title: Test Meeting
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1077872Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1081678Z       at handleMeetingCreated (src/triggers.ts:107:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1085569Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1088205Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1091138Z     [TRIGGER] Scheduled Notifications: Evening Before: 2025-12-17T20:00:00.000Z | 10m Before: 2025-12-18T09:50:00.000Z
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1125984Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1126893Z       at handleMeetingCreated (src/triggers.ts:112:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1127450Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1231995Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1236684Z     [TRIGGER] Sent confirmation push to fcm-token-abc
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1240605Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1243192Z       at handleMeetingCreated (src/triggers.ts:123:17)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1246408Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1319262Z PASS src/__tests__/triggers.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1323892Z   Triggers
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1324247Z     handleMeetingCreated
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1325179Z       ✓ calculates notification times and schedules tasks (20 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.1325604Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4332193Z FAIL src/__tests__/notifications.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4346641Z   Notification Logic
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4347332Z     determinePushTimes
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4348308Z       ✕ calculates evening before (8 PM) and 10 min before (4 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4349045Z     formatAudioMessage
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4349646Z       ✓ formats Hindi message correctly
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4350317Z       ✓ formats Odia message correctly
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4350733Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4351529Z   ● Notification Logic › determinePushTimes › calculates evening before (8 PM) and 10 min before
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4352244Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4352716Z     expect(received).toBe(expected) // Object.is equality
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4353220Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4353554Z     Expected: "2025-12-17T14:30:00.000Z"
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4354494Z     Received: "2025-12-17T20:00:00.000Z"
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4354914Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4355242Z     [0m [90m 17 |[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4356219Z      [90m 18 |[39m             [90m// Use loose equality for dates or toISOString[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4357735Z     [31m[1m>[22m[39m[90m 19 |[39m             expect(result[33m.[39meveningBefore[33m.[39mtoISOString())[33m.[39mtoBe(expectedEvening[33m.[39mtoISOString())[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4359022Z      [90m    |[39m                                                        [31m[1m^[22m[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4360311Z      [90m 20 |[39m             expect(result[33m.[39mtenMinBefore[33m.[39mtoISOString())[33m.[39mtoBe(expectedTenMin[33m.[39mtoISOString())[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4361418Z      [90m 21 |[39m         })[33m;[39m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4362063Z      [90m 22 |[39m     })[33m;[39m[0m
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4362407Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4362842Z       at Object.<anonymous> (src/__tests__/notifications.test.ts:19:56)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.4363337Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8081919Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8086864Z     [AUTH] Set custom claims for user123: role=LEADER
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8091070Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8095206Z       at setUserRole (src/auth.ts:37:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8099660Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8161960Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8166511Z     [AUTH] Set custom claims for user456: role=STAFF
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8170764Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8174787Z       at setUserRole (src/auth.ts:37:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8178969Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8182708Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8186266Z     [AUTH] Set custom claims for user789: role=LEADER
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8237795Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8240070Z       at setUserRole (src/auth.ts:37:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8243114Z PASS src/__tests__/auth.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8243431Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8251284Z   RBAC Custom Claims Sync
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8251754Z     setUserRole
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8252461Z       ✓ sets custom claims on user (2 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8253045Z       ✓ throws on invalid role (6 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8253602Z       ✓ accepts STAFF role (1 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8254149Z       ✓ accepts LEADER role (1 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8254606Z     syncRoleToClaims trigger
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8255209Z       ✓ exports syncRoleToClaims function (1 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.8255542Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.9827414Z   console.log
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.9829903Z     [SMS MOCK] To: +919999999999 | Message: Hello World
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.9830585Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.9831693Z       at sendSMS (src/messaging.ts:24:13)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:05.9832241Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0835359Z PASS src/__tests__/messaging.test.ts
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0837257Z   Messaging Service
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0837630Z     sendPushNotification
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0838910Z       ✓ sends FCM message to a specific token (2 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0839422Z     sendSMS
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0839936Z       ✓ logs SMS to console (Mock Only) (103 ms)
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0840257Z 
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0858972Z Test Suites: 1 failed, 5 passed, 6 total
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0859707Z Tests:       1 failed, 24 passed, 25 total
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0860172Z Snapshots:   0 total
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0860524Z Time:        6.809 s
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.0860859Z Ran all test suites.
+Cloud Functions Build	Run Unit Tests	2025-12-17T20:23:06.5475441Z ##[error]Process completed with exit code 1.
+Cloud Functions Build	Post Run actions/checkout@v4	﻿2025-12-17T20:23:06.5605254Z Post job cleanup.
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.6587500Z [command]/usr/bin/git version
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.6628763Z git version 2.52.0
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.6674424Z Temporarily overriding HOME='/home/runner/work/_temp/eee6c03f-bc99-4e07-a26b-c170552ed898' before making global git config changes
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.6676598Z Adding repository directory to the temporary git global config as a safe directory
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.6681446Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.7007206Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.7065183Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.7914436Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.7965323Z http.https://github.com/.extraheader
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.7973558Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.8908978Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.9177481Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Cloud Functions Build	Post Run actions/checkout@v4	2025-12-17T20:23:06.9212301Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cloud Functions Build	Complete job	﻿2025-12-17T20:23:06.9556310Z Cleaning up orphan processes

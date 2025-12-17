@@ -1,0 +1,244 @@
+Web (Next.js) Build	Set up job	﻿2025-12-17T20:22:44.6842069Z Current runner version: '2.330.0'
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6897797Z ##[group]Runner Image Provisioner
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6899410Z Hosted Compute Agent
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6900429Z Version: 20251211.462
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6901496Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6902840Z Build Date: 2025-12-11T16:28:49Z
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6903998Z Worker ID: {7977fee9-8f8b-424e-9a21-f2c851b6dfe7}
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6905244Z ##[endgroup]
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6906221Z ##[group]Operating System
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6907264Z Ubuntu
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6908102Z 24.04.3
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6917321Z LTS
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6918232Z ##[endgroup]
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6919361Z ##[group]Runner Image
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6920414Z Image: ubuntu-24.04
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6921327Z Version: 20251215.174.1
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6923096Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6925826Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6927957Z ##[endgroup]
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6930450Z ##[group]GITHUB_TOKEN Permissions
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6933329Z Contents: read
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6934364Z Metadata: read
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6935286Z Packages: read
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6936196Z ##[endgroup]
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6939580Z Secret source: Actions
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.6940770Z Prepare workflow directory
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.7697484Z Prepare all required actions
+Web (Next.js) Build	Set up job	2025-12-17T20:22:44.7753226Z Getting action download info
+Web (Next.js) Build	Set up job	2025-12-17T20:22:45.0658612Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Web (Next.js) Build	Set up job	2025-12-17T20:22:45.1925720Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Web (Next.js) Build	Set up job	2025-12-17T20:22:45.4339782Z Complete job name: Web (Next.js) Build
+Web (Next.js) Build	Run actions/checkout@v4	﻿2025-12-17T20:22:45.5000231Z ##[group]Run actions/checkout@v4
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5001081Z with:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5001523Z   repository: Kodanda10/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5002282Z   token: ***
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5002679Z   ssh-strict: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5003086Z   ssh-user: git
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5003510Z   persist-credentials: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5003975Z   clean: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5004390Z   sparse-checkout-cone-mode: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5004887Z   fetch-depth: 1
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5005293Z   fetch-tags: false
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5005707Z   show-progress: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5006128Z   lfs: false
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5006516Z   submodules: false
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5006943Z   set-safe-directory: true
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.5007709Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.6292040Z Syncing repository: Kodanda10/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7134033Z ##[group]Getting Git version info
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7135236Z Working directory is '/home/runner/work/iConnect/iConnect'
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7136825Z [command]/usr/bin/git version
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7137709Z git version 2.52.0
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7140540Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7147589Z Temporarily overriding HOME='/home/runner/work/_temp/3b0ebc38-717c-41f4-9bb4-c56fa2a2ac94' before making global git config changes
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7150173Z Adding repository directory to the temporary git global config as a safe directory
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7152023Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7154571Z Deleting the contents of '/home/runner/work/iConnect/iConnect'
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7156205Z ##[group]Initializing the repository
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7157302Z [command]/usr/bin/git init /home/runner/work/iConnect/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7159043Z hint: Using 'master' as the name for the initial branch. This default branch name
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7160637Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7162242Z hint: to use in all of your new repositories, which will suppress this warning,
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7163466Z hint: call:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7164462Z hint:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7165253Z hint: 	git config --global init.defaultBranch <name>
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7166214Z hint:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7167153Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7168910Z hint: 'development'. The just-created branch can be renamed via this command:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7170159Z hint:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7170826Z hint: 	git branch -m <name>
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7171580Z hint:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7172277Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7173220Z Initialized empty Git repository in /home/runner/work/iConnect/iConnect/.git/
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7174765Z [command]/usr/bin/git remote add origin https://github.com/Kodanda10/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7176723Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7177439Z ##[group]Disabling automatic garbage collection
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7178278Z [command]/usr/bin/git config --local gc.auto 0
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7179928Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7180603Z ##[group]Setting up auth
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7181431Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7184814Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7237554Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7249169Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7604249Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7607589Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7970152Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7974855Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7976015Z ##[group]Fetching the repository
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:45.7978157Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0fca6af33790da59c3350bbc2f0b5cbd34fbe703:refs/remotes/origin/main
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1107306Z From https://github.com/Kodanda10/iConnect
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1110889Z  * [new ref]         0fca6af33790da59c3350bbc2f0b5cbd34fbe703 -> origin/main
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1163800Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1165388Z ##[group]Determining the checkout info
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1167165Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1171464Z [command]/usr/bin/git sparse-checkout disable
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1235860Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1281943Z ##[group]Checking out the ref
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1291333Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1850184Z Switched to a new branch 'main'
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1854504Z branch 'main' set up to track 'origin/main'.
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1867447Z ##[endgroup]
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1908229Z [command]/usr/bin/git log -1 --format=%H
+Web (Next.js) Build	Run actions/checkout@v4	2025-12-17T20:22:46.1932276Z 0fca6af33790da59c3350bbc2f0b5cbd34fbe703
+Web (Next.js) Build	Run actions/setup-node@v4	﻿2025-12-17T20:22:46.2233491Z ##[group]Run actions/setup-node@v4
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2234682Z with:
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2235531Z   node-version: 20
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2236445Z   cache: npm
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2237561Z   cache-dependency-path: iconnect-web/package-lock.json
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2239076Z   always-auth: false
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2240046Z   check-latest: false
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2241284Z   token: ***
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.2242154Z ##[endgroup]
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.4291315Z Found in cache @ /opt/hostedtoolcache/node/20.19.6/x64
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:46.4296706Z ##[group]Environment details
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.3058476Z node: v20.19.6
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.3062534Z npm: 10.8.2
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.3066537Z yarn: 1.22.22
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.3067924Z ##[endgroup]
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.3113797Z [command]/opt/hostedtoolcache/node/20.19.6/x64/bin/npm config get cache
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.5849390Z /home/runner/.npm
+Web (Next.js) Build	Run actions/setup-node@v4	2025-12-17T20:22:48.7290836Z npm cache is not found
+Web (Next.js) Build	Install Dependencies	﻿2025-12-17T20:22:48.7441026Z ##[group]Run npm ci
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:22:48.7441358Z [36;1mnpm ci[0m
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:22:48.7484288Z shell: /usr/bin/bash -e {0}
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:22:48.7484569Z ##[endgroup]
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:22:56.0124974Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:22:59.5358051Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0599649Z 
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0600387Z added 897 packages, and audited 898 packages in 23s
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0601000Z 
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0601440Z 196 packages are looking for funding
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0601847Z   run `npm fund` for details
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0602034Z 
+Web (Next.js) Build	Install Dependencies	2025-12-17T20:23:12.0602152Z found 0 vulnerabilities
+Web (Next.js) Build	Lint	﻿2025-12-17T20:23:12.1139080Z ##[group]Run npm run lint
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.1139405Z [36;1mnpm run lint[0m
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.1173519Z shell: /usr/bin/bash -e {0}
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.1173770Z ##[endgroup]
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.2422844Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.2423768Z > iconnect-web@0.1.0 lint
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.2424516Z > eslint
+Web (Next.js) Build	Lint	2025-12-17T20:23:12.2424890Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1559027Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1580265Z /home/runner/work/iConnect/iConnect/iconnect-web/performance/load-test.js
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1611333Z ##[warning]  35:1  warning  Unexpected default export of anonymous function  import/no-anonymous-default-export
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1624640Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1625449Z /home/runner/work/iConnect/iConnect/iconnect-web/src/__tests__/messaging.test.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1627441Z ##[warning]  14:5  warning  'MessageProvider' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1630146Z ##[warning]  19:5  warning  'MessageResult' is defined but never used    @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1631440Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1632308Z /home/runner/work/iConnect/iConnect/iconnect-web/src/app/(dashboard)/_deprecated/festivals/page.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1634455Z ##[warning]   27:8   warning  'GlassCalendar' is defined but never used                 @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1636845Z ##[warning]   49:12  warning  'showDatePicker' is assigned a value but never used       @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1640307Z ##[warning]   50:12  warning  'calendarPosition' is assigned a value but never used     @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1642769Z ##[warning]   53:11  warning  'formatDateForInput' is assigned a value but never used   @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1645234Z ##[warning]   62:11  warning  'handleDateTextInput' is assigned a value but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1647538Z ##[warning]   99:11  warning  'handleDateSelect' is assigned a value but never used     @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1650161Z ##[warning]  107:11  warning  'openDatePicker' is assigned a value but never used       @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1651517Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1652136Z /home/runner/work/iConnect/iConnect/iconnect-web/src/app/(dashboard)/festivals/page.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1653837Z ##[warning]   27:8   warning  'GlassCalendar' is defined but never used                 @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1656159Z ##[warning]   49:12  warning  'showDatePicker' is assigned a value but never used       @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1658546Z ##[warning]   50:12  warning  'calendarPosition' is assigned a value but never used     @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1661568Z ##[warning]   53:11  warning  'formatDateForInput' is assigned a value but never used   @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1663938Z ##[warning]   62:11  warning  'handleDateTextInput' is assigned a value but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1666279Z ##[warning]   99:11  warning  'handleDateSelect' is assigned a value but never used     @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1668603Z ##[warning]  107:11  warning  'openDatePicker' is assigned a value but never used       @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1670289Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1670914Z /home/runner/work/iConnect/iConnect/iconnect-web/src/app/(dashboard)/settings/page.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1673158Z ##[warning]   15:5   warning  'Settings' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1676053Z ##[warning]   30:22  warning  'user' is assigned a value but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1679799Z ##[warning]   35:12  warning  'isLoading' is assigned a value but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1684620Z ##[warning]  307:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1690546Z ##[warning]  424:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1693058Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1693654Z /home/runner/work/iConnect/iConnect/iconnect-web/src/components/ui/FluidMorph.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1695600Z ##[warning]  67:17  warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1697122Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1697777Z /home/runner/work/iConnect/iConnect/iconnect-web/src/components/ui/GlassCalendar.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1699544Z ##[warning]  39:11  warning  'monthNames' is assigned a value but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1700870Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1701462Z /home/runner/work/iConnect/iConnect/iconnect-web/src/components/ui/ParallaxCard.tsx
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1702845Z ##[warning]  10:35  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1704056Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1704570Z /home/runner/work/iConnect/iConnect/iconnect-web/src/lib/firebase-admin.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1705920Z ##[warning]  34:26  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1707111Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1707633Z /home/runner/work/iConnect/iConnect/iconnect-web/src/lib/services/tasks.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1709310Z ##[warning]  18:5   warning  'Timestamp' is defined but never used    @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1711382Z ##[warning]  21:52  warning  'Constituent' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1712900Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1713584Z /home/runner/work/iConnect/iConnect/iconnect-web/src/lib/utils/__tests__/csvValidation.test.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1715302Z ##[warning]  8:26  warning  'CsvRowValidation' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1716662Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1717367Z /home/runner/work/iConnect/iConnect/iconnect-web/src/lib/utils/__tests__/dateValidation.test.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1719150Z ##[warning]  14:5  warning  'ValidationState' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1720487Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1721075Z /home/runner/work/iConnect/iConnect/iconnect-web/src/scripts/seed-constituents.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1722531Z ##[warning]  12:13  warning  'dotenv' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1724526Z ##[warning]  13:8   warning  'path' is defined but never used    @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1725713Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1726250Z /home/runner/work/iConnect/iConnect/iconnect-web/src/scripts/seed-december.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1727553Z ##[warning]  10:44  warning  'getDocs' is defined but never used    @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1730208Z ##[warning]  10:53  warning  'deleteDoc' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1732182Z ##[warning]  10:64  warning  'doc' is defined but never used        @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1733399Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1733920Z /home/runner/work/iConnect/iConnect/iconnect-web/src/scripts/seed-local.ts
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1735197Z ##[warning]  9:25  warning  'cert' is defined but never used  @typescript-eslint/no-unused-vars
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1736484Z 
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1737041Z ✖ 36 problems (0 errors, 36 warnings)
+Web (Next.js) Build	Lint	2025-12-17T20:23:19.1737349Z 
+Web (Next.js) Build	Run Unit Tests	﻿2025-12-17T20:23:19.2083573Z ##[group]Run npm test
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.2083848Z [36;1mnpm test[0m
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.2117099Z shell: /usr/bin/bash -e {0}
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.2117358Z ##[endgroup]
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.3457342Z 
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.3460196Z > iconnect-web@0.1.0 test
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.3462469Z > jest
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.3464375Z 
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5033184Z Error: Jest: Failed to parse the TypeScript config file /home/runner/work/iConnect/iConnect/iconnect-web/jest.config.ts
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5035063Z   Error: Jest: 'ts-node' is required for the TypeScript configuration files. Make sure it is installed
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5039347Z Error: Cannot find package 'ts-node' imported from /home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-config/build/index.js
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5041176Z     at readConfigFileAndSetRootDir (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-config/build/index.js:2274:13)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5043007Z     at async readInitialOptions (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-config/build/index.js:1147:13)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5045346Z     at async readConfig (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-config/build/index.js:918:7)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5047285Z     at async readConfigs (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-config/build/index.js:1168:26)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5049161Z     at async runCLI (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/@jest/core/build/index.js:1407:7)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5050631Z     at async Object.run (/home/runner/work/iConnect/iConnect/iconnect-web/node_modules/jest-cli/build/index.js:656:9)
+Web (Next.js) Build	Run Unit Tests	2025-12-17T20:23:19.5209855Z ##[error]Process completed with exit code 1.
+Web (Next.js) Build	Post Run actions/checkout@v4	﻿2025-12-17T20:23:19.5314308Z Post job cleanup.
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6299596Z [command]/usr/bin/git version
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6335795Z git version 2.52.0
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6382638Z Temporarily overriding HOME='/home/runner/work/_temp/f36c1989-1615-4494-9fdd-a853f0ceca84' before making global git config changes
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6385639Z Adding repository directory to the temporary git global config as a safe directory
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6390060Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6434979Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6470902Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6714214Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6739792Z http.https://github.com/.extraheader
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6752461Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.6787967Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.7020808Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Web (Next.js) Build	Post Run actions/checkout@v4	2025-12-17T20:23:19.7054311Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Web (Next.js) Build	Complete job	﻿2025-12-17T20:23:19.7393359Z Cleaning up orphan processes

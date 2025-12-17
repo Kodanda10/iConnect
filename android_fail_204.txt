@@ -1,0 +1,639 @@
+Mobile (Android) Build	Set up job	﻿2025-12-17T20:22:44.6710050Z Current runner version: '2.330.0'
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6746847Z ##[group]Runner Image Provisioner
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6748047Z Hosted Compute Agent
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6749141Z Version: 20251211.462
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6750179Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6751275Z Build Date: 2025-12-11T16:28:49Z
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6752505Z Worker ID: {5985d5a9-fd72-46ec-94ce-896a26125396}
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6753590Z ##[endgroup]
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6754479Z ##[group]Operating System
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6755834Z Ubuntu
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6756677Z 24.04.3
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6757426Z LTS
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6758380Z ##[endgroup]
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6759126Z ##[group]Runner Image
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6759972Z Image: ubuntu-24.04
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6760887Z Version: 20251215.174.1
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6762610Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6765006Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6767282Z ##[endgroup]
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6769233Z ##[group]GITHUB_TOKEN Permissions
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6771837Z Contents: read
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6772694Z Metadata: read
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6773624Z Packages: read
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6774602Z ##[endgroup]
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6777741Z Secret source: Actions
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.6778816Z Prepare workflow directory
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.7736787Z Prepare all required actions
+Mobile (Android) Build	Set up job	2025-12-17T20:22:44.7854375Z Getting action download info
+Mobile (Android) Build	Set up job	2025-12-17T20:22:45.3257198Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Mobile (Android) Build	Set up job	2025-12-17T20:22:45.4248658Z Download action repository 'actions/setup-java@v4' (SHA:c1e323688fd81a25caa38c78aa6df2d33d3e20d9)
+Mobile (Android) Build	Set up job	2025-12-17T20:22:46.1200257Z Download action repository 'subosito/flutter-action@v2' (SHA:fd55f4c5af5b953cc57a2be44cb082c8f6635e8e)
+Mobile (Android) Build	Set up job	2025-12-17T20:22:46.6030224Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Mobile (Android) Build	Set up job	2025-12-17T20:22:46.9064325Z Getting action download info
+Mobile (Android) Build	Set up job	2025-12-17T20:22:47.1131498Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+Mobile (Android) Build	Set up job	2025-12-17T20:22:47.2782604Z Complete job name: Mobile (Android) Build
+Mobile (Android) Build	Run actions/checkout@v4	﻿2025-12-17T20:22:47.3582165Z ##[group]Run actions/checkout@v4
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3583467Z with:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3584209Z   repository: Kodanda10/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3585626Z   token: ***
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3586348Z   ssh-strict: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3587102Z   ssh-user: git
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3587865Z   persist-credentials: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3588718Z   clean: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3589497Z   sparse-checkout-cone-mode: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3590422Z   fetch-depth: 1
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3591185Z   fetch-tags: false
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3591953Z   show-progress: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3592764Z   lfs: false
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3593476Z   submodules: false
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3594283Z   set-safe-directory: true
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.3595482Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4748328Z Syncing repository: Kodanda10/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4752139Z ##[group]Getting Git version info
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4754238Z Working directory is '/home/runner/work/iConnect/iConnect'
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4757587Z [command]/usr/bin/git version
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4819778Z git version 2.52.0
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4853887Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4866509Z Temporarily overriding HOME='/home/runner/work/_temp/2447cc0b-1aa9-4dbb-905d-1f09d111b25f' before making global git config changes
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4881079Z Adding repository directory to the temporary git global config as a safe directory
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4886403Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4925930Z Deleting the contents of '/home/runner/work/iConnect/iConnect'
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4930489Z ##[group]Initializing the repository
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.4936031Z [command]/usr/bin/git init /home/runner/work/iConnect/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5038177Z hint: Using 'master' as the name for the initial branch. This default branch name
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5041843Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5046224Z hint: to use in all of your new repositories, which will suppress this warning,
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5048599Z hint: call:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5049799Z hint:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5052041Z hint: 	git config --global init.defaultBranch <name>
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5053880Z hint:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5055812Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5058794Z hint: 'development'. The just-created branch can be renamed via this command:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5061125Z hint:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5062303Z hint: 	git branch -m <name>
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5063641Z hint:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5065726Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5068800Z Initialized empty Git repository in /home/runner/work/iConnect/iConnect/.git/
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5074825Z [command]/usr/bin/git remote add origin https://github.com/Kodanda10/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5104836Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5107603Z ##[group]Disabling automatic garbage collection
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5110656Z [command]/usr/bin/git config --local gc.auto 0
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5142407Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5144523Z ##[group]Setting up auth
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5149299Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5183776Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5510290Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5544803Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5778047Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.5809430Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.6064582Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.6117541Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.6119597Z ##[group]Fetching the repository
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:47.6123758Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0fca6af33790da59c3350bbc2f0b5cbd34fbe703:refs/remotes/origin/main
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2763449Z From https://github.com/Kodanda10/iConnect
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2764310Z  * [new ref]         0fca6af33790da59c3350bbc2f0b5cbd34fbe703 -> origin/main
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2785957Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2786681Z ##[group]Determining the checkout info
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2787477Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2787987Z [command]/usr/bin/git sparse-checkout disable
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2789431Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2795904Z ##[group]Checking out the ref
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.2799355Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.3249275Z Switched to a new branch 'main'
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.3250325Z branch 'main' set up to track 'origin/main'.
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.3365665Z ##[endgroup]
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.3387667Z [command]/usr/bin/git log -1 --format=%H
+Mobile (Android) Build	Run actions/checkout@v4	2025-12-17T20:22:48.3388671Z 0fca6af33790da59c3350bbc2f0b5cbd34fbe703
+Mobile (Android) Build	Run actions/setup-java@v4	﻿2025-12-17T20:22:48.3822178Z ##[group]Run actions/setup-java@v4
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3822761Z with:
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3823119Z   distribution: zulu
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3823812Z   java-version: 17
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3824200Z   java-package: jdk
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3824609Z   check-latest: false
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3825018Z   server-id: github
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3825819Z   server-username: GITHUB_ACTOR
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3826349Z   server-password: GITHUB_TOKEN
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3826847Z   overwrite-settings: true
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3827358Z   job-status: success
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3827978Z   token: ***
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.3828367Z ##[endgroup]
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.6079008Z ##[group]Installed distributions
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.6106879Z Trying to resolve the latest version from remote
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.7516522Z Resolved latest version as 17.0.17+10
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.7521759Z Trying to download...
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:48.7524046Z Downloading Java 17.0.17+10 (Zulu) from https://cdn.azul.com/zulu/bin/zulu17.62.19-ca-crac-jdk17.0.17-linux_x64.tar.gz ...
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:50.4131930Z Extracting Java archive...
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:50.4242374Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/459bd95a-c372-4dfd-9ec4-27b8a82bda86 -f /home/runner/work/_temp/6c906fca-8c82-4635-bf76-d194bd52b0f6
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4645867Z Java 17.0.17+10 was downloaded
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4647383Z Setting Java 17.0.17+10 as the default
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4648241Z Creating toolchains.xml for JDK version 17 from zulu
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4726494Z Writing to /home/runner/.m2/toolchains.xml
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4731189Z 
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4732917Z Java configuration:
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4736122Z   Distribution: zulu
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4736535Z   Version: 17.0.17+10
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4737011Z   Path: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4737448Z 
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4738331Z ##[endgroup]
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4757756Z Creating settings.xml with server-id: github
+Mobile (Android) Build	Run actions/setup-java@v4	2025-12-17T20:22:54.4758313Z Writing to /home/runner/.m2/settings.xml
+Mobile (Android) Build	Run subosito/flutter-action@v2	﻿2025-12-17T20:22:54.4957810Z ##[group]Run subosito/flutter-action@v2
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4958137Z with:
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4958308Z   flutter-version: 3.32.7
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4958517Z   channel: stable
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4958697Z   architecture: X64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4958876Z   cache: false
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4959057Z   pub-cache-path: default
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4959269Z   dry-run: false
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4959504Z   git-source: https://github.com/flutter/flutter.git
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4959793Z env:
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4960035Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4960412Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.4960719Z ##[endgroup]
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5045408Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5045850Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5083442Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5083775Z env:
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5084100Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5084513Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5084836Z ##[endgroup]
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5223707Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5224086Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5224350Z [36;1m  -n '3.32.7' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5224550Z [36;1m  -f '' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5224737Z [36;1m  -a 'X64' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5224916Z [36;1m  -k '' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5225388Z [36;1m  -c '' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5225645Z [36;1m  -l '' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5225835Z [36;1m  -d 'default' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5226128Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5226418Z [36;1m  stable[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5256292Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5256619Z env:
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5256863Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5257429Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.5257737Z ##[endgroup]
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9894351Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9894676Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9894926Z [36;1m  -n '3.32.7' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9895445Z [36;1m  -a 'x64' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9895754Z [36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.32.7-x64' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9896102Z [36;1m  -d '/home/runner/.pub-cache' \[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9896352Z [36;1m  stable[0m
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9928378Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9928703Z env:
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9928945Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9929333Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:54.9929639Z ##[endgroup]
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:55.3454223Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:55.3457315Z                                  Dload  Upload   Total   Spent    Left  Speed
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:55.3460628Z 
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:55.8632352Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:56.8071120Z   1 1366M    1 24.1M    0     0  46.4M      0  0:00:29 --:--:--  0:00:29 46.4M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:57.8066345Z  11 1366M   11  161M    0     0   110M      0  0:00:12  0:00:01  0:00:11  110M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:58.8069096Z  23 1366M   23  328M    0     0   133M      0  0:00:10  0:00:02  0:00:08  133M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:22:59.8074066Z  37 1366M   37  505M    0     0   146M      0  0:00:09  0:00:03  0:00:06  146M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:23:00.8071530Z  51 1366M   51  704M    0     0   157M      0  0:00:08  0:00:04  0:00:04  157M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:23:01.8068933Z  66 1366M   66  912M    0     0   167M      0  0:00:08  0:00:05  0:00:03  179M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:23:02.8066206Z  82 1366M   82 1124M    0     0   174M      0  0:00:07  0:00:06  0:00:01  192M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:23:03.1038108Z  96 1366M   96 1316M    0     0   176M      0  0:00:07  0:00:07 --:--:--  197M
+Mobile (Android) Build	Run subosito/flutter-action@v2	2025-12-17T20:23:03.1039292Z 100 1366M  100 1366M    0     0   176M      0  0:00:07  0:00:07 --:--:--  200M
+Mobile (Android) Build	Install Dependencies	﻿2025-12-17T20:23:55.2802079Z ##[group]Run flutter pub get
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2802369Z [36;1mflutter pub get[0m
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2836108Z shell: /usr/bin/bash -e {0}
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2836331Z env:
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2836571Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2836947Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2837320Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.7-x64
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2837621Z   PUB_CACHE: /home/runner/.pub-cache
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:23:55.2837856Z ##[endgroup]
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:02.0786456Z Resolving dependencies...
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:04.8468688Z Downloading packages...
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9549941Z + _fe_analyzer_shared 85.0.0 (92.0.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9559413Z + _flutterfire_internals 1.3.59 (1.3.65 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9559908Z + analyzer 7.7.1 (9.0.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9565404Z + args 2.7.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9565723Z + async 2.13.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9566006Z + bloc 9.1.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9566342Z + bloc_test 10.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9566657Z + boolean_selector 2.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9567008Z + build 3.1.0 (4.0.3 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9567369Z + build_config 1.2.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9567673Z + build_daemon 4.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9568007Z + build_resolvers 3.0.3 (3.0.4 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9568421Z + build_runner 2.7.1 (2.10.4 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9568853Z + build_runner_core 9.3.1 (9.3.2 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9569266Z + built_collection 5.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9569585Z + built_value 8.12.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9569904Z + characters 1.4.0 (1.4.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9570279Z + checked_yaml 2.0.4
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9570588Z + cli_config 0.2.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9571185Z + clock 1.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9571506Z + cloud_firestore 5.6.12 (6.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9572035Z + cloud_firestore_platform_interface 6.6.12 (7.0.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9572599Z + cloud_firestore_web 4.4.12 (5.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9573054Z + cloud_functions 5.6.2 (6.0.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9573572Z + cloud_functions_platform_interface 5.8.2 (5.8.8 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9574104Z + cloud_functions_web 4.11.5 (5.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9574515Z + code_builder 4.11.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9574829Z + collection 1.19.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9575361Z + convert 3.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9575663Z + coverage 1.15.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9575948Z + crypto 3.0.7
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9576254Z + dart_style 3.1.1 (3.1.3 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9576617Z + dartz 0.10.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9576916Z + diff_match_patch 0.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9577253Z + equatable 2.0.7
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9577562Z + fake_async 1.3.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9577874Z + ffi 2.1.4
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9578126Z + file 7.0.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9578424Z + firebase_auth 5.7.0 (6.1.3 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9578924Z + firebase_auth_platform_interface 7.7.3 (8.1.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9579503Z + firebase_auth_web 5.15.3 (6.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9579940Z + firebase_core 3.15.2 (4.3.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9580376Z + firebase_core_platform_interface 6.0.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9580817Z + firebase_core_web 2.24.1 (3.3.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9581275Z + firebase_messaging 15.2.10 (16.1.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9581846Z + firebase_messaging_platform_interface 4.6.10 (4.7.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9582425Z + firebase_messaging_web 3.10.10 (4.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9582915Z + firebase_storage 12.4.10 (13.0.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9583464Z + firebase_storage_platform_interface 5.2.10 (5.2.16 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9584041Z + firebase_storage_web 3.10.17 (3.11.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9584528Z + fixnum 1.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9584872Z + flutter 0.0.0 from sdk flutter
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9585405Z + flutter_bloc 9.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9585744Z + flutter_lints 5.0.0 (6.0.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9586140Z + flutter_svg 2.2.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9586775Z + flutter_test 0.0.0 from sdk flutter
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9587258Z + flutter_web_plugins 0.0.0 from sdk flutter
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9587688Z + frontend_server_client 4.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9588053Z + get_it 8.3.0 (9.2.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9588386Z + glob 2.1.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9588688Z + google_fonts 6.3.2 (6.3.3 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9589063Z + graphs 2.3.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9589338Z + http 1.6.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9589619Z + http_multi_server 3.2.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9589950Z + http_parser 4.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9590334Z + injectable 2.7.1+2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9590730Z + injectable_generator 2.8.1 (2.11.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9591143Z + intl 0.20.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9591403Z + io 1.0.5
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9591659Z + js 0.7.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9591926Z + json_annotation 4.9.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9592262Z + leak_tracker 10.0.9 (11.0.2 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9592733Z + leak_tracker_flutter_testing 3.0.9 (3.0.10 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9593236Z + leak_tracker_testing 3.0.1 (3.0.2 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9593660Z + lints 5.1.1 (6.0.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9593987Z + logging 1.3.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9594293Z + matcher 0.12.17 (0.12.18 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9594736Z + material_color_utilities 0.11.1 (0.13.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9622514Z + meta 1.16.0 (1.17.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9622913Z + mime 2.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9623235Z + mockito 5.5.0 (5.6.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9623614Z + mocktail 1.0.4
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9623901Z + nested 1.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9624194Z + node_preamble 2.0.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9624516Z + package_config 2.2.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9624836Z + path 1.9.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9625365Z + path_parsing 1.1.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9625997Z + path_provider 2.1.5
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9626366Z + path_provider_android 2.2.19 (2.2.22 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9626856Z + path_provider_foundation 2.4.2 (2.5.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9627324Z + path_provider_linux 2.2.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9627723Z + path_provider_platform_interface 2.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9628161Z + path_provider_windows 2.3.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9628515Z + petitparser 7.0.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9628821Z + platform 3.1.6
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9629144Z + plugin_platform_interface 2.1.8
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9629529Z + pool 1.5.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9629823Z + provider 6.1.5+1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9630133Z + pub_semver 2.2.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9630431Z + pubspec_parse 1.5.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9630744Z + recase 4.1.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9631068Z + shared_preferences 2.5.3 (2.5.4 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9631563Z + shared_preferences_android 2.4.13 (2.4.18 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9632122Z + shared_preferences_foundation 2.5.4 (2.5.6 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9632649Z + shared_preferences_linux 2.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9633087Z + shared_preferences_platform_interface 2.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9633537Z + shared_preferences_web 2.4.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9633951Z + shared_preferences_windows 2.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9634344Z + shelf 1.4.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9634657Z + shelf_packages_handler 3.0.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9635019Z + shelf_static 1.1.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9635662Z + shelf_web_socket 3.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9636017Z + shimmer 3.0.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9636333Z + sky_engine 0.0.0 from sdk flutter
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9636744Z + source_gen 3.1.0 (4.1.1 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9637152Z + source_map_stack_trace 2.1.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9637540Z + source_maps 0.10.13
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9637867Z + source_span 1.10.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9638190Z + stack_trace 1.12.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9638503Z + stream_channel 2.1.4
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9638841Z + stream_transform 2.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9639185Z + string_scanner 1.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9639520Z + term_glyph 1.2.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9639839Z + test 1.25.15 (1.28.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9640214Z + test_api 0.7.4 (0.7.8 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9640627Z + test_core 0.6.8 (0.6.14 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9641318Z + timing 1.0.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9641628Z + typed_data 1.4.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9641920Z + url_launcher 6.3.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9642294Z + url_launcher_android 6.3.20 (6.3.28 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9642792Z + url_launcher_ios 6.3.4 (6.3.6 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9643250Z + url_launcher_linux 3.2.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9643636Z + url_launcher_macos 3.2.3 (3.2.5 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9644061Z + url_launcher_platform_interface 2.3.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9644471Z + url_launcher_web 2.4.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9644817Z + url_launcher_windows 3.1.5
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9645516Z + uuid 4.5.2
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9645812Z + vector_graphics 1.1.19
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9646168Z + vector_graphics_codec 1.1.13
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9646575Z + vector_graphics_compiler 1.1.19
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9646977Z + vector_math 2.1.4 (2.2.0 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9647386Z + vm_service 15.0.0 (15.0.2 available)
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9647784Z + watcher 1.2.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9648061Z + web 1.1.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9648347Z + web_socket 1.0.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9648656Z + web_socket_channel 3.0.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9649030Z + webkit_inspection_protocol 1.2.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9649430Z + xdg_directories 1.1.0
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9649750Z + xml 6.6.1
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9650008Z + yaml 3.1.3
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9656913Z Changed 150 dependencies!
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9671115Z 52 packages have newer versions incompatible with dependency constraints.
+Mobile (Android) Build	Install Dependencies	2025-12-17T20:24:11.9671991Z Try `flutter pub outdated` for more information.
+Mobile (Android) Build	Generate Code (Build Runner)	﻿2025-12-17T20:24:14.0826405Z ##[group]Run flutter pub run build_runner build --delete-conflicting-outputs
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0827319Z [36;1mflutter pub run build_runner build --delete-conflicting-outputs[0m
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0861801Z shell: /usr/bin/bash -e {0}
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0862030Z env:
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0862271Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0862657Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0863066Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.7-x64
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0863379Z   PUB_CACHE: /home/runner/.pub-cache
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:14.0863613Z ##[endgroup]
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:20.2544925Z   Generating the build script.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:20.8328635Z   Compiling the build script.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:27.3121337Z   Reading the asset graph.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:27.8800408Z   Creating the asset graph.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:28.3642434Z   Doing initial build cleanup.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:28.3659332Z   Deleting 1 declared outputs which already existed on disk.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:28.3745769Z   Updating the asset graph.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:28.3748996Z   Building, full build because builders changed.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:28.3803913Z   0s mockito:mockBuilder on 13 inputs; test/features/meetings/meetings_bloc_test.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:53.8094642Z   25s mockito:mockBuilder on 13 inputs: 1 no-op; spent 14s analyzing, 8s sdk, 3s resolving; test/features/report/data/repositories/firestore_report_repository_test.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:55.3332140Z   27s mockito:mockBuilder on 13 inputs: 1 same, 8 no-op; spent 15s analyzing, 8s sdk, 3s resolving, 1s building; test/features/ticker/presentation/bloc/ticker_bloc_test.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:58.3728829Z   30s mockito:mockBuilder on 13 inputs: 1 same, 10 no-op; spent 17s analyzing, 8s sdk, 3s resolving, 1s building; test/features/ticker/ticker_bloc_test.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:58.4180095Z   30s mockito:mockBuilder on 13 inputs: 1 same, 12 no-op; spent 17s analyzing, 8s sdk, 3s resolving, 1s building
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:58.4184993Z   0s injectable_generator:injectable_builder on 80 inputs; lib/core/error/failures.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.3779997Z   1s injectable_generator:injectable_builder on 80 inputs: 38 no-op; lib/features/tasks/data/repositories/firestore_task_repository.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.8824878Z   1s injectable_generator:injectable_builder on 80 inputs: 12 skipped, 68 no-op; spent 1s analyzing
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.8827494Z   0s injectable_generator:injectable_config_builder on 80 inputs; lib/core/error/failures.dart
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.9329874Z   0s injectable_generator:injectable_config_builder on 80 inputs: 12 skipped, 68 no-op
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.9331526Z   Running the post build.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:24:59.9340870Z   Writing the asset graph.
+Mobile (Android) Build	Generate Code (Build Runner)	2025-12-17T20:25:00.0402256Z   Built with build_runner in 34s; wrote 1 output.
+Mobile (Android) Build	Run Tests	﻿2025-12-17T20:25:00.2255731Z ##[group]Run flutter test
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2256022Z [36;1mflutter test[0m
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2308334Z shell: /usr/bin/bash -e {0}
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2308584Z env:
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2308835Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2309216Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2309609Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.7-x64
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2309928Z   PUB_CACHE: /home/runner/.pub-cache
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:00.2310157Z ##[endgroup]
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:03.3199028Z 
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:13.2704277Z ✅ /home/runner/work/iConnect/iConnect/test/widget_test.dart: Placeholder smoke test
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:15.0762097Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/ticker_bloc_test.dart: TickerBloc initial state is TickerInitial
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:15.0990754Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/ticker_bloc_test.dart: TickerBloc emits [TickerActive] when repository stream emits a ticker
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:15.1033374Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/ticker_bloc_test.dart: TickerBloc emits [TickerEmpty] when repository stream emits null
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:16.7061278Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/data/repositories/firestore_ticker_repository_test.dart: FirestoreTickerRepository getActiveTicker emits MeetingTicker when document exists and is active
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:16.7112688Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/data/repositories/firestore_ticker_repository_test.dart: FirestoreTickerRepository getActiveTicker correctly maps CONFERENCE_CALL type
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:16.7153967Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/data/repositories/firestore_ticker_repository_test.dart: FirestoreTickerRepository getActiveTicker emits null when document does not exist
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:16.7190183Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/data/repositories/firestore_ticker_repository_test.dart: FirestoreTickerRepository getActiveTicker emits null when status is concluded
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:17.7962051Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/presentation/bloc/ticker_bloc_test.dart: TickerBloc initial state is TickerInitial
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:17.8242405Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/presentation/bloc/ticker_bloc_test.dart: TickerBloc emits [TickerActive] when repository emits valid ticker
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:17.8289340Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/presentation/bloc/ticker_bloc_test.dart: TickerBloc emits [TickerEmpty] when repository emits null
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:21.6438558Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/presentation/widgets/liquid_ticker_widget_test.dart: renders nothing when state is TickerEmpty
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:21.8174424Z ✅ /home/runner/work/iConnect/iConnect/test/features/ticker/presentation/widgets/liquid_ticker_widget_test.dart: renders ticker content when state is TickerActive
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:22.8517848Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_persistence_schema_test.dart: TaskModel Persistence should parse action flags correctly from Firestore (snake_case)
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:22.8540985Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_persistence_schema_test.dart: TaskModel Persistence should parse legacy camelCase action flags
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9125990Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: EnrichedTask Action Status Fields should have callSent field defaulting to false
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9148818Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: EnrichedTask Action Status Fields should have smsSent field defaulting to false
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9178391Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: EnrichedTask Action Status Fields should have whatsappSent field defaulting to false
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9199558Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: EnrichedTask Action Status Fields should be able to create EnrichedTask with action status set to true
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9326534Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: UpdateActionStatus Event UpdateActionStatus event should exist with taskId and actionType
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9642432Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: UpdateActionStatus Event emits ActionStatusUpdated when UpdateActionStatus is added successfully
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:23.9717335Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/action_status_test.dart: UpdateActionStatus Event emits TaskError when UpdateActionStatus fails
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:25.2024009Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_model_schema_test.dart: TaskModel Schema Standardization fromFirestore parses snake_case constituent_id field
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:25.2073713Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_model_schema_test.dart: TaskModel Schema Standardization fromFirestore parses snake_case due_date field
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:25.2094307Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_model_schema_test.dart: TaskModel Schema Standardization fromFirestore parses snake_case created_at field
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:25.2131261Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_model_schema_test.dart: TaskModel Schema Standardization toFirestore writes snake_case fields
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:26.2785718Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_bloc_test.dart: LoadCompletedTasks emits [TaskLoading, TaskLoaded] when LoadCompletedTasks succeeds
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:26.2836752Z ✅ /home/runner/work/iConnect/iConnect/test/features/tasks/task_bloc_test.dart: LoadCompletedTasks emits [TaskLoading, TaskError] when LoadCompletedTasks fails
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:27.3364634Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/data/repositories/firestore_report_repository_test.dart: getTodaySummary returns correct stats using aggregation queries
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:27.3538345Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/data/repositories/firestore_report_repository_test.dart: getReportForDays returns list of DaySummary grouped by date
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6010395Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ActionLog Entity creates ActionLog with all fields
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6034065Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ActionLog Entity ActionType enum has correct values
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6067867Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: DaySummary Entity groups multiple actions by date
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6172487Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ReportBloc initial state is ReportInitial
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6443484Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ReportBloc emits [ReportLoading, ReportLoaded] when LoadReport is successful
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6551283Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ReportBloc emits [ReportLoading, ReportError] when LoadReport fails
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:28.6627123Z ✅ /home/runner/work/iConnect/iConnect/test/features/report/report_bloc_test.dart: ReportBloc LoadMoreReport appends to existing data
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.6938087Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: ScheduledMeeting Entity creates ScheduledMeeting with conference call details
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.6969151Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: ScheduledMeeting Entity isUpcoming returns true for future meetings
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.6996797Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: ScheduledMeeting Entity isUpcoming returns false for past meetings
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.7020704Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: ScheduledMeeting Entity TargetGroup enum has correct values
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.7122598Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: MeetingsBloc initial state is MeetingsInitial
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.7342380Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: MeetingsBloc emits [MeetingsLoading, MeetingsLoaded] with active meeting
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.7383469Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: MeetingsBloc emits [MeetingsLoading, MeetingsLoaded] with null when no meeting scheduled
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:29.7443729Z ✅ /home/runner/work/iConnect/iConnect/test/features/meetings/meetings_bloc_test.dart: MeetingsBloc emits [MeetingsLoading, MeetingsError] on failure
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:30.7629082Z ✅ /home/runner/work/iConnect/iConnect/test/features/settings/presentation/cubit/settings_cubit_test.dart: SettingsCubit initial state is SettingsInitial
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:30.7916160Z ✅ /home/runner/work/iConnect/iConnect/test/features/settings/presentation/cubit/settings_cubit_test.dart: SettingsCubit emits [SettingsLoading, SettingsLoaded] when loadSettings succeeds
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:30.7983945Z ✅ /home/runner/work/iConnect/iConnect/test/features/settings/presentation/cubit/settings_cubit_test.dart: SettingsCubit emits [SettingsLoading, SettingsError] when loadSettings fails
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:30.8181452Z 
+Mobile (Android) Build	Run Tests	2025-12-17T20:25:30.8188951Z 🎉 48 tests passed.
+Mobile (Android) Build	Run Flutter Analyze	﻿2025-12-17T20:25:30.8995921Z ##[group]Run flutter analyze
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.8996409Z [36;1mflutter analyze[0m
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9029498Z shell: /usr/bin/bash -e {0}
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9029724Z env:
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9029967Z   JAVA_HOME: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9030359Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Zulu_jdk/17.0.17-10/x64
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9030751Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.32.7-x64
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9031079Z   PUB_CACHE: /home/runner/.pub-cache
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:30.9031314Z ##[endgroup]
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1431245Z Analyzing iConnect...                                           
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1440742Z 
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1492560Z   error • The named parameter 'email' is required, but there's no corresponding argument • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:48:37 • missing_required_argument
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1498004Z   error • The named parameter 'password' is required, but there's no corresponding argument • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:48:37 • missing_required_argument
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1502934Z   error • Too many positional arguments: 0 expected, but 2 found • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:48:56 • extra_positional_arguments_could_be_named
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1507853Z   error • The named parameter 'email' is required, but there's no corresponding argument • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:62:37 • missing_required_argument
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1527819Z   error • The named parameter 'password' is required, but there's no corresponding argument • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:62:37 • missing_required_argument
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1530976Z   error • Too many positional arguments: 0 expected, but 2 found • Jules/test/features/auth/presentation/bloc/auth_bloc_test.dart:62:56 • extra_positional_arguments_could_be_named
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1533402Z   error • Target of URI doesn't exist: 'package:iconnect_mobile/features/tasks/presentation/widgets/task_card.dart' • Jules/test/features/auth/presentation/pages/login_page_test.dart:3:8 • uri_does_not_exist
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1536039Z warning • Unused import: 'package:iconnect_mobile/features/tasks/domain/entities/task.dart' • Jules/test/features/auth/presentation/pages/login_page_test.dart:4:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1538080Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/theme/app_theme.dart:158:33 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1539850Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/theme/app_theme.dart:165:54 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1541609Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/theme/app_theme.dart:204:25 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1543400Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/theme/app_theme.dart:206:44 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1545265Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/theme/app_theme.dart:209:29 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1547534Z    info • The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' • lib/features/action/presentation/widgets/ai_greeting_sheet.dart:1:8 • unnecessary_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1549713Z warning • Unused import: '../../../../core/theme/app_theme.dart' • lib/features/action/presentation/widgets/ai_greeting_sheet.dart:7:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1660993Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/action/presentation/widgets/ai_greeting_sheet.dart:263:50 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1663554Z warning • Unused import: '../../domain/entities/auth_user.dart' • lib/features/auth/presentation/bloc/auth_event.dart:2:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1711675Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:106:58 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1714100Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:132:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1716512Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:165:82 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1721027Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:166:100 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1723243Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:184:82 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1725686Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:185:98 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1727890Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:206:74 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1730109Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/auth/presentation/pages/login_page.dart:253:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1731827Z warning • Duplicate import • lib/features/home/presentation/pages/home_page.dart:20:8 • duplicate_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1733771Z warning • Unused import: 'package:iconnect_mobile/features/ticker/presentation/widgets/liquid_ticker_widget.dart' • lib/features/home/presentation/pages/home_page.dart:22:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1735862Z warning • The declaration '_launchSMS' isn't referenced • lib/features/home/presentation/pages/home_page.dart:77:8 • unused_element
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1737453Z warning • The declaration '_launchWhatsApp' isn't referenced • lib/features/home/presentation/pages/home_page.dart:82:8 • unused_element
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1739017Z warning • The declaration '_filterTasks' isn't referenced • lib/features/home/presentation/pages/home_page.dart:94:22 • unused_element
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1740582Z warning • The declaration '_getCount' isn't referenced • lib/features/home/presentation/pages/home_page.dart:111:7 • unused_element
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1742484Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:137:39 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1744675Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:158:41 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1747016Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:236:46 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1749211Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:238:69 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1751364Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:265:36 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1753748Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:267:36 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1756284Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:333:52 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1758435Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:348:45 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1760616Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:350:64 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1762765Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:394:68 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1764707Z warning • The value of the local variable 'countAll' isn't used • lib/features/home/presentation/pages/home_page.dart:433:15 • unused_local_variable
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1766613Z    info • Use a 'SizedBox' to add whitespace to a layout • lib/features/home/presentation/pages/home_page.dart:441:18 • sized_box_for_whitespace
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1768358Z warning • The value of the local variable 'activeBg' isn't used • lib/features/home/presentation/pages/home_page.dart:461:11 • unused_local_variable
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1770345Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:497:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1772545Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:498:36 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1774700Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:502:37 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1851496Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:503:38 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1853715Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:507:53 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1856023Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:519:72 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1858153Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:527:71 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1860300Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:537:59 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1862419Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:537:91 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1864530Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:655:34 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1899906Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:657:53 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1902352Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:668:50 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1904611Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:695:29 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1906998Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:697:48 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1909140Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:710:50 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1911318Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:721:29 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1913473Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:723:48 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1931285Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:743:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1933592Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:745:54 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1935939Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:747:73 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1938047Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:763:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1940165Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:797:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1942286Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:799:54 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1944433Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:802:39 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1946728Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:818:43 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1948899Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:863:77 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1951082Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:868:47 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1953287Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:880:71 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1974683Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:885:47 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1977164Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:898:43 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1979535Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:900:62 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1981795Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:908:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1983901Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:940:53 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1986132Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:959:52 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1988286Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1003:37 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1990505Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1006:77 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1992679Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1011:52 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.1994870Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1041:33 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2029424Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1043:52 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2031649Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1046:37 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2033891Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1067:38 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2036250Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1088:33 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2038439Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1090:58 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2040591Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1117:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2042749Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1119:68 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2044971Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1138:73 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2063057Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1144:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2065408Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1156:81 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2067486Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1163:51 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2069908Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1176:82 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2072261Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1182:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2074452Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1231:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2076807Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1235:35 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2095603Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1236:36 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2097901Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/home/presentation/pages/home_page.dart:1241:36 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2099809Z    info • Don't use 'BuildContext's across async gaps • lib/features/home/presentation/pages/home_page.dart:1335:26 • use_build_context_synchronously
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2101719Z    info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/home/presentation/pages/home_page.dart:1344:8 • use_build_context_synchronously
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2103583Z    info • Dangling library doc comment • lib/features/meetings/domain/entities/scheduled_meeting.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2105372Z    info • Use the end-of-line form ('///') for doc comments • lib/features/meetings/domain/entities/scheduled_meeting.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2107043Z    info • Dangling library doc comment • lib/features/meetings/domain/repositories/meetings_repository.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2108764Z    info • Use the end-of-line form ('///') for doc comments • lib/features/meetings/domain/repositories/meetings_repository.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2110478Z    info • Dangling library doc comment • lib/features/meetings/presentation/bloc/meetings_bloc.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2112155Z    info • Use the end-of-line form ('///') for doc comments • lib/features/meetings/presentation/bloc/meetings_bloc.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2113816Z    info • Dangling library doc comment • lib/features/meetings/presentation/bloc/meetings_event.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2135767Z    info • Use the end-of-line form ('///') for doc comments • lib/features/meetings/presentation/bloc/meetings_event.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2144291Z    info • Dangling library doc comment • lib/features/meetings/presentation/bloc/meetings_state.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2146145Z    info • Use the end-of-line form ('///') for doc comments • lib/features/meetings/presentation/bloc/meetings_state.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2147675Z    info • Dangling library doc comment • lib/features/report/domain/entities/action_log.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2149142Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/domain/entities/action_log.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2150695Z    info • Dangling library doc comment • lib/features/report/domain/entities/day_summary.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2152262Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/domain/entities/day_summary.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2154105Z    info • Dangling library doc comment • lib/features/report/domain/repositories/report_repository.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2171833Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/domain/repositories/report_repository.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2173565Z    info • Dangling library doc comment • lib/features/report/presentation/bloc/report_bloc.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2175348Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/presentation/bloc/report_bloc.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2176935Z warning • The value of the field '_currentDaysLoaded' isn't used • lib/features/report/presentation/bloc/report_bloc.dart:15:7 • unused_field
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2178477Z    info • Dangling library doc comment • lib/features/report/presentation/bloc/report_event.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2180016Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/presentation/bloc/report_event.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2181500Z    info • Dangling library doc comment • lib/features/report/presentation/bloc/report_state.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2182971Z    info • Use the end-of-line form ('///') for doc comments • lib/features/report/presentation/bloc/report_state.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2184452Z warning • Unused import: '../../domain/entities/task.dart' • lib/features/tasks/presentation/bloc/task_event.dart:2:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2186133Z    info • Dangling library doc comment • lib/features/tasks/presentation/widgets/shimmer_task_card.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2187685Z warning • Unused import: 'package:dartz/dartz.dart' • lib/features/ticker/domain/repositories/ticker_repository.dart:1:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2189327Z warning • Unused import: '../../../../../core/error/failures.dart' • lib/features/ticker/domain/repositories/ticker_repository.dart:2:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2191157Z    info • The imported package 'bloc' isn't a dependency of the importing package • lib/features/ticker/presentation/bloc/ticker_bloc.dart:1:8 • depend_on_referenced_packages
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2192819Z warning • Unused import: 'dart:io' • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:1:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2194511Z warning • Unused import: 'package:google_fonts/google_fonts.dart' • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:5:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2227246Z warning • Unnecessary cast • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:102:35 • unnecessary_cast
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2229211Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:115:43 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2231503Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:116:62 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2233761Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:119:45 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2236291Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:174:61 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2238649Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/ticker/presentation/widgets/liquid_ticker_widget.dart:200:68 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2240857Z    info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/main.dart:54:49 • deprecated_member_use
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2242619Z    info • Dangling library doc comment • test/features/meetings/meetings_bloc_test.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2244139Z    info • Use the end-of-line form ('///') for doc comments • test/features/meetings/meetings_bloc_test.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2261725Z warning • Unused import: 'package:iconnect_mobile/features/report/domain/repositories/report_repository.dart' • test/features/report/data/repositories/firestore_report_repository_test.dart:6:8 • unused_import
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2264294Z warning • The class 'Query' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/report/data/repositories/firestore_report_repository_test.dart:9:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2266787Z warning • The class 'Query' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/report/data/repositories/firestore_report_repository_test.dart:10:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2269195Z warning • The class 'DocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/report/data/repositories/firestore_report_repository_test.dart:12:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2271639Z warning • The class 'QueryDocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/report/data/repositories/firestore_report_repository_test.dart:12:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2273514Z    info • Dangling library doc comment • test/features/report/report_bloc_test.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2274811Z    info • Use the end-of-line form ('///') for doc comments • test/features/report/report_bloc_test.dart:1:1 • slash_for_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2276325Z    info • Dangling library doc comment • test/features/tasks/action_status_test.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2277652Z    info • Dangling library doc comment • test/features/tasks/task_bloc_test.dart:1:1 • dangling_library_doc_comments
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2279348Z warning • The class 'DocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/tasks/task_model_schema_test.dart:6:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2281527Z warning • The class 'DocumentSnapshot' shouldn't be extended, mixed in, or implemented because it's sealed • test/features/tasks/task_persistence_schema_test.dart:5:1 • subtype_of_sealed_class
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2283965Z warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/ticker/data/repositories/firestore_ticker_repository_test.mocks.dart:1248:12 • duplicate_ignore
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2309403Z warning • The diagnostic 'must_be_immutable' doesn't need to be ignored here because it's already being ignored • test/features/ticker/data/repositories/firestore_ticker_repository_test.mocks.dart:1660:12 • duplicate_ignore
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2310688Z 
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2311367Z 153 issues found. (ran in 17.7s)
+Mobile (Android) Build	Run Flutter Analyze	2025-12-17T20:25:51.2418583Z ##[error]Process completed with exit code 1.
+Mobile (Android) Build	Post Run subosito/flutter-action@v2	﻿2025-12-17T20:25:51.2541132Z Post job cleanup.
+Mobile (Android) Build	Post Run actions/setup-java@v4	﻿2025-12-17T20:25:51.2597636Z Post job cleanup.
+Mobile (Android) Build	Post Run actions/checkout@v4	﻿2025-12-17T20:25:51.4748355Z Post job cleanup.
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5771827Z [command]/usr/bin/git version
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5812635Z git version 2.52.0
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5862464Z Temporarily overriding HOME='/home/runner/work/_temp/3a787025-2e67-48b1-b0b1-71933bd41749' before making global git config changes
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5866002Z Adding repository directory to the temporary git global config as a safe directory
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5868667Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/iConnect/iConnect
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5914787Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.5956716Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6227750Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6249927Z http.https://github.com/.extraheader
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6267314Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6300096Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6528710Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Mobile (Android) Build	Post Run actions/checkout@v4	2025-12-17T20:25:51.6563138Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Mobile (Android) Build	Complete job	﻿2025-12-17T20:25:51.6900530Z Cleaning up orphan processes
