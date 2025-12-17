@@ -1,8 +1,8 @@
 /// iConnect Design System - Emerald Amethyst Glass Theme
-/// 
+///
 /// This file contains the complete design system for Flutter,
 /// matching the web portal's Emerald/Amethyst Glass theme.
-/// 
+///
 /// @changelog
 /// - 2024-12-11: Initial implementation
 library;
@@ -16,32 +16,32 @@ class AppColors {
   static const Color primary = Color(0xFF008F7A);
   static const Color primaryLight = Color(0xFF00A896);
   static const Color primaryDark = Color(0xFF006B5A);
-  
+
   // Secondary - Deep Amethyst
   static const Color secondary = Color(0xFF5E548E);
   static const Color secondaryLight = Color(0xFF7B6FA6);
-  
+
   // Text Colors
   static const Color textPrimary = Color(0xFF1A2A24);
   static const Color textSecondary = Color(0xFF4F6F65);
   static const Color textMuted = Color(0xFF8A9A92);
   static const Color textOnDark = Colors.white;
-  
+
   // Background - Mesh Gradient colors
   static const Color bgGradientStart = Color(0xFF0D3B2E);
   static const Color bgGradientEnd = Color(0xFF2A2D4E);
-  
+
   // Glass Surface
   static const Color glassSurface = Color(0x1FFFFFFF); // 12% white
   static const Color glassBorder = Color(0x4DFFFFFF); // 30% white
   static const Color glassSurfaceLight = Color(0xCCFFFFFF); // 80% white
-  
+
   // Status Colors
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
-  
+
   // Task Type Colors
   static const Color birthday = Color(0xFFEC4899); // Pink
   static const Color anniversary = Color(0xFF8B5CF6); // Purple
@@ -168,7 +168,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.lg),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -189,7 +192,7 @@ class AppTheme {
       ),
     );
   }
-  
+
   /// Mesh gradient background decoration
   static BoxDecoration get meshGradient => const BoxDecoration(
     gradient: LinearGradient(
@@ -198,7 +201,7 @@ class AppTheme {
       colors: [AppColors.bgGradientStart, AppColors.bgGradientEnd],
     ),
   );
-  
+
   /// Glass card decoration
   static BoxDecoration glassCard({double opacity = 0.12}) => BoxDecoration(
     color: Colors.white.withOpacity(opacity),
@@ -212,14 +215,14 @@ class AppTheme {
       ),
     ],
   );
-  
+
   /// Primary gradient
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.primary, AppColors.primaryLight],
   );
-  
+
   /// Secondary gradient
   static const LinearGradient secondaryGradient = LinearGradient(
     begin: Alignment.topLeft,

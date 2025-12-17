@@ -21,5 +21,13 @@ class MeetingTicker extends Equatable {
   });
 
   @override
-  List<Object?> get props => [title, startTime, meetUrl, status, meetingType, dialInNumber, accessCode];
+  List<Object?> get props => [
+    title,
+    startTime,
+    meetUrl,
+    status,
+    meetingType,
+    dialInNumber,
+    accessCode,
+  ];
 }

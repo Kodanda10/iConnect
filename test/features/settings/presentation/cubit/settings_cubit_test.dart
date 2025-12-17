@@ -15,10 +15,9 @@ class FakeSettingsRepository implements SettingsRepository {
     if (shouldFail) {
       return Left(ServerFailure('Test Error'));
     }
-    return Right(const AppSettings(
-      appName: 'Test App',
-      leaderName: 'Test Leader',
-    ));
+    return Right(
+      const AppSettings(appName: 'Test App', leaderName: 'Test Leader'),
+    );
   }
 }
 
@@ -40,27 +39,34 @@ void main() {
       expect(cubit.state, equals(SettingsInitial()));
     });
 
-    test('emits [SettingsLoading, SettingsLoaded] when loadSettings succeeds', () async {
-      final expected = [
-        SettingsLoading(),
-        isA<SettingsLoaded>().having((s) => s.settings.appName, 'appName', 'Test App'),
-      ];
+    test(
+      'emits [SettingsLoading, SettingsLoaded] when loadSettings succeeds',
+      () async {
+        final expected = [
+          SettingsLoading(),
+          isA<SettingsLoaded>().having(
+            (s) => s.settings.appName,
+            'appName',
+            'Test App',
+          ),
+        ];
 
-      expectLater(cubit.stream, emitsInOrder(expected));
+        expectLater(cubit.stream, emitsInOrder(expected));
 
-      await cubit.loadSettings();
-    });
+        await cubit.loadSettings();
+      },
+    );
 
-    test('emits [SettingsLoading, SettingsError] when loadSettings fails', () async {
-      repository.shouldFail = true;
-      final expected = [
-        SettingsLoading(),
-        const SettingsError('Test Error'),
-      ];
+    test(
+      'emits [SettingsLoading, SettingsError] when loadSettings fails',
+      () async {
+        repository.shouldFail = true;
+        final expected = [SettingsLoading(), const SettingsError('Test Error')];
 
-      expectLater(cubit.stream, emitsInOrder(expected));
+        expectLater(cubit.stream, emitsInOrder(expected));
 
-      await cubit.loadSettings();
-    });
+        await cubit.loadSettings();
+      },
+    );
   });
 }

@@ -3,7 +3,7 @@ import '../../domain/entities/task.dart';
 
 abstract class TaskState extends Equatable {
   const TaskState();
-  
+
   @override
   List<Object?> get props => [];
 }
@@ -35,10 +35,7 @@ class ActionStatusUpdating extends TaskState {
   final String taskId;
   final String actionType;
 
-  const ActionStatusUpdating({
-    required this.taskId,
-    required this.actionType,
-  });
+  const ActionStatusUpdating({required this.taskId, required this.actionType});
 
   @override
   List<Object?> get props => [taskId, actionType];
@@ -49,10 +46,7 @@ class ActionStatusUpdated extends TaskState {
   final String taskId;
   final String actionType;
 
-  const ActionStatusUpdated({
-    required this.taskId,
-    required this.actionType,
-  });
+  const ActionStatusUpdated({required this.taskId, required this.actionType});
 
   @override
   List<Object?> get props => [taskId, actionType];

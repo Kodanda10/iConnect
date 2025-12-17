@@ -17,11 +17,12 @@ class LiquidTickerWidget extends StatefulWidget {
   State<LiquidTickerWidget> createState() => _LiquidTickerWidgetState();
 }
 
-class _LiquidTickerWidgetState extends State<LiquidTickerWidget> with TickerProviderStateMixin {
+class _LiquidTickerWidgetState extends State<LiquidTickerWidget>
+    with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late ScrollController _scrollController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -30,13 +31,13 @@ class _LiquidTickerWidgetState extends State<LiquidTickerWidget> with TickerProv
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-    
+
     _pulseAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     _scrollController = ScrollController();
-    
+
     // Start marquee effect after build
     WidgetsBinding.instance.addPostFrameCallback((_) => _startMarquee());
   }
@@ -73,7 +74,9 @@ class _LiquidTickerWidgetState extends State<LiquidTickerWidget> with TickerProv
     if (ticker.meetingType == 'CONFERENCE_CALL') {
       // Auto-Dialer Logic: tel:<number>,<code >#
       // Comma (,) adds a 2-second pause per comma on most phones
-      final dialUri = Uri.parse("tel:${ticker.dialInNumber},${ticker.accessCode}#");
+      final dialUri = Uri.parse(
+        "tel:${ticker.dialInNumber},${ticker.accessCode}#",
+      );
       if (await canLaunchUrl(dialUri)) {
         await launchUrl(dialUri);
       }
@@ -98,125 +101,149 @@ class _LiquidTickerWidgetState extends State<LiquidTickerWidget> with TickerProv
           curve: Curves.elasticOut, // Spring Bounce effect
           child: !isActive
               ? const SizedBox.shrink()
-              : Builder(builder: (context) {
-                  final ticker = (state as TickerActive).ticker;
-                  final timeStr = DateFormat('jm').format(ticker.startTime);
-                  
-                  final isAudio = ticker.meetingType == 'CONFERENCE_CALL';
-                  final themeColor = isAudio ? Colors.purple : AppColors.primary;
-                  final icon = isAudio ? Icons.phone_in_talk : Icons.videocam;
-                  final actionIcon = isAudio ? Icons.call : Icons.play_arrow_rounded;
+              : Builder(
+                  builder: (context) {
+                    final ticker = (state as TickerActive).ticker;
+                    final timeStr = DateFormat('jm').format(ticker.startTime);
 
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                      // Liquid Glass effect
-                      color: Colors.white.withOpacity(0.12),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: themeColor.withOpacity(0.15),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
+                    final isAudio = ticker.meetingType == 'CONFERENCE_CALL';
+                    final themeColor = isAudio
+                        ? Colors.purple
+                        : AppColors.primary;
+                    final icon = isAudio ? Icons.phone_in_talk : Icons.videocam;
+                    final actionIcon = isAudio
+                        ? Icons.call
+                        : Icons.play_arrow_rounded;
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        // Liquid Glass effect
+                        color: Colors.white.withOpacity(0.12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                          child: Row(
-                            children: [
-                              // Left Indicator (Live Pulse)
-                              AnimatedBuilder(
-                                animation: _pulseAnimation,
-                                builder: (context, child) => Transform.scale(
-                                  scale: _pulseAnimation.value,
-                                  child: child,
-                                ),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: themeColor,
-                                    shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: themeColor.withOpacity(0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              children: [
+                                // Left Indicator (Live Pulse)
+                                AnimatedBuilder(
+                                  animation: _pulseAnimation,
+                                  builder: (context, child) => Transform.scale(
+                                    scale: _pulseAnimation.value,
+                                    child: child,
                                   ),
-                                  child: Icon(icon, color: Colors.white, size: 20),
-                                ),
-                              ),
-                              
-                              const SizedBox(width: 12),
-                              
-                              // Scrolling Text Content
-                              Expanded(
-                                child: SizedBox(
-                                  height: 20,
-                                  child: ListView(
-                                    controller: _scrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    children: [
-                                      Text(
-                                        "📢 ${ticker.title}  •  🗓️ Today at $timeStr  •  ",
-                                        style: const TextStyle(
-                                          color: AppColors.textPrimary,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        isAudio 
-                                            ? "Tap to JOIN AUDIO BRIDGE (Dialing: ${ticker.dialInNumber}, Code: ${ticker.accessCode}#)"
-                                            : "Click to JOIN MEETING (URL is copied)",
-                                        style: TextStyle(
-                                          color: themeColor.withOpacity(0.8),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      // Buffer space for marquee loop
-                                      const SizedBox(width: 50), 
-                                    ],
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: themeColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      icon,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              
-                              const SizedBox(width: 12),
 
-                              // Right Action Button (FAB Style)
-                              InkWell(
-                                onTap: () => _launchMeeting(ticker),
-                                borderRadius: BorderRadius.circular(30),
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isAudio ? AppColors.secondary : AppColors.secondary, // Keep consistent or swap
-                                    shape: BoxShape.circle, // FAB Style
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.secondary.withOpacity(0.4),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      )
-                                    ],
+                                const SizedBox(width: 12),
+
+                                // Scrolling Text Content
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 20,
+                                    child: ListView(
+                                      controller: _scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      children: [
+                                        Text(
+                                          "📢 ${ticker.title}  •  🗓️ Today at $timeStr  •  ",
+                                          style: const TextStyle(
+                                            color: AppColors.textPrimary,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Text(
+                                          isAudio
+                                              ? "Tap to JOIN AUDIO BRIDGE (Dialing: ${ticker.dialInNumber}, Code: ${ticker.accessCode}#)"
+                                              : "Click to JOIN MEETING (URL is copied)",
+                                          style: TextStyle(
+                                            color: themeColor.withOpacity(0.8),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        // Buffer space for marquee loop
+                                        const SizedBox(width: 50),
+                                      ],
+                                    ),
                                   ),
-                                  child: Icon(actionIcon, color: Colors.white, size: 24),
                                 ),
-                              ),
-                            ],
+
+                                const SizedBox(width: 12),
+
+                                // Right Action Button (FAB Style)
+                                InkWell(
+                                  onTap: () => _launchMeeting(ticker),
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: isAudio
+                                          ? AppColors.secondary
+                                          : AppColors
+                                                .secondary, // Keep consistent or swap
+                                      shape: BoxShape.circle, // FAB Style
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: AppColors.secondary
+                                              .withOpacity(0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      actionIcon,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  },
+                ),
         );
       },
     );
   }
 }
-
-

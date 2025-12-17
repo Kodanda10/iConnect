@@ -8,14 +8,17 @@ class FirebaseGreetingRepository implements GreetingRepository {
   final FirebaseFunctions _functions;
 
   FirebaseGreetingRepository({FirebaseFunctions? functions})
-      : _functions = functions ?? FirebaseFunctions.instanceFor(region: 'asia-south1');
+    : _functions =
+          functions ?? FirebaseFunctions.instanceFor(region: 'asia-south1');
 
   @override
-  Future<Either<Failure, String>> generateGreeting(GreetingRequest request) async {
+  Future<Either<Failure, String>> generateGreeting(
+    GreetingRequest request,
+  ) async {
     try {
       final callable = _functions.httpsCallable('generateGreeting');
       final result = await callable.call(request.toJson());
-      
+
       final data = result.data as Map<String, dynamic>;
       if (data.containsKey('greeting')) {
         return Right(data['greeting'] as String);

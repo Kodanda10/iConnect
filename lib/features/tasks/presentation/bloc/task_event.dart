@@ -36,10 +36,7 @@ class UpdateActionStatus extends TaskEvent {
   final String taskId;
   final String actionType; // 'CALL', 'SMS', 'WHATSAPP'
 
-  const UpdateActionStatus({
-    required this.taskId,
-    required this.actionType,
-  });
+  const UpdateActionStatus({required this.taskId, required this.actionType});
 
   @override
   List<Object?> get props => [taskId, actionType];

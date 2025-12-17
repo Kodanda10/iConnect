@@ -7,20 +7,25 @@ import '../../domain/repositories/settings_repository.dart';
 class FirestoreSettingsRepository implements SettingsRepository {
   final FirebaseFirestore _firestore;
 
-  FirestoreSettingsRepository({FirebaseFirestore? firestore}) 
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreSettingsRepository({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<Either<Failure, AppSettings>> getSettings() async {
     try {
-      final doc = await _firestore.collection('settings').doc('app_config').get();
+      final doc = await _firestore
+          .collection('settings')
+          .doc('app_config')
+          .get();
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
-        return Right(AppSettings(
-          appName: data['appName'] ?? 'AC Connect',
-          leaderName: data['leaderName'] ?? 'Pranab Kumar Balabantaray',
-          headerImageUrl: data['headerImageUrl'],
-        ));
+        return Right(
+          AppSettings(
+            appName: data['appName'] ?? 'AC Connect',
+            leaderName: data['leaderName'] ?? 'Pranab Kumar Balabantaray',
+            headerImageUrl: data['headerImageUrl'],
+          ),
+        );
       } else {
         return Right(AppSettings.defaults());
       }

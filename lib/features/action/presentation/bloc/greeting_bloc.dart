@@ -8,8 +8,8 @@ class GreetingBloc extends Bloc<GreetingEvent, GreetingState> {
   final GreetingRepository _repository;
 
   GreetingBloc({required GreetingRepository repository})
-      : _repository = repository,
-        super(GreetingInitial()) {
+    : _repository = repository,
+      super(GreetingInitial()) {
     on<GenerateGreetingRequested>(_onGenerateGreetingRequested);
     on<ResetGreeting>((event, emit) => emit(GreetingInitial()));
   }
@@ -19,7 +19,7 @@ class GreetingBloc extends Bloc<GreetingEvent, GreetingState> {
     Emitter<GreetingState> emit,
   ) async {
     emit(GreetingLoading());
-    
+
     final request = GreetingRequest(
       constituentName: event.constituentName,
       type: event.type,

@@ -12,6 +12,7 @@ abstract class TickerEvent extends Equatable {
 }
 
 class StartTickerListening extends TickerEvent {}
+
 class _TickerUpdated extends TickerEvent {
   final MeetingTicker? ticker;
   const _TickerUpdated(this.ticker);
@@ -27,7 +28,9 @@ abstract class TickerState extends Equatable {
 }
 
 class TickerInitial extends TickerState {}
+
 class TickerEmpty extends TickerState {}
+
 class TickerActive extends TickerState {
   final MeetingTicker ticker;
   const TickerActive(this.ticker);
@@ -41,17 +44,21 @@ class TickerBloc extends Bloc<TickerEvent, TickerState> {
   StreamSubscription? _subscription;
 
   TickerBloc({required TickerRepository repository})
-      : _repository = repository,
-        super(TickerInitial()) {
+    : _repository = repository,
+      super(TickerInitial()) {
     on<StartTickerListening>(_onStartListening);
     on<_TickerUpdated>(_onTickerUpdated);
   }
 
-  void _onStartListening(StartTickerListening event, Emitter<TickerState> emit) {
+  void _onStartListening(
+    StartTickerListening event,
+    Emitter<TickerState> emit,
+  ) {
     _subscription?.cancel();
     _subscription = _repository.getActiveTicker().listen(
       (ticker) => add(_TickerUpdated(ticker)),
-      onError: (_) => add(const _TickerUpdated(null)), // Handle error by hiding ticker
+      onError: (_) =>
+          add(const _TickerUpdated(null)), // Handle error by hiding ticker
     );
   }
 

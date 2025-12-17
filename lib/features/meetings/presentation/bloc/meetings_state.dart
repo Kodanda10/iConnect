@@ -26,10 +26,7 @@ class MeetingsLoaded extends MeetingsState {
   final ScheduledMeeting? activeMeeting;
   final List<ScheduledMeeting> upcomingMeetings;
 
-  const MeetingsLoaded({
-    this.activeMeeting,
-    this.upcomingMeetings = const [],
-  });
+  const MeetingsLoaded({this.activeMeeting, this.upcomingMeetings = const []});
 
   @override
   List<Object?> get props => [activeMeeting, upcomingMeetings];

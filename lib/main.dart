@@ -1,7 +1,7 @@
 /// iConnect Mobile App Entry Point
-/// 
+///
 /// Initializes Firebase and runs the app with BLoC providers.
-/// 
+///
 /// @changelog
 /// - 2024-12-11: Initial implementation with Firebase
 library;
@@ -20,25 +20,25 @@ import 'features/auth/presentation/bloc/auth_state.dart';
 
 import 'features/action/presentation/bloc/greeting_bloc.dart';
 
-import 'features/ticker/presentation/bloc/ticker_bloc.dart';
-
 import 'features/tasks/presentation/bloc/task_bloc.dart';
 import 'features/tasks/presentation/bloc/task_event.dart';
 import 'features/settings/presentation/cubit/settings_cubit.dart';
+import 'features/report/presentation/bloc/report_bloc.dart';
+import 'features/report/presentation/bloc/report_event.dart';
+import 'features/meetings/presentation/bloc/meetings_bloc.dart';
+import 'features/meetings/presentation/bloc/meetings_event.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Dependency Injection
   await di.init();
-  
+
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
@@ -48,12 +48,10 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
-  
+
   // Lock to portrait mode
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-  
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   runApp(const IConnectApp());
 }
 
@@ -67,17 +65,14 @@ class IConnectApp extends StatelessWidget {
         BlocProvider(
           create: (_) => di.sl<AuthBloc>()..add(AuthCheckRequested()),
         ),
+        BlocProvider(create: (_) => di.sl<TaskBloc>()..add(LoadPendingTasks())),
+        BlocProvider(create: (_) => di.sl<GreetingBloc>()),
+        BlocProvider(create: (_) => di.sl<SettingsCubit>()..loadSettings()),
         BlocProvider(
-          create: (_) => di.sl<TaskBloc>()..add(LoadPendingTasks()),
+          create: (_) => di.sl<ReportBloc>()..add(const LoadReport(days: 7)),
         ),
         BlocProvider(
-          create: (_) => di.sl<TickerBloc>()..add(StartTickerListening()),
-        ),
-        BlocProvider(
-          create: (_) => di.sl<GreetingBloc>(),
-        ),
-        BlocProvider(
-          create: (_) => di.sl<SettingsCubit>()..loadSettings(),
+          create: (_) => di.sl<MeetingsBloc>()..add(LoadActiveMeeting()),
         ),
       ],
       child: MaterialApp(

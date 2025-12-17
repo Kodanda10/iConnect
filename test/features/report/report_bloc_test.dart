@@ -131,8 +131,9 @@ void main() {
           ),
         ];
 
-        when(() => mockRepository.getReportForDays(7))
-            .thenAnswer((_) async => Right(mockSummaries));
+        when(
+          () => mockRepository.getReportForDays(7),
+        ).thenAnswer((_) async => Right(mockSummaries));
 
         return ReportBloc(repository: mockRepository);
       },
@@ -153,8 +154,9 @@ void main() {
     blocTest<ReportBloc, ReportState>(
       'emits [ReportLoading, ReportError] when LoadReport fails',
       build: () {
-        when(() => mockRepository.getReportForDays(any()))
-            .thenAnswer((_) async => Left(ServerFailure('Network error')));
+        when(
+          () => mockRepository.getReportForDays(any()),
+        ).thenAnswer((_) async => Left(ServerFailure('Network error')));
 
         return ReportBloc(repository: mockRepository);
       },
@@ -203,21 +205,18 @@ void main() {
           ],
         );
 
-        when(() => mockRepository.getReportForDays(7))
-            .thenAnswer((_) async => Right([initialSummary]));
+        when(
+          () => mockRepository.getReportForDays(7),
+        ).thenAnswer((_) async => Right([initialSummary]));
 
-        when(() => mockRepository.getReportForDateRange(any(), any()))
-            .thenAnswer((_) async => Right([olderSummary]));
+        when(
+          () => mockRepository.getReportForDateRange(any(), any()),
+        ).thenAnswer((_) async => Right([olderSummary]));
 
         return ReportBloc(repository: mockRepository);
       },
       seed: () => ReportLoaded(
-        daySummaries: [
-          DaySummary(
-            date: DateTime.now(),
-            actions: [],
-          ),
-        ],
+        daySummaries: [DaySummary(date: DateTime.now(), actions: [])],
         hasMore: true,
       ),
       act: (bloc) => bloc.add(LoadMoreReport()),
@@ -229,15 +228,13 @@ void main() {
           true,
         ),
         // Then: combined results with loading done
-        isA<ReportLoaded>().having(
-          (s) => s.daySummaries.length,
-          'has more summaries after loading more',
-          2,
-        ).having(
-          (s) => s.loadingMore,
-          'is not loading more',
-          false,
-        ),
+        isA<ReportLoaded>()
+            .having(
+              (s) => s.daySummaries.length,
+              'has more summaries after loading more',
+              2,
+            )
+            .having((s) => s.loadingMore, 'is not loading more', false),
       ],
     );
   });

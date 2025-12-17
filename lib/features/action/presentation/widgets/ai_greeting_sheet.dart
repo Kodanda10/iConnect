@@ -35,10 +35,10 @@ class AiGreetingSheet extends StatefulWidget {
 class _AiGreetingSheetState extends State<AiGreetingSheet> {
   String _language = 'English';
   final List<String> _languages = ['English', 'Hindi', 'Odia'];
-  
+
   String _tone = 'Warm';
   final List<String> _tones = ['Warm', 'Formal', 'Excited'];
-  
+
   final TextEditingController _messageController = TextEditingController();
   bool _hasGenerated = false;
 
@@ -61,27 +61,31 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
   void _send() async {
     final message = _messageController.text;
     if (message.isEmpty) return;
-    
+
     // 1. Launch App
     if (widget.actionType == 'WHATSAPP') {
       final cleanNumber = widget.mobile.replaceAll(RegExp(r'[^0-9]'), '');
-      final uri = Uri.parse('https://wa.me/$cleanNumber?text=${Uri.encodeComponent(message)}');
+      final uri = Uri.parse(
+        'https://wa.me/$cleanNumber?text=${Uri.encodeComponent(message)}',
+      );
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } else {
-      final uri = Uri.parse('sms:${widget.mobile}?body=${Uri.encodeComponent(message)}');
+      final uri = Uri.parse(
+        'sms:${widget.mobile}?body=${Uri.encodeComponent(message)}',
+      );
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
       }
     }
-    
+
     // 2. Show Verification Dialog (after a short delay to simulate return)
     if (mounted) {
       _showCompletionDialog();
     }
   }
-  
+
   void _showCompletionDialog() {
     showDialog(
       context: context,
@@ -116,7 +120,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               // Action Summary
               Container(
                 padding: const EdgeInsets.all(16),
@@ -133,7 +137,10 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                       children: [
                         Text(
                           'Action taken: ${widget.actionType}',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
                         ),
                         Text(
                           widget.constituentName,
@@ -149,20 +156,24 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Connected/Sent Button
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () {
                   // Mark action as sent
-                  context.read<TaskBloc>().add(UpdateActionStatus(
-                    taskId: widget.taskId,
-                    actionType: widget.actionType,
-                  ));
+                  context.read<TaskBloc>().add(
+                    UpdateActionStatus(
+                      taskId: widget.taskId,
+                      actionType: widget.actionType,
+                    ),
+                  );
                   Navigator.pop(ctx);
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -173,10 +184,16 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                   );
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
-                label: const Text('Connected / Sent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'Connected / Sent',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
-              
+
               // No Answer / Reschedule Row
               Row(
                 children: [
@@ -186,7 +203,9 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                         foregroundColor: Colors.red[400],
                         side: BorderSide(color: Colors.red[200]!),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onPressed: () {
                         Navigator.pop(ctx);
@@ -203,7 +222,9 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                         foregroundColor: Colors.grey[600],
                         side: BorderSide(color: Colors.grey[300]!),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onPressed: () {
                         Navigator.pop(ctx);
@@ -235,7 +256,13 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 24, offset: Offset(0, -4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 24,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -253,7 +280,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Header
           Row(
             children: [
@@ -264,7 +291,9 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  widget.actionType == 'WHATSAPP' ? Icons.chat_bubble : Icons.message,
+                  widget.actionType == 'WHATSAPP'
+                      ? Icons.chat_bubble
+                      : Icons.message,
                   color: const Color(0xFF134E4A),
                 ),
               ),
@@ -290,7 +319,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Controls (Language & Tone)
           Row(
             children: [
@@ -314,17 +343,22 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Helper: "Generate" button if not yet generated
           if (!_hasGenerated)
             ElevatedButton.icon(
               onPressed: _generate,
               icon: const Icon(Icons.auto_awesome, color: Colors.white),
-              label: const Text('Generate with AI', style: TextStyle(color: Colors.white)),
+              label: const Text(
+                'Generate with AI',
+                style: TextStyle(color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF134E4A),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
 
@@ -340,10 +374,12 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
               if (state is GreetingLoading) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 32),
-                  child: Center(child: CircularProgressIndicator(color:  Color(0xFF134E4A))),
+                  child: Center(
+                    child: CircularProgressIndicator(color: Color(0xFF134E4A)),
+                  ),
                 );
               }
-              
+
               if (_hasGenerated || state is GreetingLoaded) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -359,7 +395,10 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                       child: TextField(
                         controller: _messageController,
                         maxLines: 4,
-                        style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+                        style: const TextStyle(
+                          color: Color(0xFF111827),
+                          fontSize: 16,
+                        ),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Message will appear here...',
@@ -371,15 +410,19 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                     Row(
                       children: [
                         IconButton(
-                          onPressed: _generate, 
+                          onPressed: _generate,
                           icon: Icon(Icons.refresh, color: Colors.grey[600]),
                           tooltip: 'Regenerate',
                         ),
                         const Spacer(),
                         IconButton(
                           onPressed: () {
-                             Clipboard.setData(ClipboardData(text: _messageController.text));
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!')));
+                            Clipboard.setData(
+                              ClipboardData(text: _messageController.text),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Copied!')),
+                            );
                           },
                           icon: Icon(Icons.copy, color: Colors.grey[600]),
                           tooltip: 'Copy',
@@ -390,27 +433,36 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                     ElevatedButton.icon(
                       onPressed: _send,
                       icon: Icon(
-                        widget.actionType == 'WHATSAPP' ? Icons.send : Icons.sms, 
+                        widget.actionType == 'WHATSAPP'
+                            ? Icons.send
+                            : Icons.sms,
                         color: Colors.white,
                       ),
                       label: Text(
                         'Send via ${widget.actionType == 'WHATSAPP' ? 'WhatsApp' : 'SMS'}',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: widget.actionType == 'WHATSAPP' ? const Color(0xFF10B981) : Colors.blue[600],
+                        backgroundColor: widget.actionType == 'WHATSAPP'
+                            ? const Color(0xFF10B981)
+                            : Colors.blue[600],
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ],
                 );
               }
-              
+
               return const SizedBox.shrink();
             },
           ),
-          
+
           const SizedBox(height: 24),
         ],
       ),
@@ -435,8 +487,14 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
           value: value,
           icon: Icon(icon, color: Colors.grey[400], size: 16),
           dropdownColor: Colors.white,
-          style: const TextStyle(color: Color(0xFF111827), fontWeight: FontWeight.bold, fontSize: 13),
-          items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          style: const TextStyle(
+            color: Color(0xFF111827),
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          items: items
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
           onChanged: onChanged,
         ),
       ),

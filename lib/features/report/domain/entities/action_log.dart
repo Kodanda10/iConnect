@@ -8,11 +8,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Action type enum for different interaction types
-enum ActionType {
-  call,
-  sms,
-  whatsapp,
-}
+enum ActionType { call, sms, whatsapp }
 
 /// Entity representing a single action log entry
 class ActionLog extends Equatable {
@@ -40,16 +36,16 @@ class ActionLog extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        constituentId,
-        constituentName,
-        actionType,
-        executedAt,
-        executedBy,
-        success,
-        messagePreview,
-        durationSeconds,
-      ];
+    id,
+    constituentId,
+    constituentName,
+    actionType,
+    executedAt,
+    executedBy,
+    success,
+    messagePreview,
+    durationSeconds,
+  ];
 
   /// Convert action type string from Firestore to enum
   static ActionType actionTypeFromString(String type) {
@@ -76,12 +72,14 @@ class ActionLog extends Equatable {
         return 'WHATSAPP';
     }
   }
+
   /// Create ActionLog from Firestore Map
   factory ActionLog.fromMap(Map<String, dynamic> map, String id) {
     // Handle Timestamp or String for executed_at
     DateTime executedAt;
     final dateVal = map['executed_at'];
-    if (dateVal != null && dateVal.runtimeType.toString().contains('Timestamp')) {
+    if (dateVal != null &&
+        dateVal.runtimeType.toString().contains('Timestamp')) {
       // Dynamic check to avoid importing cloud_firestore in domain
       executedAt = (dateVal as dynamic).toDate();
     } else if (dateVal is String) {

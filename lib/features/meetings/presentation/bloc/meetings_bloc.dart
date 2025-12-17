@@ -14,8 +14,8 @@ class MeetingsBloc extends Bloc<MeetingsEvent, MeetingsState> {
   final MeetingsRepository _repository;
 
   MeetingsBloc({required MeetingsRepository repository})
-      : _repository = repository,
-        super(MeetingsInitial()) {
+    : _repository = repository,
+      super(MeetingsInitial()) {
     on<LoadActiveMeeting>(_onLoadActiveMeeting);
     on<RefreshMeeting>(_onRefreshMeeting);
   }

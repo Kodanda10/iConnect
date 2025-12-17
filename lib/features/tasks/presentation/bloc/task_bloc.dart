@@ -7,8 +7,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final TaskRepository _taskRepository;
 
   TaskBloc({required TaskRepository taskRepository})
-      : _taskRepository = taskRepository,
-        super(TaskInitial()) {
+    : _taskRepository = taskRepository,
+      super(TaskInitial()) {
     on<LoadTasksForDate>(_onLoadTasksForDate);
     on<LoadPendingTasks>(_onLoadPendingTasks);
     on<LoadCompletedTasks>(_onLoadCompletedTasks);
@@ -56,7 +56,10 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     UpdateTaskStatus event,
     Emitter<TaskState> emit,
   ) async {
-    final result = await _taskRepository.updateTaskStatus(event.taskId, event.status);
+    final result = await _taskRepository.updateTaskStatus(
+      event.taskId,
+      event.status,
+    );
     result.fold(
       (failure) => emit(TaskError(failure.message)),
       (_) => add(LoadPendingTasks()),
@@ -68,22 +71,20 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     UpdateActionStatus event,
     Emitter<TaskState> emit,
   ) async {
-    emit(ActionStatusUpdating(
-      taskId: event.taskId,
-      actionType: event.actionType,
-    ));
-    
+    emit(
+      ActionStatusUpdating(taskId: event.taskId, actionType: event.actionType),
+    );
+
     final result = await _taskRepository.updateActionStatus(
       event.taskId,
       event.actionType,
     );
-    
-    result.fold(
-      (failure) => emit(TaskError(failure.message)),
-      (_) => emit(ActionStatusUpdated(
-        taskId: event.taskId,
-        actionType: event.actionType,
-      )),
-    );
+
+    result.fold((failure) => emit(TaskError(failure.message)), (_) {
+      emit(
+        ActionStatusUpdated(taskId: event.taskId, actionType: event.actionType),
+      );
+      add(LoadPendingTasks());
+    });
   }
 }

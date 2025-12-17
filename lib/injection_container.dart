@@ -23,6 +23,14 @@ import 'features/ticker/data/repositories/firestore_ticker_repository.dart';
 import 'features/ticker/domain/repositories/ticker_repository.dart';
 import 'features/ticker/presentation/bloc/ticker_bloc.dart';
 
+import 'features/report/data/repositories/firestore_report_repository.dart';
+import 'features/report/domain/repositories/report_repository.dart';
+import 'features/report/presentation/bloc/report_bloc.dart';
+
+import 'features/meetings/data/repositories/firestore_meetings_repository.dart';
+import 'features/meetings/domain/repositories/meetings_repository.dart';
+import 'features/meetings/presentation/bloc/meetings_bloc.dart';
+
 final sl = GetIt.instance; // Service Locator
 
 Future<void> init() async {
@@ -41,7 +49,7 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<TaskRepository>(
-    () => FirestoreTaskRepository(firestore: sl()),
+    () => FirestoreTaskRepository(firestore: sl(), auth: sl()),
   );
 
   //! Features - Action (Greetings)
@@ -71,8 +79,22 @@ Future<void> init() async {
     () => FirestoreTickerRepository(firestore: sl(), auth: sl()),
   );
 
+  //! Features - Report
+  sl.registerFactory(() => ReportBloc(repository: sl()));
+  sl.registerLazySingleton<ReportRepository>(
+    () => FirestoreReportRepository(firestore: sl()),
+  );
+
+  //! Features - Meetings
+  sl.registerFactory(() => MeetingsBloc(repository: sl()));
+  sl.registerLazySingleton<MeetingsRepository>(
+    () => FirestoreMeetingsRepository(firestore: sl()),
+  );
+
   //! External
   sl.registerLazySingleton(() => FirebaseAuth.instance);
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton(() => FirebaseFunctions.instanceFor(region: 'asia-south1'));
+  sl.registerLazySingleton(
+    () => FirebaseFunctions.instanceFor(region: 'asia-south1'),
+  );
 }

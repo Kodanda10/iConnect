@@ -13,10 +13,7 @@ class DaySummary extends Equatable {
   final DateTime date;
   final List<ActionLog> actions;
 
-  const DaySummary({
-    required this.date,
-    required this.actions,
-  });
+  const DaySummary({required this.date, required this.actions});
 
   /// Number of successful actions
   int get successCount => actions.where((a) => a.success).length;

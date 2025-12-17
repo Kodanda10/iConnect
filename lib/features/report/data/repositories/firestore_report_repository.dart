@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
@@ -10,8 +9,6 @@ class FirestoreReportRepository implements ReportRepository {
   final FirebaseFirestore firestore;
 
   FirestoreReportRepository({required this.firestore});
-
-
 
   @override
   Future<Either<Failure, List<DaySummary>>> getReportForDays(int days) async {
@@ -26,7 +23,9 @@ class FirestoreReportRepository implements ReportRepository {
 
   @override
   Future<Either<Failure, List<DaySummary>>> getReportForDateRange(
-      DateTime start, DateTime end) async {
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       final querySnapshot = await firestore
           .collection('action_logs')
@@ -37,13 +36,13 @@ class FirestoreReportRepository implements ReportRepository {
 
       // Group by Date (YYYY-MM-DD)
       final Map<String, List<ActionLog>> groupedLogs = {};
-      
+
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
         final action = ActionLog.fromMap(data, doc.id);
-        
+
         final dateKey = action.executedAt.toIso8601String().split('T')[0];
-        
+
         if (!groupedLogs.containsKey(dateKey)) {
           groupedLogs[dateKey] = [];
         }
@@ -71,10 +70,11 @@ class FirestoreReportRepository implements ReportRepository {
     try {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-      
+      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+
       // Calculate Wishes Sent (SMS + WhatsApp with Success=true) - Approximation for MVP:
       // Actually "Wishes" are specific actions. Let's assume ANY successful action is a wish/greeting for now
-      // or filter by specific action types if needed. 
+      // or filter by specific action types if needed.
       // User prompt says "ReportRepository", likely general stats.
       // Let's implement generic action stats.
 
@@ -85,11 +85,15 @@ class FirestoreReportRepository implements ReportRepository {
           .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
           .where('success', isEqualTo: true)
           .count();
-      
+
       // 2. Total Events (Tasks due today)
       final tasksQuery = firestore
           .collection('tasks')
-          .where('due_date', isEqualTo: startOfDay.toIso8601String().split('T')[0])
+          .where(
+            'dueDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
+          .where('dueDate', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
           .count();
 
       // 3. Calls Made
@@ -105,7 +109,7 @@ class FirestoreReportRepository implements ReportRepository {
           .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
           .where('action_type', isEqualTo: 'SMS')
           .count();
-          
+
       // 5. WhatsApp Sent
       final whatsappQuery = firestore
           .collection('action_logs')
@@ -122,13 +126,15 @@ class FirestoreReportRepository implements ReportRepository {
         whatsappQuery.get(),
       ]);
 
-      return Right(TodaySummaryStats(
-        wishesSent: results[0].count ?? 0,
-        totalEvents: results[1].count ?? 0,
-        callsMade: results[2].count ?? 0,
-        smsCount: results[3].count ?? 0,
-        whatsappCount: results[4].count ?? 0,
-      ));
+      return Right(
+        TodaySummaryStats(
+          wishesSent: results[0].count ?? 0,
+          totalEvents: results[1].count ?? 0,
+          callsMade: results[2].count ?? 0,
+          smsCount: results[3].count ?? 0,
+          whatsappCount: results[4].count ?? 0,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

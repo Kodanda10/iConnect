@@ -1,8 +1,8 @@
 /// Shimmer loading skeleton for task cards
-/// 
+///
 /// Displays a placeholder skeleton while tasks are loading
 /// using shimmer animation effect.
-/// 
+///
 /// @changelog
 /// - 2024-12-15: Initial implementation
 import 'package:flutter/material.dart';
@@ -107,7 +107,7 @@ class ShimmerTaskCard extends StatelessWidget {
 /// Widget that displays multiple shimmer cards as a loading skeleton list
 class ShimmerTaskList extends StatelessWidget {
   final int itemCount;
-  
+
   const ShimmerTaskList({super.key, this.itemCount = 3});
 
   @override

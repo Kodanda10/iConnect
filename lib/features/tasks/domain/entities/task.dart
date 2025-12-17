@@ -18,7 +18,14 @@ class Task extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, constituentId, type, status, dueDate, createdAt];
+  List<Object?> get props => [
+    id,
+    constituentId,
+    type,
+    status,
+    dueDate,
+    createdAt,
+  ];
 }
 
 class EnrichedTask extends Task {
@@ -27,7 +34,7 @@ class EnrichedTask extends Task {
   final String block;
   final String gramPanchayat;
   final String mobile;
-  
+
   // Action status tracking
   final bool callSent;
   final bool smsSent;
@@ -51,6 +58,15 @@ class EnrichedTask extends Task {
   });
 
   @override
-  List<Object?> get props => [...super.props, name, ward, block, gramPanchayat, mobile, callSent, smsSent, whatsappSent];
+  List<Object?> get props => [
+    ...super.props,
+    name,
+    ward,
+    block,
+    gramPanchayat,
+    mobile,
+    callSent,
+    smsSent,
+    whatsappSent,
+  ];
 }
-

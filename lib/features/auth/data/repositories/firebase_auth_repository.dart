@@ -12,8 +12,8 @@ class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
-  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+  }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<Either<Failure, AuthUser>> login(String email, String password) async {
@@ -41,12 +41,9 @@ class FirebaseAuthRepository implements AuthRepository {
         }
       }
 
-      return Right(AuthUser(
-        id: user.uid,
-        email: user.email!,
-        name: name,
-        role: role,
-      ));
+      return Right(
+        AuthUser(id: user.uid, email: user.email!, name: name, role: role),
+      );
     } on FirebaseAuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Authentication failed'));
     } catch (e) {
@@ -87,12 +84,9 @@ class FirebaseAuthRepository implements AuthRepository {
         }
       }
 
-      return Right(AuthUser(
-        id: user.uid,
-        email: user.email!,
-        name: name,
-        role: role,
-      ));
+      return Right(
+        AuthUser(id: user.uid, email: user.email!, name: name, role: role),
+      );
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

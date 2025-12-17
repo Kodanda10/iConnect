@@ -15,8 +15,8 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
   int _currentDaysLoaded = 0;
 
   ReportBloc({required ReportRepository repository})
-      : _repository = repository,
-        super(ReportInitial()) {
+    : _repository = repository,
+      super(ReportInitial()) {
     on<LoadReport>(_onLoadReport);
     on<LoadMoreReport>(_onLoadMoreReport);
     on<RefreshReport>(_onRefreshReport);
@@ -30,16 +30,12 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
 
     final result = await _repository.getReportForDays(event.days);
 
-    result.fold(
-      (failure) => emit(ReportError(failure.message)),
-      (summaries) {
-        _currentDaysLoaded = event.days;
-        emit(ReportLoaded(
-          daySummaries: summaries,
-          hasMore: summaries.isNotEmpty,
-        ));
-      },
-    );
+    result.fold((failure) => emit(ReportError(failure.message)), (summaries) {
+      _currentDaysLoaded = event.days;
+      emit(
+        ReportLoaded(daySummaries: summaries, hasMore: summaries.isNotEmpty),
+      );
+    });
   }
 
   Future<void> _onLoadMoreReport(
@@ -66,11 +62,13 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
           emit(currentState.copyWith(loadingMore: false, hasMore: false)),
       (newSummaries) {
         _currentDaysLoaded += 7;
-        emit(ReportLoaded(
-          daySummaries: [...currentState.daySummaries, ...newSummaries],
-          hasMore: newSummaries.isNotEmpty,
-          loadingMore: false,
-        ));
+        emit(
+          ReportLoaded(
+            daySummaries: [...currentState.daySummaries, ...newSummaries],
+            hasMore: newSummaries.isNotEmpty,
+            loadingMore: false,
+          ),
+        );
       },
     );
   }

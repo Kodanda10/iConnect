@@ -10,7 +10,7 @@ class GenerateGreetingRequested extends GreetingEvent {
   final String constituentName;
   final String type;
   final String language;
-  
+
   const GenerateGreetingRequested({
     required this.constituentName,
     required this.type,

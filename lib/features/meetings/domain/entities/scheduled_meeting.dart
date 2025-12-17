@@ -8,11 +8,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Target group for meeting notifications
-enum TargetGroup {
-  assembly,
-  block,
-  gp,
-}
+enum TargetGroup { assembly, block, gp }
 
 /// Entity representing a scheduled conference call meeting
 class ScheduledMeeting extends Equatable {
@@ -54,16 +50,16 @@ class ScheduledMeeting extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        scheduledTime,
-        dialInNumber,
-        accessCode,
-        targetGroup,
-        targetId,
-        description,
-        notifiedConstituents,
-      ];
+    id,
+    title,
+    scheduledTime,
+    dialInNumber,
+    accessCode,
+    targetGroup,
+    targetId,
+    description,
+    notifiedConstituents,
+  ];
 
   /// Convert target group string from Firestore to enum
   static TargetGroup targetGroupFromString(String group) {

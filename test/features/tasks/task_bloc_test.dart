@@ -1,5 +1,5 @@
 /// Test suite for TaskBloc
-/// 
+///
 /// @changelog
 /// - 2024-12-15: Initial test for LoadCompletedTasks event
 import 'package:flutter_test/flutter_test.dart';
@@ -47,29 +47,25 @@ void main() {
     blocTest<TaskBloc, TaskState>(
       'emits [TaskLoading, TaskLoaded] when LoadCompletedTasks succeeds',
       build: () {
-        when(() => mockTaskRepository.getCompletedTasks())
-            .thenAnswer((_) async => Right(tCompletedTasks));
+        when(
+          () => mockTaskRepository.getCompletedTasks(),
+        ).thenAnswer((_) async => Right(tCompletedTasks));
         return taskBloc;
       },
       act: (bloc) => bloc.add(LoadCompletedTasks()),
-      expect: () => [
-        TaskLoading(),
-        TaskLoaded(tCompletedTasks),
-      ],
+      expect: () => [TaskLoading(), TaskLoaded(tCompletedTasks)],
     );
 
     blocTest<TaskBloc, TaskState>(
       'emits [TaskLoading, TaskError] when LoadCompletedTasks fails',
       build: () {
-        when(() => mockTaskRepository.getCompletedTasks())
-            .thenAnswer((_) async => Left(ServerFailure('Server error')));
+        when(
+          () => mockTaskRepository.getCompletedTasks(),
+        ).thenAnswer((_) async => Left(ServerFailure('Server error')));
         return taskBloc;
       },
       act: (bloc) => bloc.add(LoadCompletedTasks()),
-      expect: () => [
-        TaskLoading(),
-        const TaskError('Server error'),
-      ],
+      expect: () => [TaskLoading(), const TaskError('Server error')],
     );
   });
 }

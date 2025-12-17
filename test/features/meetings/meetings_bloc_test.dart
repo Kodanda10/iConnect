@@ -103,8 +103,9 @@ void main() {
           targetId: 'block_a',
         );
 
-        when(() => mockRepository.getActiveMeeting())
-            .thenAnswer((_) async => Right(activeMeeting));
+        when(
+          () => mockRepository.getActiveMeeting(),
+        ).thenAnswer((_) async => Right(activeMeeting));
 
         return MeetingsBloc(repository: mockRepository);
       },
@@ -122,8 +123,9 @@ void main() {
     blocTest<MeetingsBloc, MeetingsState>(
       'emits [MeetingsLoading, MeetingsLoaded] with null when no meeting scheduled',
       build: () {
-        when(() => mockRepository.getActiveMeeting())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockRepository.getActiveMeeting(),
+        ).thenAnswer((_) async => const Right(null));
 
         return MeetingsBloc(repository: mockRepository);
       },
@@ -141,8 +143,9 @@ void main() {
     blocTest<MeetingsBloc, MeetingsState>(
       'emits [MeetingsLoading, MeetingsError] on failure',
       build: () {
-        when(() => mockRepository.getActiveMeeting())
-            .thenAnswer((_) async => Left(ServerFailure('Connection failed')));
+        when(
+          () => mockRepository.getActiveMeeting(),
+        ).thenAnswer((_) async => Left(ServerFailure('Connection failed')));
 
         return MeetingsBloc(repository: mockRepository);
       },

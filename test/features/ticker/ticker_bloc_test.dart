@@ -23,14 +23,18 @@ void main() {
     );
 
     test('initial state is TickerInitial', () {
-      expect(TickerBloc(repository: mockRepository).state, equals(TickerInitial()));
+      expect(
+        TickerBloc(repository: mockRepository).state,
+        equals(TickerInitial()),
+      );
     });
 
     blocTest<TickerBloc, TickerState>(
       'emits [TickerActive] when repository stream emits a ticker',
       build: () {
-        when(() => mockRepository.getActiveTicker())
-            .thenAnswer((_) => Stream.value(tTicker));
+        when(
+          () => mockRepository.getActiveTicker(),
+        ).thenAnswer((_) => Stream.value(tTicker));
         return TickerBloc(repository: mockRepository);
       },
       act: (bloc) => bloc.add(StartTickerListening()),
@@ -40,8 +44,9 @@ void main() {
     blocTest<TickerBloc, TickerState>(
       'emits [TickerEmpty] when repository stream emits null',
       build: () {
-        when(() => mockRepository.getActiveTicker())
-            .thenAnswer((_) => Stream.value(null));
+        when(
+          () => mockRepository.getActiveTicker(),
+        ).thenAnswer((_) => Stream.value(null));
         return TickerBloc(repository: mockRepository);
       },
       act: (bloc) => bloc.add(StartTickerListening()),

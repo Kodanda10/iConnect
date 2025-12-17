@@ -11,6 +11,16 @@ class TaskModel extends Task {
     required super.createdAt,
   });
 
+  static DateTime _parseFirestoreDate(dynamic value) {
+    if (value == null) return DateTime.fromMillisecondsSinceEpoch(0);
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.fromMillisecondsSinceEpoch(0);
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return TaskModel(
@@ -18,8 +28,8 @@ class TaskModel extends Task {
       constituentId: data['constituentId'] ?? '',
       type: data['type'] ?? 'UNKNOWN',
       status: data['status'] ?? 'PENDING',
-      dueDate: (data['dueDate'] as Timestamp).toDate(),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      dueDate: _parseFirestoreDate(data['dueDate'] ?? data['due_date']),
+      createdAt: _parseFirestoreDate(data['createdAt'] ?? data['created_at']),
     );
   }
 
