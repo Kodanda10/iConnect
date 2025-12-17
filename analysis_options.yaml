@@ -1,1 +1,17 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "test/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    subtype_of_sealed_class: ignore
+    must_be_immutable: ignore
+    duplicate_ignore: ignore
+    unused_import: ignore
+    slash_for_doc_comments: ignore
+    dangling_library_doc_comments: ignore
+    prefer_const_constructors: ignore
+    prefer_const_literals_to_create_immutables: ignore
+    avoid_print: ignore

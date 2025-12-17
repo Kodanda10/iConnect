@@ -7,7 +7,8 @@
     - **Web**: Standardized `scheduler-audience.test.tsx` using `findByRole`, `findAllByText`, and label-based selectors to resolve selection ambiguity in Campaign Wizard. Verified all 179 tests pass.
     - **Wiring**: Finalized `HomeTab` action persistence logic. Buttons now grey out and show "Sent" status across sessions.
     - **History**: Implemented 7-day performance history timeline in the mobile app.
-- **Status**: 100% Local CI Pass. GitHub CI blocked by account billing/spending limit issues.
-- **Next Steps**: User to resolve GitHub billing/link payment. Push verified locally.
+- **Status**: 100% Local CI Pass. GitHub CI blocked by account billing/spending limit issues (and potential strict analyze settings).
+- **Persistence**: Standardized cross-channel action confirmation. Added "Mark as Called" prompt for dialer launches in `HomePage` and "Mark as Sent" for SMS/WhatsApp in `AiGreetingSheet`. Wired all to Firestore via `UpdateActionStatus` for persistent session-safe state.
+- **Next Steps**: User to resolve GitHub billing. Push verified locally.
  
 

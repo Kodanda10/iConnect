@@ -69,9 +69,161 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   // --- Actions ---
 
-  void _launchPhone(String number) async {
-    final uri = Uri.parse('tel:$number');
-    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  void _launchPhone(EnrichedTask task) async {
+    final uri = Uri.parse('tel:${task.mobile}');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+      
+      // Delay slightly to prevent the dialog from appearing behind the dialer immediately on some OSs
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (mounted) {
+        _showActionOutcomeDialog(task, 'CALL');
+      }
+    }
+  }
+
+  void _showActionOutcomeDialog(EnrichedTask task, String actionType) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Outcome for ${task.name}?',
+                      style: const TextStyle(
+                        color: Color(0xFF111827),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.close, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Action Summary
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      actionType == 'CALL' ? Icons.phone_callback : Icons.message, 
+                      color: Colors.grey
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Action taken: $actionType',
+                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        ),
+                        Text(
+                          task.name,
+                          style: const TextStyle(
+                            color: Color(0xFF00A896),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Connected/Sent Button
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  // Mark action as sent/called
+                  context.read<TaskBloc>().add(UpdateActionStatus(
+                    taskId: task.id,
+                    actionType: actionType,
+                  ));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('$actionType recorded!'),
+                      backgroundColor: Colors.teal,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.check, color: Colors.white),
+                label: Text(
+                  actionType == 'CALL' ? 'Mark as Called' : 'Mark as Sent', 
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // No Answer / Reschedule Row
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red[400],
+                        side: BorderSide(color: Colors.red[200]!),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                      },
+                      child: const Text('No Answer'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.grey[600],
+                        side: BorderSide(color: Colors.grey[300]!),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        // TODO: Implement reschedule logic if needed
+                      },
+                      icon: const Icon(Icons.schedule, size: 18),
+                      label: const Text('Reschedule'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _launchSMS(String number, String message) async {
@@ -1195,7 +1347,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           // Action Buttons (Call, SMS, WhatsApp) - Liquid Glass Style with Status
           Row(
             children: [
-                Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task.mobile))),
+                Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task))),
                 const SizedBox(width: 10),
                 Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, const Color(0xFF5E548E), task.smsSent, () => _openAiWizard(task, 'SMS'))),
                 const SizedBox(width: 10),

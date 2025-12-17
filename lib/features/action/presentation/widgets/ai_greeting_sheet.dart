@@ -173,7 +173,7 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
                   );
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
-                label: const Text('Connected / Sent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text('Mark as Sent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 12),
               
