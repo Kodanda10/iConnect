@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-05-20: Optimized date parsing in scanForTasks
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -87,6 +88,18 @@ function taskExists(
 }
 
 /**
+ * Helper to extract month and date from YYYY-MM-DD string or Date object.
+ * Returns null if invalid.
+ */
+function getMonthDate(dateStr: string): { month: number, date: number } | null {
+    // Optimization: avoid new Date() if string is strictly YYYY-MM-DD
+    // However, sticking to new Date() for safety but doing it once.
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return { month: d.getMonth(), date: d.getDate() };
+}
+
+/**
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
  */
@@ -98,38 +111,62 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // Optimization: Pre-calculate target dates
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDate = tomorrow.getDate();
+
     const newTasks: Task[] = [];
 
+    // Helper map to speed up lookups if existingTasks is large, but for now linear scan is likely small
+    // If existingTasks grows large, we should optimize this too.
+
     for (const constituent of constituents) {
-        // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
-            const dueDate = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
-                newTasks.push(createTask(constituent.id, 'BIRTHDAY', today));
+        // Optimize: Parse dates only once per constituent
+        let dobParts: { month: number, date: number } | null = null;
+        if (constituent.dob) {
+            dobParts = getMonthDate(constituent.dob);
+        }
+
+        let annParts: { month: number, date: number } | null = null;
+        if (constituent.anniversary) {
+            annParts = getMonthDate(constituent.anniversary);
+        }
+
+        if (dobParts) {
+            // Check Birthday - Today
+            if (dobParts.month === todayMonth && dobParts.date === todayDate) {
+                const dueDate = today.toISOString().split('T')[0];
+                if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
+                    newTasks.push(createTask(constituent.id, 'BIRTHDAY', today));
+                }
+            }
+
+            // Check Birthday - Tomorrow
+            if (dobParts.month === tomorrowMonth && dobParts.date === tomorrowDate) {
+                const dueDate = tomorrow.toISOString().split('T')[0];
+                if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
+                    newTasks.push(createTask(constituent.id, 'BIRTHDAY', tomorrow));
+                }
             }
         }
 
-        // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDate = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
-                newTasks.push(createTask(constituent.id, 'BIRTHDAY', tomorrow));
+        if (annParts) {
+            // Check Anniversary - Today
+            if (annParts.month === todayMonth && annParts.date === todayDate) {
+                const dueDate = today.toISOString().split('T')[0];
+                if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
+                    newTasks.push(createTask(constituent.id, 'ANNIVERSARY', today));
+                }
             }
-        }
 
-        // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
-            const dueDate = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
-                newTasks.push(createTask(constituent.id, 'ANNIVERSARY', today));
-            }
-        }
-
-        // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDate = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
-                newTasks.push(createTask(constituent.id, 'ANNIVERSARY', tomorrow));
+            // Check Anniversary - Tomorrow
+            if (annParts.month === tomorrowMonth && annParts.date === tomorrowDate) {
+                const dueDate = tomorrow.toISOString().split('T')[0];
+                if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
+                    newTasks.push(createTask(constituent.id, 'ANNIVERSARY', tomorrow));
+                }
             }
         }
     }
