@@ -71,6 +71,8 @@ class FirestoreReportRepository implements ReportRepository {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+      final startTs = Timestamp.fromDate(startOfDay);
+      final endTs = Timestamp.fromDate(endOfDay);
 
       // Calculate Wishes Sent (SMS + WhatsApp with Success=true) - Approximation for MVP:
       // Actually "Wishes" are specific actions. Let's assume ANY successful action is a wish/greeting for now
@@ -82,38 +84,39 @@ class FirestoreReportRepository implements ReportRepository {
       // Note: AggregateQuery with filters is supported in recent FlutterFire
       final wishesQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
+          .where('executed_at', isGreaterThanOrEqualTo: startTs)
+          .where('executed_at', isLessThanOrEqualTo: endTs)
           .where('success', isEqualTo: true)
           .count();
 
       // 2. Total Events (Tasks due today)
       final tasksQuery = firestore
           .collection('tasks')
-          .where(
-            'dueDate',
-            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
-          )
-          .where('dueDate', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+          .where('dueDate', isGreaterThanOrEqualTo: startTs)
+          .where('dueDate', isLessThanOrEqualTo: endTs)
           .count();
 
       // 3. Calls Made
       final callsQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
+          .where('executed_at', isGreaterThanOrEqualTo: startTs)
+          .where('executed_at', isLessThanOrEqualTo: endTs)
           .where('action_type', isEqualTo: 'CALL')
           .count();
 
       // 4. SMS Sent
       final smsQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
+          .where('executed_at', isGreaterThanOrEqualTo: startTs)
+          .where('executed_at', isLessThanOrEqualTo: endTs)
           .where('action_type', isEqualTo: 'SMS')
           .count();
 
       // 5. WhatsApp Sent
       final whatsappQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
+          .where('executed_at', isGreaterThanOrEqualTo: startTs)
+          .where('executed_at', isLessThanOrEqualTo: endTs)
           .where('action_type', isEqualTo: 'WHATSAPP')
           .count();
 
