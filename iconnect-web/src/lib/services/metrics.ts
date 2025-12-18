@@ -38,34 +38,43 @@ export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
     const db = getFirebaseDb();
     const constituentsRef = collection(db, 'constituents');
 
-    // Get total count using Firestore aggregation
-    const countSnapshot = await getCountFromServer(constituentsRef);
-    const total = countSnapshot.data().count;
+    try {
+        // Get total count using Firestore aggregation
+        const countSnapshot = await getCountFromServer(constituentsRef);
+        const total = countSnapshot.data().count;
+        console.log('[Metrics] Total count from server:', total);
 
-    // Get all constituents to calculate block breakdown
-    // Note: For large datasets, consider Cloud Functions aggregation
-    const snapshot = await getDocs(constituentsRef);
+        // Get all constituents to calculate block breakdown
+        // Note: For large datasets, consider Cloud Functions aggregation
+        const snapshot = await getDocs(constituentsRef);
+        console.log('[Metrics] Docs fetched:', snapshot.size);
 
-    // Group by block
-    const blockCounts: Record<string, number> = {};
+        // Group by block
+        const blockCounts: Record<string, number> = {};
 
-    snapshot.forEach((doc) => {
-        const data = doc.data();
-        const block = data.block || 'Unknown';
-        blockCounts[block] = (blockCounts[block] || 0) + 1;
-    });
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const block = data.block || 'Unknown';
+            blockCounts[block] = (blockCounts[block] || 0) + 1;
+        });
 
-    // Convert to array format
-    const blocks: BlockMetric[] = Object.entries(blockCounts).map(([name, count]) => ({
-        name,
-        count,
-        gps: [], // GPs loaded on-demand when block is clicked/hovered
-    }));
+        console.log('[Metrics] Block counts:', blockCounts);
 
-    // Sort by count descending
-    blocks.sort((a, b) => b.count - a.count);
+        // Convert to array format
+        const blocks: BlockMetric[] = Object.entries(blockCounts).map(([name, count]) => ({
+            name,
+            count,
+            gps: [], // GPs loaded on-demand when block is clicked/hovered
+        }));
 
-    return { total, blocks };
+        // Sort by count descending
+        blocks.sort((a, b) => b.count - a.count);
+
+        return { total, blocks };
+    } catch (error) {
+        console.error('[Metrics] Error fetching metrics:', error);
+        throw error;
+    }
 }
 
 /**

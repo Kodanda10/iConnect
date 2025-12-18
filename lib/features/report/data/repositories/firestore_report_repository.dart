@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/day_summary.dart';
@@ -8,10 +9,12 @@ import '../../domain/repositories/report_repository.dart';
 
 class FirestoreReportRepository implements ReportRepository {
   final FirebaseFirestore firestore;
+  final FirebaseAuth auth;
 
-  FirestoreReportRepository({required this.firestore});
-
-
+  FirestoreReportRepository({
+    required this.firestore,
+    required this.auth,
+  });
 
   @override
   Future<Either<Failure, List<DaySummary>>> getReportForDays(int days) async {
@@ -28,11 +31,17 @@ class FirestoreReportRepository implements ReportRepository {
   Future<Either<Failure, List<DaySummary>>> getReportForDateRange(
       DateTime start, DateTime end) async {
     try {
+      final user = auth.currentUser;
+      if (user == null) {
+        return Left(ServerFailure('User not authenticated'));
+      }
+
       final querySnapshot = await firestore
           .collection('action_logs')
+          .where('executed_by', isEqualTo: user.uid)
           .where('executed_at', isGreaterThanOrEqualTo: start)
           .where('executed_at', isLessThanOrEqualTo: end)
-          .orderBy('executed_at')
+          .orderBy('executed_at', descending: true)
           .get();
 
       // Group by Date (YYYY-MM-DD)
@@ -42,7 +51,7 @@ class FirestoreReportRepository implements ReportRepository {
         final data = doc.data();
         final action = ActionLog.fromMap(data, doc.id);
         
-        final dateKey = action.executedAt.toIso8601String().split('T')[0];
+        final dateKey = action.executedAt.toLocal().toIso8601String().split('T')[0];
         
         if (!groupedLogs.containsKey(dateKey)) {
           groupedLogs[dateKey] = [];
@@ -69,48 +78,57 @@ class FirestoreReportRepository implements ReportRepository {
   @override
   Future<Either<Failure, TodaySummaryStats>> getTodaySummary() async {
     try {
+      final user = auth.currentUser;
+      if (user == null) {
+        return Left(ServerFailure('User not authenticated'));
+      }
+
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-      
-      // Calculate Wishes Sent (SMS + WhatsApp with Success=true) - Approximation for MVP:
-      // Actually "Wishes" are specific actions. Let's assume ANY successful action is a wish/greeting for now
-      // or filter by specific action types if needed. 
-      // User prompt says "ReportRepository", likely general stats.
-      // Let's implement generic action stats.
+      final startTimestamp = Timestamp.fromDate(startOfDay);
+      final nextDayTimestamp = Timestamp.fromDate(startOfDay.add(const Duration(days: 1)));
 
-      // 1. Total Wishes Sent (Success=true)
-      // Note: AggregateQuery with filters is supported in recent FlutterFire
+      // 1. Wishes Sent (Success = true)
       final wishesQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
+          .where('executed_by', isEqualTo: user.uid)
+          .where('executed_at', isGreaterThanOrEqualTo: startTimestamp)
           .where('success', isEqualTo: true)
           .count();
       
       // 2. Total Events (Tasks due today)
+      // Note: due_date is Timestamp in Firestore
       final tasksQuery = firestore
           .collection('tasks')
-          .where('due_date', isEqualTo: startOfDay.toIso8601String().split('T')[0])
+          .where('due_date', isGreaterThanOrEqualTo: startTimestamp)
+          .where('due_date', isLessThan: nextDayTimestamp)
+          // We can't easily filter by uid unless tasks have it. 
+          // Assuming we rely on client-side filtering or tasks are global/assigned.
+          // If tasks have 'constituent_id', we might not filter by user here if shared.
           .count();
 
       // 3. Calls Made
       final callsQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
-          .where('action_type', isEqualTo: 'CALL')
+          .where('executed_by', isEqualTo: user.uid)
+          .where('executed_at', isGreaterThanOrEqualTo: startTimestamp)
+          .where('action_type', isEqualTo: 'call')
           .count();
 
       // 4. SMS Sent
       final smsQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
-          .where('action_type', isEqualTo: 'SMS')
+          .where('executed_by', isEqualTo: user.uid)
+          .where('executed_at', isGreaterThanOrEqualTo: startTimestamp)
+          .where('action_type', isEqualTo: 'sms')
           .count();
           
       // 5. WhatsApp Sent
       final whatsappQuery = firestore
           .collection('action_logs')
-          .where('executed_at', isGreaterThanOrEqualTo: startOfDay)
-          .where('action_type', isEqualTo: 'WHATSAPP')
+          .where('executed_by', isEqualTo: user.uid)
+          .where('executed_at', isGreaterThanOrEqualTo: startTimestamp)
+          .where('action_type', isEqualTo: 'whatsapp')
           .count();
 
       // Execute all in parallel

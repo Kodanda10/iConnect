@@ -67,11 +67,15 @@ jest.mock('firebase/firestore', () => ({
         forEach: (callback: (doc: typeof mockTaskDocs[0]) => void) => mockTaskDocs.forEach(callback),
         size: mockTaskDocs.length,
     })),
+    getCountFromServer: jest.fn(() => Promise.resolve({
+        data: () => ({ count: mockTaskDocs.length }),
+    })),
     query: jest.fn(),
     where: jest.fn(),
     orderBy: jest.fn(),
     Timestamp: {
         now: jest.fn(() => ({ toDate: () => new Date() })),
+        fromDate: jest.fn((date) => ({ toDate: () => date })),
     },
 }));
 
@@ -104,8 +108,7 @@ describe('Tasks Service', () => {
                 constituent_id: 'const-1',
                 type: 'BIRTHDAY',
                 status: 'PENDING',
-                due_date: '2024-12-15',
-                message_template: 'Happy Birthday!',
+                due_date: new Date('2024-12-15'), // Changed from string to Date
             });
 
             expect(taskId).toBeDefined();

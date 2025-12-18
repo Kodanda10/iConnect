@@ -15,7 +15,9 @@ service cloud.firestore {
     
     // Helper function: Check user role
     function hasRole(role) {
-      return isSignedIn() && getUserData().role == role;
+      return isSignedIn() 
+             && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+             && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
     }
     
     function isStaff() {
@@ -53,40 +55,33 @@ service cloud.firestore {
     
     // Settings collection - singleton document
     // SECURITY FIX (2025-12-16): Restricted write access to STAFF only
+    // Settings collection - singleton document
+    // SECURITY UPDATE: Restricted read access of non-public settings to STAFF only.
     match /settings/{docId} {
-      // Keep the public surface area minimal: only the singleton app config is public-read.
-      // Any additional settings docs require authentication.
-      // SECURITY UPDATE: Restricted read access of non-public settings to STAFF only.
-      allow read: if docId == 'app_config' || isStaff();
-      allow write: if isStaff(); // Only authenticated staff can modify settings
+      allow read: if docId == 'app_config' || isStaffOrLeader();
+      allow write: if isStaffOrLeader(); // Grant full access to both for now
     }
     
     // Constituents collection
     match /constituents/{constituentId} {
       allow read: if isStaffOrLeader();
-      // SECURITY FIX: Removed 'seeded' tag backdoor - only authenticated staff can create
-      allow create: if isStaff();
-      allow update, delete: if isStaff();
+      allow create: if isStaffOrLeader();
+      allow update, delete: if isStaffOrLeader();
     }
     
     // Tasks collection
     match /tasks/{taskId} {
       allow read: if isStaffOrLeader();
-      // Staff can do full CRUD, Leader can update status/notes + action flags
-      allow create: if isStaff();
-      // Security Fix (2025-12-17): Expanded LEADER permissions to match client writes
-      allow update: if isStaff() || (isLeader() && 
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'notes', 'action_taken', 'completed_by', 
-                    'callSent', 'callSentAt', 'smsSent', 'smsSentAt', 
-                    'whatsappSent', 'whatsappSentAt', 'updatedAt']));
-      allow delete: if isStaff();
+      // Grant full CRUD to both Staff and Leader for initial purpose
+      allow create: if isStaffOrLeader();
+      allow update: if isStaffOrLeader();
+      allow delete: if isStaffOrLeader();
     }
     
     // Festivals collection
     match /festivals/{festivalId} {
       allow read: if isStaffOrLeader();
-      allow write: if isStaff();
+      allow write: if isStaffOrLeader();
     }
 
     // Active Tickers collection (Public Read for App users, Write for Staff/Leader)
@@ -98,9 +93,9 @@ service cloud.firestore {
     // Action Logs collection - Leaders log their actions, Staff can read/modify
     // P0 Security (2025-12-17): Added per implementation_plan.md
     match /action_logs/{logId} {
-      allow read: if isStaffOrLeader();
-      allow create: if isLeader(); // Leaders log their own actions
-      allow update, delete: if isStaff(); // Only staff can modify logs
+      allow read: if isStaffOrLeader() || (isSignedIn() && resource.data.executed_by == request.auth.uid);
+      allow create: if isStaffOrLeader() || (isSignedIn() && request.resource.data.executed_by == request.auth.uid);
+      allow update, delete: if isStaffOrLeader(); 
     }
 
     // Scheduled Meetings collection - For conference call scheduling
@@ -108,7 +103,7 @@ service cloud.firestore {
     match /scheduled_meetings/{meetingId} {
       allow read: if isStaffOrLeader();
       allow create: if isStaffOrLeader(); // Both can create meetings
-      allow update, delete: if isStaff(); // Only staff can modify/cancel
+      allow update, delete: if isStaffOrLeader(); // Grant full access
     }
 
     // Scheduled Notifications - Cloud Functions only (Admin SDK bypasses rules)

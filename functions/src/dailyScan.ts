@@ -3,7 +3,6 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
- * - 2025-05-20: Optimized date parsing in scanForTasks
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -24,14 +23,17 @@ export interface Constituent {
 
 export interface Task {
     id: string;
-    constituentId: string;  // Schema alignment: camelCase to match Flutter
+    constituent_id: string;
+    constituent_name: string;
+    constituent_mobile: string;
+    ward_number: string;
     type: TaskType;
-    dueDate: string;        // Schema alignment: camelCase
+    due_date: any; // Firestore Timestamp
     status: TaskStatus;
     notes?: string;
-    actionTaken?: 'CALL' | 'SMS' | 'WHATSAPP';  // camelCase
-    completedBy?: 'LEADER' | 'STAFF';            // camelCase
-    createdAt: string;                           // camelCase
+    action_taken?: 'CALL' | 'SMS' | 'WHATSAPP';
+    completed_by?: 'LEADER' | 'STAFF';
+    created_at: any; // Firestore Timestamp
 }
 
 export interface ScanResult {
@@ -45,28 +47,38 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    const date = new Date(dateStr);
+    // Handle YYYY-MM-DD format
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return false;
+    
+    const day = parseInt(parts[2], 10);
+    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+
     return (
-        date.getDate() === targetDate.getDate() &&
-        date.getMonth() === targetDate.getMonth()
+        day === targetDate.getDate() &&
+        month === targetDate.getMonth()
     );
 }
 
 /**
- * Create a new task object
+ * Create a new task object with denormalized data
  */
 function createTask(
-    constituentId: string,
+    constituent: Constituent,
     type: TaskType,
-    dueDate: Date
+    dueDate: Date,
+    TimestampClass: any
 ): Task {
     return {
         id: uuidv4(),
-        constituentId: constituentId,
+        constituent_id: constituent.id,
+        constituent_name: constituent.name,
+        constituent_mobile: constituent.mobile_number,
+        ward_number: constituent.ward_number,
         type,
-        dueDate: dueDate.toISOString().split('T')[0],
+        due_date: TimestampClass.fromDate(dueDate),
         status: 'PENDING',
-        createdAt: new Date().toISOString(),
+        created_at: TimestampClass.now(),
     };
 }
 
@@ -79,24 +91,21 @@ function taskExists(
     type: TaskType,
     dueDate: string
 ): boolean {
-    return existingTasks.some(
-        (task) =>
-            task.constituentId === constituentId &&
+    return existingTasks.some((task) => {
+        // Handle both Timestamp and String for backward compatibility during migration
+        let taskDateStr = '';
+        if (task.due_date && typeof task.due_date.toDate === 'function') {
+            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
+        } else if (typeof task.due_date === 'string') {
+            taskDateStr = task.due_date;
+        }
+        
+        return (
+            (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
             task.type === type &&
-            task.dueDate === dueDate
-    );
-}
-
-/**
- * Helper to extract month and date from YYYY-MM-DD string or Date object.
- * Returns null if invalid.
- */
-function getMonthDate(dateStr: string): { month: number, date: number } | null {
-    // Optimization: avoid new Date() if string is strictly YYYY-MM-DD
-    // However, sticking to new Date() for safety but doing it once.
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return null;
-    return { month: d.getMonth(), date: d.getDate() };
+            taskDateStr === dueDate
+        );
+    });
 }
 
 /**
@@ -105,68 +114,45 @@ function getMonthDate(dateStr: string): { month: number, date: number } | null {
  */
 export function scanForTasks(
     constituents: Constituent[],
-    existingTasks: Task[]
+    existingTasks: Task[],
+    TimestampClass: any
 ): ScanResult {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // Optimization: Pre-calculate target dates
-    const todayMonth = today.getMonth();
-    const todayDate = today.getDate();
-    const tomorrowMonth = tomorrow.getMonth();
-    const tomorrowDate = tomorrow.getDate();
-
     const newTasks: Task[] = [];
 
-    // Helper map to speed up lookups if existingTasks is large, but for now linear scan is likely small
-    // If existingTasks grows large, we should optimize this too.
-
     for (const constituent of constituents) {
-        // Optimize: Parse dates only once per constituent
-        let dobParts: { month: number, date: number } | null = null;
-        if (constituent.dob) {
-            dobParts = getMonthDate(constituent.dob);
-        }
-
-        let annParts: { month: number, date: number } | null = null;
-        if (constituent.anniversary) {
-            annParts = getMonthDate(constituent.anniversary);
-        }
-
-        if (dobParts) {
-            // Check Birthday - Today
-            if (dobParts.month === todayMonth && dobParts.date === todayDate) {
-                const dueDate = today.toISOString().split('T')[0];
-                if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
-                    newTasks.push(createTask(constituent.id, 'BIRTHDAY', today));
-                }
-            }
-
-            // Check Birthday - Tomorrow
-            if (dobParts.month === tomorrowMonth && dobParts.date === tomorrowDate) {
-                const dueDate = tomorrow.toISOString().split('T')[0];
-                if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDate)) {
-                    newTasks.push(createTask(constituent.id, 'BIRTHDAY', tomorrow));
-                }
+        // Check Birthday - Today
+        if (isDateMatch(constituent.dob, today)) {
+            const dueDateStr = today.toISOString().split('T')[0];
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+                newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
         }
 
-        if (annParts) {
-            // Check Anniversary - Today
-            if (annParts.month === todayMonth && annParts.date === todayDate) {
-                const dueDate = today.toISOString().split('T')[0];
-                if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
-                    newTasks.push(createTask(constituent.id, 'ANNIVERSARY', today));
-                }
+        // Check Birthday - Tomorrow
+        if (isDateMatch(constituent.dob, tomorrow)) {
+            const dueDateStr = tomorrow.toISOString().split('T')[0];
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+                newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
+        }
 
-            // Check Anniversary - Tomorrow
-            if (annParts.month === tomorrowMonth && annParts.date === tomorrowDate) {
-                const dueDate = tomorrow.toISOString().split('T')[0];
-                if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDate)) {
-                    newTasks.push(createTask(constituent.id, 'ANNIVERSARY', tomorrow));
-                }
+        // Check Anniversary - Today
+        if (isDateMatch(constituent.anniversary, today)) {
+            const dueDateStr = today.toISOString().split('T')[0];
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+                newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
+            }
+        }
+
+        // Check Anniversary - Tomorrow
+        if (isDateMatch(constituent.anniversary, tomorrow)) {
+            const dueDateStr = tomorrow.toISOString().split('T')[0];
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+                newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
         }
     }

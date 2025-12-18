@@ -51,7 +51,7 @@ export default function ValidatedDateInput({
     }, [value]);
 
     // Get current validation state
-    const validationState = getValidationState(displayValue);
+    const validationState = getValidationState(displayValue, allowFuture);
 
     // Handle text input with auto-masking
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

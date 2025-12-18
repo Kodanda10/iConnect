@@ -16,9 +16,10 @@ import {
     where,
     orderBy,
     Timestamp,
+    getCountFromServer,
 } from 'firebase/firestore';
 import { getFirebaseDb } from '@/lib/firebase';
-import { Task, EnrichedTask, TaskStatus, TaskType, Constituent } from '@/types';
+import { Task, EnrichedTask, TaskStatus, TaskType, Constituent, ActionType, CompletedBy } from '@/types';
 import { getConstituentById } from './constituents';
 
 const COLLECTION_NAME = 'tasks';
@@ -29,8 +30,8 @@ const COLLECTION_NAME = 'tasks';
 export async function getTasks(
     status: TaskStatus = 'PENDING',
     type?: TaskType,
-    startDate?: string,
-    endDate?: string
+    startDate?: Date,
+    endDate?: Date
 ): Promise<Task[]> {
     const db = getFirebaseDb();
     const constraints = [
@@ -43,11 +44,11 @@ export async function getTasks(
     }
 
     if (startDate) {
-        constraints.push(where('due_date', '>=', startDate));
+        constraints.push(where('due_date', '>=', Timestamp.fromDate(startDate)));
     }
 
     if (endDate) {
-        constraints.push(where('due_date', '<=', endDate));
+        constraints.push(where('due_date', '<=', Timestamp.fromDate(endDate)));
     }
 
     const q = query(collection(db, COLLECTION_NAME), ...constraints);
@@ -66,17 +67,18 @@ export async function getTasks(
  */
 export async function getPendingTasks(): Promise<Task[]> {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-
-    const todayStr = today.toISOString().split('T')[0];
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
     const db = getFirebaseDb();
     const q = query(
         collection(db, COLLECTION_NAME),
         where('status', '==', 'PENDING'),
-        where('due_date', 'in', [todayStr, tomorrowStr]),
+        where('due_date', 'in', [
+            Timestamp.fromDate(today),
+            Timestamp.fromDate(tomorrow)
+        ]),
         orderBy('due_date', 'asc')
     );
 
@@ -102,7 +104,22 @@ export async function getEnrichedTasks(
     const enrichedTasks: EnrichedTask[] = [];
 
     for (const task of tasks) {
-        const constituent = await getConstituentById(task.constituentId);
+        // Optimization: Check for denormalized data first
+        if (task.constituent_name && task.constituent_mobile) {
+            enrichedTasks.push({
+                ...task,
+                constituent: {
+                    id: task.constituent_id,
+                    name: task.constituent_name,
+                    mobile_number: task.constituent_mobile,
+                    ward_number: task.ward_number,
+                } as Constituent
+            });
+            continue;
+        }
+
+        // Fallback: Fetch constituent details if not denormalized
+        const constituent = await getConstituentById(task.constituent_id);
         if (constituent) {
             enrichedTasks.push({
                 ...task,
@@ -136,9 +153,15 @@ export async function createTask(
 ): Promise<string> {
     const db = getFirebaseDb();
 
+    // Ensure due_date is converted to Timestamp if it's a Date
+    const dueDate = data.due_date instanceof Date
+        ? Timestamp.fromDate(data.due_date)
+        : data.due_date;
+
     const taskData = {
         ...data,
-        created_at: new Date().toISOString(),
+        due_date: dueDate,
+        created_at: Timestamp.now(),
     };
 
     const docRef = await addDoc(collection(db, COLLECTION_NAME), taskData);
@@ -162,15 +185,20 @@ export async function updateTask(
  */
 export async function completeTask(
     id: string,
-    action: 'CALL' | 'SMS' | 'WHATSAPP',
-    completedBy: 'LEADER' | 'STAFF',
+    action: ActionType,
+    completedBy: CompletedBy,
     notes?: string
 ): Promise<void> {
+    const actionKey = action.toLowerCase() === 'whatsapp' ? 'whatsapp_sent' : `${action.toLowerCase()}_sent`;
+
     await updateTask(id, {
         status: 'COMPLETED',
-        actionTaken: action,
-        completedBy: completedBy,
+        action_taken: action,
+        completed_by: completedBy,
+        [actionKey]: true,
+        [`${actionKey}_at`]: Timestamp.now(),
         notes: notes || `Completed via ${action}`,
+        updated_at: Timestamp.now(),
     });
 }
 
@@ -185,40 +213,37 @@ export async function getTaskCounts(): Promise<{
 }> {
     const db = getFirebaseDb();
 
-    // Pending count
+    // O(1) Optimization: Using getCountFromServer
     const pendingQuery = query(
         collection(db, COLLECTION_NAME),
         where('status', '==', 'PENDING')
     );
-    const pendingSnapshot = await getDocs(pendingQuery);
+    const pendingCount = (await getCountFromServer(pendingQuery)).data().count;
 
-    // Completed count
     const completedQuery = query(
         collection(db, COLLECTION_NAME),
         where('status', '==', 'COMPLETED')
     );
-    const completedSnapshot = await getDocs(completedQuery);
+    const completedCount = (await getCountFromServer(completedQuery)).data().count;
 
-    // Birthday count
     const birthdayQuery = query(
         collection(db, COLLECTION_NAME),
         where('status', '==', 'PENDING'),
         where('type', '==', 'BIRTHDAY')
     );
-    const birthdaySnapshot = await getDocs(birthdayQuery);
+    const birthdayCount = (await getCountFromServer(birthdayQuery)).data().count;
 
-    // Anniversary count
     const anniversaryQuery = query(
         collection(db, COLLECTION_NAME),
         where('status', '==', 'PENDING'),
         where('type', '==', 'ANNIVERSARY')
     );
-    const anniversarySnapshot = await getDocs(anniversaryQuery);
+    const anniversaryCount = (await getCountFromServer(anniversaryQuery)).data().count;
 
     return {
-        pending: pendingSnapshot.size,
-        completed: completedSnapshot.size,
-        pendingBirthdays: birthdaySnapshot.size,
-        pendingAnniversaries: anniversarySnapshot.size,
+        pending: pendingCount,
+        completed: completedCount,
+        pendingBirthdays: birthdayCount,
+        pendingAnniversaries: anniversaryCount,
     };
 }

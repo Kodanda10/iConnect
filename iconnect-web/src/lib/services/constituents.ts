@@ -45,7 +45,7 @@ export async function getConstituents(
 ): Promise<{ constituents: Constituent[]; lastDoc: DocumentSnapshot | null }> {
     const db = getFirebaseDb();
     const constraints: QueryConstraint[] = [
-        orderBy('createdAt', 'desc'),
+        orderBy('created_at', 'desc'),
         limit(pageSize),
     ];
 
@@ -85,7 +85,7 @@ export async function getConstituentById(id: string): Promise<Constituent | null
  */
 export async function searchConstituents(
     searchTerm: string,
-    field: 'name' | 'mobileNumber' = 'name'
+    field: 'name' | 'mobile_number' = 'name'
 ): Promise<Constituent[]> {
     const db = getFirebaseDb();
 
@@ -111,27 +111,38 @@ export async function searchConstituents(
  * Add new constituent
  */
 export async function addConstituent(
-    data: Omit<Constituent, 'id' | 'createdAt'>
+    data: Omit<Constituent, 'id' | 'created_at'>
 ): Promise<string> {
     const db = getFirebaseDb();
 
     // Extract day/month for efficient birthday/anniversary queries
     const constituentData: Record<string, unknown> = {
         ...data,
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
     };
+
+    // Sanitize: Remove undefined values to prevent Firestore errors
+    Object.keys(constituentData).forEach(key =>
+        constituentData[key] === undefined && delete constituentData[key]
+    );
 
     if (data.dob) {
         const dobDate = new Date(data.dob);
+        const month = String(dobDate.getMonth() + 1).padStart(2, '0');
+        const day = String(dobDate.getDate()).padStart(2, '0');
         constituentData.dob_month = dobDate.getMonth() + 1;
         constituentData.dob_day = dobDate.getDate();
+        constituentData.birthday_mmdd = `${month}-${day}`; // For scheduler queries
     }
 
     if (data.anniversary) {
         const annDate = toDate(data.anniversary);
+        const month = String(annDate.getMonth() + 1).padStart(2, '0');
+        const day = String(annDate.getDate()).padStart(2, '0');
         Object.assign(constituentData, {
             anniversary_month: annDate.getMonth() + 1,
             anniversary_day: annDate.getDate(),
+            anniversary_mmdd: `${month}-${day}`, // For scheduler queries
         });
     }
 
@@ -143,7 +154,7 @@ export async function addConstituent(
  * Add multiple constituents (batch import)
  */
 export async function addConstituents(
-    dataArray: Omit<Constituent, 'id' | 'createdAt'>[]
+    dataArray: Omit<Constituent, 'id' | 'created_at'>[]
 ): Promise<string[]> {
     const ids: string[] = [];
 
@@ -168,6 +179,11 @@ export async function updateConstituent(
 
     // Update day/month if dates changed
     const updateData: Record<string, unknown> = { ...data };
+
+    // Sanitize: Remove undefined values
+    Object.keys(updateData).forEach(key =>
+        updateData[key] === undefined && delete updateData[key]
+    );
 
     if (data.dob) {
         const dobDate = new Date(data.dob);
@@ -229,7 +245,9 @@ export async function getConstituentsForDateMMDD(
     type: 'birthday' | 'anniversary' = 'birthday'
 ): Promise<Constituent[]> {
     const db = getFirebaseDb();
-    const field = type === 'birthday' ? 'birthdayMmdd' : 'anniversaryMmdd';
+    const field = type === 'birthday' ? 'birthday_mmdd' : 'anniversary_mmdd';
+
+    console.log(`[Scheduler] Querying ${field} == '${mmdd}'`);
 
     const q = query(
         collection(db, COLLECTION_NAME),
@@ -243,6 +261,52 @@ export async function getConstituentsForDateMMDD(
         results.push({ id: doc.id, ...doc.data() } as Constituent);
     });
 
+    console.log(`[Scheduler] Found ${results.length} results for ${type}`);
     return results;
 }
 
+/**
+ * Get all event dates for a given month (for calendar indicators)
+ * Returns array of YYYY-MM-DD date strings where events occur
+ */
+export async function getMonthEventDates(year: number, month: number): Promise<string[]> {
+    const db = getFirebaseDb();
+    const monthStr = String(month).padStart(2, '0');
+
+    // Query all constituents with birthday_mmdd or anniversary_mmdd starting with this month
+    const birthdayQuery = query(
+        collection(db, COLLECTION_NAME),
+        where('birthday_mmdd', '>=', `${monthStr}-01`),
+        where('birthday_mmdd', '<=', `${monthStr}-31`)
+    );
+
+    const anniversaryQuery = query(
+        collection(db, COLLECTION_NAME),
+        where('anniversary_mmdd', '>=', `${monthStr}-01`),
+        where('anniversary_mmdd', '<=', `${monthStr}-31`)
+    );
+
+    const [birthdaySnap, anniversarySnap] = await Promise.all([
+        getDocs(birthdayQuery),
+        getDocs(anniversaryQuery),
+    ]);
+
+    const eventDates = new Set<string>();
+
+    birthdaySnap.forEach((doc) => {
+        const data = doc.data();
+        if (data.birthday_mmdd) {
+            eventDates.add(`${year}-${data.birthday_mmdd}`);
+        }
+    });
+
+    anniversarySnap.forEach((doc) => {
+        const data = doc.data();
+        if (data.anniversary_mmdd) {
+            eventDates.add(`${year}-${data.anniversary_mmdd}`);
+        }
+    });
+
+    console.log(`[Calendar] Found ${eventDates.size} event dates for ${year}-${monthStr}`);
+    return Array.from(eventDates);
+}

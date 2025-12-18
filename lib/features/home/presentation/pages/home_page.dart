@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,6 +21,17 @@ import 'package:iconnect_mobile/features/settings/domain/entities/app_settings.d
 import 'dart:ui';
 import 'package:iconnect_mobile/features/tasks/presentation/widgets/shimmer_task_card.dart';
 import 'package:iconnect_mobile/features/ticker/presentation/widgets/liquid_ticker_widget.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_bloc.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_event.dart';
+import 'package:iconnect_mobile/features/report/presentation/bloc/report_state.dart';
+import 'package:iconnect_mobile/features/report/presentation/widgets/action_timeline_card.dart';
+import 'package:iconnect_mobile/features/report/presentation/widgets/animated_count_up.dart';
+import 'package:iconnect_mobile/features/report/presentation/widgets/parallax_scroll_view.dart';
+import 'package:iconnect_mobile/features/report/domain/entities/day_summary.dart';
+import 'package:iconnect_mobile/features/report/domain/entities/action_log.dart';
+import 'package:iconnect_mobile/core/widgets/app_background.dart';
+import 'package:iconnect_mobile/core/widgets/glass_container.dart';
+import 'package:iconnect_mobile/core/widgets/primary_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,26 +81,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   // --- Actions ---
 
-  void _launchPhone(EnrichedTask task) async {
-    final uri = Uri.parse('tel:${task.mobile}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-      
-      // Delay slightly to prevent the dialog from appearing behind the dialer immediately on some OSs
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      if (mounted) {
-        _showActionOutcomeDialog(task, 'CALL');
-      }
-    }
-  }
+
 
   void _showActionOutcomeDialog(EnrichedTask task, String actionType) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Text(
                       'Outcome for ${task.name}?',
                       style: const TextStyle(
-                        color: Color(0xFF111827),
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -122,8 +122,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: Colors.white.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.1)),
                 ),
                 child: Row(
                   children: [
@@ -132,22 +133,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       color: Colors.grey
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Action taken: $actionType',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                        ),
-                        Text(
-                          task.name,
-                          style: const TextStyle(
-                            color: Color(0xFF00A896),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Action taken: $actionType',
+                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
                           ),
-                        ),
-                      ],
+                          Text(
+                            task.name,
+                            style: const TextStyle(
+                              color: Color(0xFF00A896),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -155,7 +159,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(height: 24),
               
               // Connected/Sent Button
-              ElevatedButton.icon(
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -180,6 +186,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   actionType == 'CALL' ? 'Mark as Called' : 'Mark as Sent', 
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
                 ),
+              ),
               ),
               const SizedBox(height: 12),
               
@@ -226,15 +233,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _launchSMS(String number, String message) async {
-    final uri = Uri.parse('sms:$number?body=${Uri.encodeComponent(message)}');
-    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  // Define the Signature Constant
+  static const String leaderSignature = "\n\n- Pranab Balabantaray";
+
+  void _launchSMS(String number, String baseMessage) async {
+    final fullMessage = "$baseMessage$leaderSignature";
+    final cleanPhone = number.replaceAll(RegExp(r'\D'), '');
+    final uri = Uri.parse('sms:$cleanPhone?body=${Uri.encodeComponent(fullMessage)}');
+    
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
-  void _launchWhatsApp(String number, String message) async {
-    final cleanNumber = number.replaceAll(RegExp(r'[^0-9]'), '');
-    final uri = Uri.parse('https://wa.me/$cleanNumber?text=${Uri.encodeComponent(message)}');
-    if (await canLaunchUrl(uri)) await launchUrl(uri, mode: LaunchMode.externalApplication);
+  void _launchWhatsApp(String number, String baseMessage) async {
+    final fullMessage = "$baseMessage$leaderSignature";
+    final cleanPhone = number.replaceAll(RegExp(r'\D'), '');
+    
+    final uri = Uri.parse('whatsapp://send?phone=$cleanPhone&text=${Uri.encodeComponent(fullMessage)}');
+    
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+        // Fallback or error handling
+        if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('WhatsApp not installed')),
+              );
+        }
+    }
   }
 
   void _signOut() {
@@ -267,71 +294,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by mesh gradient
-      body: Stack(
+    return AppBackground(
+      child: Column(
         children: [
-          // Layer 1: Base Linear Gradient
-          Container(decoration: AppTheme.meshGradient),
-
-          // Layer 2: Top Center Emerald Glow (Radial)
-          Positioned(
-            top: -100,
-            left: 0,
-            right: 0,
-            height: 500,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topCenter,
-                  radius: 0.8,
-                  colors: [
-                    AppColors.primary.withOpacity(0.2), // Reduced opacity
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          // Layer 3: Bottom Right Amethyst Glow (Radial)
-          Positioned(
-            bottom: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 0.8,
-                  colors: [
-                    AppColors.secondary.withOpacity(0.25),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Content
-          Column(
-          children: [
             // Custom Header Section
             _buildHeader(),
             
-            // Sub Filters (hide for Meeting tab)
-            if (_filterStatus != 'MEETING')
-              _buildSubFilters(),
+            // Sub Filters (hide for Meeting and Report tabs)
+          if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
+            _buildSubFilters(),
             
-            // Main Content Area - Conditional based on tab
+            // Main Content Area - IndexedStack for Persistence (Fix Tab Flash)
             Expanded(
-              child: _filterStatus == 'MEETING'
-                ? _buildMeetingTab()
-                : _filterStatus == 'COMPLETED'
-                  ? _buildReportTab()
-                  : BlocBuilder<TaskBloc, TaskState>(
+              child: IndexedStack(
+                index: _filterStatus == 'MEETING' ? 2 : (_filterStatus == 'COMPLETED' ? 1 : 0),
+                children: [
+                  // Index 0: PENDING (Home)
+                  BlocBuilder<TaskBloc, TaskState>(
                       builder: (context, state) {
                         if (state is TaskLoading) {
                           return const ShimmerTaskList(itemCount: 3);
@@ -351,10 +330,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         return const SizedBox.shrink();
                       },
                     ),
+
+                  // Index 1: COMPLETED (Report)
+                  _buildReportTab(),
+
+                  // Index 2: MEETING
+                  _buildMeetingTab(),
+                ],
+              ),
             ),
-          ],
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -533,8 +518,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           // Dispatch appropriate BLoC event
           if (key == 'PENDING') {
             context.read<TaskBloc>().add(LoadPendingTasks());
+          } else if (key == 'COMPLETED') {
+            context.read<ReportBloc>().add(const LoadReport(days: 7));
           } else {
-            context.read<TaskBloc>().add(LoadCompletedTasks());
+            // Meeting (TickerBloc usually handles or we just show)
           }
         },
         child: AnimatedContainer(
@@ -590,16 +577,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
              countAnniversary = list.where((t) => t.type == 'ANNIVERSARY').length;
           }
 
-          return Container(
+          return SizedBox(
             width: double.infinity,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // _buildFilterChip('ALL', 'All', null, countAll), // Removed per requirement
-                _buildFilterChip('BIRTHDAY', 'Birthday', Icons.card_giftcard, countBirthday),
-                const SizedBox(width: 8),
-                _buildFilterChip('ANNIVERSARY', 'Anniversary', Icons.favorite, countAnniversary),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // _buildFilterChip('ALL', 'All', null, countAll), // Removed per requirement
+                  _buildFilterChip('BIRTHDAY', 'Birthday', Icons.card_giftcard, countBirthday),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('ANNIVERSARY', 'Anniversary', Icons.favorite, countAnniversary),
+                ],
+              ),
             ),
           );
         }
@@ -616,8 +606,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
        activeColor = Colors.pink;
        activeBg = Colors.pink[50]!;
     } else if (key == 'ANNIVERSARY') {
-       activeColor = Colors.purple;
-       activeBg = Colors.purple[50]!;
+       activeColor = Colors.purpleAccent;
+       activeBg = Colors.purpleAccent.withOpacity(0.1);
     }
 
     return GestureDetector(
@@ -733,47 +723,304 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   
   // --- Report Tab ---
   
+  // --- Report Tab ---
+  
   Widget _buildReportTab() {
-    return BlocBuilder<TaskBloc, TaskState>(
+    return BlocBuilder<ReportBloc, ReportState>(
       builder: (context, state) {
-        if (state is TaskLoading) {
-          return const ShimmerTaskList(itemCount: 3);
+        if (state is ReportLoading) {
+           return const Center(child: CircularProgressIndicator(color: Colors.white));
         }
-        
-        List<EnrichedTask> completedTasks = [];
-        if (state is TaskLoaded) {
-          completedTasks = state.tasks.where((t) => t.status == 'COMPLETED').toList();
-        }
-        
-        return RefreshIndicator(
-          onRefresh: () async {
-            context.read<TaskBloc>().add(LoadHistory());
-          },
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              _buildReportStats(completedTasks),
-              const SizedBox(height: 32),
-              const Text(
-                '7-DAY PERFORMANCE TIMELINE',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+
+        if (state is ReportLoaded) {
+            final now = DateTime.now();
+            final todayKey = DateFormat('yyyy-MM-dd').format(now);
+            
+            DaySummary? todaySummary;
+            try {
+              todaySummary = state.daySummaries.firstWhere(
+                (s) => DateFormat('yyyy-MM-dd').format(s.date) == todayKey,
+              );
+            } catch (e) {
+              todaySummary = null; 
+            }
+            
+            final todayActions = todaySummary?.actions ?? [];
+            final previousDays = state.daySummaries.where(
+               (s) => DateFormat('yyyy-MM-dd').format(s.date) != todayKey
+            ).toList();
+
+            // Ultra-minimal layout: Just ListView with cards (no complex nesting)
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Overview Card (restored)
+                BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, taskState) {
+                    final todayTaskCount = taskState is TaskLoaded 
+                        ? taskState.tasks.where((t) => t.status == 'PENDING').length 
+                        : 0;
+                    return _buildReportStatsFromActions(todayActions, todayTaskCount: todayTaskCount);
+                  },
                 ),
-              ),
-              const SizedBox(height: 16),
-              if (completedTasks.isEmpty)
-                _buildEmptyHistory()
-              else
-                ..._buildGroupedTimeline(completedTasks),
-            ],
-          ),
-        );
+                const SizedBox(height: 24),
+                
+                // Today's Tasks Title
+                const Text(
+                  "TODAY'S TASKS",
+                  style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                ),
+                const SizedBox(height: 12),
+                
+                // Today's Actions
+                if (todayActions.isNotEmpty)
+                  ActionTimelineCard(
+                    actions: todayActions,
+                    initiallyExpanded: true,
+                    title: const SizedBox.shrink(),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text("No tasks completed today", style: TextStyle(color: Colors.white30)),
+                  ),
+                
+                const SizedBox(height: 32),
+                
+                // Previous Days Title
+                const Text(
+                  'PREVIOUS 7 DAYS',
+                  style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                ),
+                const SizedBox(height: 16),
+                
+                // Previous Days
+                if (previousDays.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text("No previous history available", style: TextStyle(color: Colors.white30)),
+                  )
+                else
+                  ...previousDays.map((day) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: ActionTimelineCard(
+                      key: ValueKey(day.date),
+                      actions: day.actions,
+                      initiallyExpanded: false,
+                      title: _buildHistoryTitle(day),
+                    ),
+                  )),
+              ],
+            );
+        }
+        
+        if (state is ReportError) {
+          return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
+        }
+        
+        return const SizedBox.shrink();
       },
     );
   }
+
+  Widget _buildReportStatsFromActions(List<ActionLog> actions, {int todayTaskCount = 0}) {
+    // Compute stats from today's actions
+    final calls = actions.where((a) => a.actionType == ActionType.call).length;
+    final wishesSent = actions.where((a) => a.success).length;
+    // Use actual task count from TaskBloc instead of hardcoded value
+    final totalEvents = todayTaskCount > 0 ? todayTaskCount : (actions.isNotEmpty ? actions.length : 0);
+    final progress = totalEvents > 0 ? (wishesSent / totalEvents).clamp(0.0, 1.0) : 0.0;
+    
+    return AnimatedCardEntry(
+      delay: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 500),
+      child: GlassContainer(
+        borderRadius: 20,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Today's Overview",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  // Wishes Sent + Progress Ring
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Wishes Sent',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.6),
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.call, color: Colors.green, size: 16),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.chat_bubble, color: Colors.purple[300], size: 16),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.message, color: Colors.teal, size: 16),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  AnimatedCountUp(
+                                    end: wishesSent,
+                                    duration: const Duration(milliseconds: 1200),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    ' / $totalEvents',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          // Animated Progress Ring
+                          AnimatedProgressRing(
+                            progress: progress,
+                            duration: const Duration(milliseconds: 1500),
+                            color: const Color(0xFF00A896),
+                            backgroundColor: Colors.white.withOpacity(0.1),
+                            strokeWidth: 6,
+                            child: AnimatedCountUp(
+                              end: (progress * 100).toInt(),
+                              duration: const Duration(milliseconds: 1200),
+                              suffix: '%',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Total Events
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total Events',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.cake, color: Colors.purple[300], size: 24),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FittedBox(
+                                  alignment: Alignment.centerLeft,
+                                  fit: BoxFit.scaleDown,
+                                  child: AnimatedCountUp(
+                                    end: totalEvents,
+                                    duration: const Duration(milliseconds: 1200),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryTitle(DaySummary day) {
+    // Basic date formatting, could be enhanced for 'Yesterday'
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(day.date.year, day.date.month, day.date.day);
+    
+    String dateStr = DateFormat('EEEE, dd MMM').format(day.date);
+    if (date == today.subtract(const Duration(days: 1))) {
+      dateStr = "Yesterday, ${DateFormat('MMM dd').format(day.date)}";
+    }
+
+    final wishesSent = day.actions.where((a) => a.success).length; // Approximating wishes
+    final totalEvents = day.actions.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          dateStr,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "$wishesSent Wishes Sent • $totalEvents Events",
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
 
   List<Widget> _buildGroupedTimeline(List<EnrichedTask> tasks) {
     // Group tasks by date
@@ -841,6 +1088,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    // Determine colors based on selection state or other logic if needed
+    final effectiveIconColor = color; // Or based on isSelected
+    final effectiveTextColor = Colors.white; // Or based on isSelected
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -957,9 +1208,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1069,13 +1321,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Icon(Icons.phone, size: 18, color: Colors.tealAccent),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(
-                                dialInNumber,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'monospace',
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
+                                  dialInNumber,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'monospace',
+                                  ),
                                 ),
                               ),
                             ),
@@ -1086,12 +1341,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Icon(Icons.dialpad, size: 18, color: Colors.tealAccent),
                             const SizedBox(width: 10),
-                            Text(
-                              'Access Code: $accessCode',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                                fontFamily: 'monospace',
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
+                                  'Access Code: $accessCode',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -1138,6 +1398,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -1167,22 +1428,40 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
+    // Filter Logic
+    final visibleList = tasks.where((t) {
+       if (_filterType == 'BIRTHDAY') return t.type == 'BIRTHDAY'; // Assuming 'type' field holds this
+       if (_filterType == 'ANNIVERSARY') return t.type == 'ANNIVERSARY';
+       return true;
+    }).toList();
+
+    if (visibleList.isEmpty) {
+      return Center(
+         child: Text(
+           "No ${_filterType == 'ALL' ? 'pending' : _filterType.toLowerCase()} tasks", 
+           style: TextStyle(color: Colors.white.withOpacity(0.5))
+         )
+      );
+    }
+
     return ListView.separated(
-      padding: const EdgeInsets.all(24),
-      itemCount: tasks.length,
+      padding: const EdgeInsets.only(top: 80, bottom: 20, left: 24, right: 24),
+      itemCount: visibleList.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final task = tasks[index];
-        return _buildTaskCard(task);
+        final task = visibleList[index];
+        // Staggered Animation: 50ms delay per item
+        return AnimatedCardEntry(
+          delay: Duration(milliseconds: 50 * index),
+          duration: const Duration(milliseconds: 400),
+          slideOffset: 30,
+          child: _buildTaskCard(task),
+        );
       },
     );
   }
 
   Widget _buildTaskCard(EnrichedTask task) {
-    final bool isBirthday = task.type == 'BIRTHDAY';
-    final Color typeColor = isBirthday ? Colors.pink : Colors.purple;
-    final Color typeBg = isBirthday ? Colors.pink[50]! : Colors.purple[50]!;
-    final IconData typeIcon = isBirthday ? Icons.card_giftcard : Icons.favorite;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
@@ -1229,133 +1508,79 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          // Header
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48, 
-                height: 48, 
-                decoration: BoxDecoration(
-                  color: typeBg.withOpacity(0.9), // Higher opacity for icon bg
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: typeColor.withOpacity(0.4), blurRadius: 12)]
-                ),
-                child: Icon(typeIcon, color: typeColor, size: 24),
+            // Row A: Name (Full Width, Bold 18, White)
+            Text(
+              task.name,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Row 1: Name + Ward (Top Right)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            task.name,
-                            style: const TextStyle(
-                              fontSize: 16, // Slightly smaller than 18 to fit
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white.withOpacity(0.2)),
-                          ),
-                          child: Text(
-                            "Ward ${task.ward}",
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 4),
-                    
-                    // Row 2: Phone Number (Below Name)
-                    Row(
-                      children: [
-                        Icon(Icons.phone, size: 12, color: Colors.white.withOpacity(0.7)),
-                        const SizedBox(width: 4),
-                        Text(
-                          task.mobile.isNotEmpty ? task.mobile : "No Mobile",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.white.withOpacity(0.8),
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Row 3: Block & GP
-                    Row(
-                      children: [
-                        Icon(Icons.location_city, size: 12, color: Colors.white.withOpacity(0.6)),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            "${task.block.isNotEmpty ? task.block : 'Block N/A'} • ${task.gramPanchayat.isNotEmpty ? task.gramPanchayat : 'GP N/A'}",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withOpacity(0.6),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                     const SizedBox(height: 4),
-                     
-                     // Row 4: Date
-                     Row(
-                      children: [
-                        Icon(Icons.calendar_today, size: 12, color: Colors.white.withOpacity(0.6)),
-                        const SizedBox(width: 4),
-                        Text(
-                          DateFormat('dd MMM yyyy').format(task.dueDate),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Row B: Mobile
+            Row(
+              children: [
+                Icon(Icons.call, size: 14, color: Colors.white.withOpacity(0.6)),
+                const SizedBox(width: 6),
+                Text(
+                  task.mobile.isNotEmpty ? task.mobile : "No Mobile",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.8),
+                    fontFamily: 'monospace',
+                  ),
                 ),
+              ],
+            ),
+            
+            const SizedBox(height: 6),
+            
+            // Row C: Address (Block > GP > Ward)
+            Text(
+              "${task.block.isNotEmpty ? task.block : 'N/A'} > ${task.gramPanchayat.isNotEmpty ? task.gramPanchayat : 'N/A'} > Ward ${task.ward.isNotEmpty ? task.ward : 'N/A'}",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.5),
               ),
-            ],
-          ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Row D: Event Context (Small Icon + Date)
+            Row(
+              children: [
+                Icon(
+                  task.type == 'BIRTHDAY' ? Icons.cake : Icons.favorite,
+                  color: task.type == 'BIRTHDAY' ? Colors.pink : Colors.purple,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  DateFormat('dd MMM yyyy').format(task.dueDate),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
           
-          const SizedBox(height: 20),
+            const SizedBox(height: 16),
           
-          // Action Buttons (Call, SMS, WhatsApp) - Liquid Glass Style with Status
-          Row(
-            children: [
-                Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task))),
-                const SizedBox(width: 10),
-                Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, const Color(0xFF5E548E), task.smsSent, () => _openAiWizard(task, 'SMS'))),
-                const SizedBox(width: 10),
-                Expanded(child: _buildLiquidGlassButton("WhatsApp", Icons.chat_bubble, const Color(0xFF10B981), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
-            ],
-          )
-        ],
-      ),
+            // Row E: Action Buttons (Call, SMS, WhatsApp)
+            Row(
+              children: [
+                  Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task))),
+                  const SizedBox(width: 10),
+                  Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, Colors.purpleAccent, task.smsSent, () => _openAiWizard(task, 'SMS'))),
+                  const SizedBox(width: 10),
+                  Expanded(child: _buildLiquidGlassButton("WhatsApp", Icons.chat_bubble, const Color(0xFF10B981), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
+              ],
+            )
+          ],
+        ),
               ), // End Padding
             ], // End Stack children
           ), // End Stack
@@ -1372,7 +1597,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final effectiveBgOpacity = isCompleted ? 0.05 : 0.10;
     
     return GestureDetector(
-      onTap: isCompleted ? null : onTap, // Disable tap if completed
+      onTap: isCompleted ? null : () {
+        HapticFeedback.lightImpact(); // Premium tactile feedback
+        onTap();
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(50),
         child: BackdropFilter(
@@ -1396,19 +1624,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isCompleted) ...[
-                  Icon(Icons.check_circle, size: 14, color: Colors.grey[400]),
-                  const SizedBox(width: 6),
-                  Text("$label Sent", style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 11)),
-                ] else ...[
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
                   Icon(icon, size: 16, color: effectiveIconColor),
                   const SizedBox(width: 6),
-                  Text(label, style: TextStyle(color: effectiveTextColor, fontWeight: FontWeight.w600, fontSize: 12)),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: effectiveTextColor, 
+                        fontWeight: FontWeight.w600, 
+                        fontSize: 11,
+                        decoration: isCompleted ? TextDecoration.none : null,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -1417,10 +1655,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _openAiWizard(EnrichedTask task, String actionType) {
+    HapticFeedback.mediumImpact(); // Haptic feedback on modal open
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      // Spring physics curve matching Web's cubic-bezier(0.2, 0.8, 0.2, 1)
+      transitionAnimationController: AnimationController(
+        duration: const Duration(milliseconds: 400),
+        vsync: this,
+      )..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed) {
+          // Clean up handled by Flutter
+        }
+      }),
       builder: (context) => AiGreetingSheet(
         taskId: task.id,
         constituentName: task.name,
@@ -1434,6 +1682,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildErrorState(String message) {
     return Center(child: Text(message, style: const TextStyle(color: Colors.red)));
   }
+
   Future<void> _seedDemoData() async {
     final firestore = FirebaseFirestore.instance;
     final uid = FirebaseAuth.instance.currentUser?.uid ?? 'leader_pranab'; 
@@ -1484,6 +1733,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     await batch.commit();
     
+    if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('✅ Demo Data Seeded! Refreshing...'),
@@ -1492,8 +1743,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     
     // Trigger Refresh
-    if (context.mounted) {
-       context.read<TaskBloc>().add(LoadPendingTasks());
+    context.read<TaskBloc>().add(LoadPendingTasks());
+  }
+
+  Future<void> _launchPhone(dynamic target) async {
+    String? number;
+    if (target is String) {
+      number = target;
+    } else if (target is EnrichedTask) {
+      number = target.mobile;
+    }
+    
+    if (number != null && number.isNotEmpty) {
+      final Uri launchUri = Uri(scheme: 'tel', path: number);
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri);
+        
+        // If it's a task, show the outcome dialog after a brief delay
+        if (target is EnrichedTask) {
+           await Future.delayed(const Duration(milliseconds: 500));
+           if (mounted) {
+             _showActionOutcomeDialog(target, 'CALL');
+           }
+        }
+        
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch dialer for $number')),
+        );
+      }
+    } else {
+       if (!mounted) return;
+       ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No phone number available')),
+        );
     }
   }
 }

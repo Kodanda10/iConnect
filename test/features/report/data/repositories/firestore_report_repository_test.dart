@@ -2,10 +2,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:iconnect_mobile/features/report/data/repositories/firestore_report_repository.dart';
-import 'package:iconnect_mobile/features/report/domain/repositories/report_repository.dart';
 
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+class MockUser extends Mock implements User {}
 class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
 class MockQuery extends Mock implements Query<Map<String, dynamic>> {}
 class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynamic>> {}
@@ -16,6 +18,8 @@ class MockAggregateQuerySnapshot extends Mock implements AggregateQuerySnapshot 
 void main() {
   late FirestoreReportRepository repository;
   late MockFirebaseFirestore mockFirestore;
+  late MockFirebaseAuth mockAuth;
+  late MockUser mockUser;
   late MockCollectionReference mockActionLogs;
   late MockCollectionReference mockTasks;
   late MockQuery mockQuery;
@@ -23,8 +27,12 @@ void main() {
   late MockAggregateQuerySnapshot mockAggregateSnapshot;
   late MockQuerySnapshot mockQuerySnapshot;
 
+  const tUserId = 'test_user_id';
+
   setUp(() {
     mockFirestore = MockFirebaseFirestore();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
     mockActionLogs = MockCollectionReference();
     mockTasks = MockCollectionReference();
     mockQuery = MockQuery();
@@ -32,39 +40,38 @@ void main() {
     mockAggregateSnapshot = MockAggregateQuerySnapshot();
     mockQuerySnapshot = MockQuerySnapshot();
 
+    when(() => mockAuth.currentUser).thenReturn(mockUser);
+    when(() => mockUser.uid).thenReturn(tUserId);
+
     when(() => mockFirestore.collection('action_logs')).thenReturn(mockActionLogs);
     when(() => mockFirestore.collection('tasks')).thenReturn(mockTasks);
     
-    repository = FirestoreReportRepository(firestore: mockFirestore);
+    repository = FirestoreReportRepository(firestore: mockFirestore, auth: mockAuth);
   });
 
   group('getTodaySummary', () {
     test('returns correct stats using aggregation queries', () async {
-      // Arrange
-      // Mock Action Logs counts
-      // We need to leniently match any 'where' call to return mockQuery
-      // Because where returns a Query, and subsequent where calls are on Query
-      
       // Mock CollectionReference.where -> Query
+      // Expect executed_by filter first or anywhere
       when(() => mockActionLogs.where(
         any(), 
+        isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
-        isEqualTo: any(named: 'isEqualTo'),
       )).thenReturn(mockQuery);
 
-      // Mock Query.where -> Query (chaining)
-      when(() => mockQuery.where(
-        any(), 
-        isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
-        isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
-        isEqualTo: any(named: 'isEqualTo')
-      )).thenReturn(mockQuery);
-      
       when(() => mockTasks.where(
         any(),
         isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'), 
+        isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
+      )).thenReturn(mockQuery);
+
+      // Mock chainable where calls on Query
+      when(() => mockQuery.where(
+        any(), 
+        isEqualTo: any(named: 'isEqualTo'),
+        isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
       )).thenReturn(mockQuery);
 
@@ -89,11 +96,12 @@ void main() {
       final mockDoc1 = MockQueryDocumentSnapshot();
       when(() => mockDoc1.id).thenReturn('1');
       when(() => mockDoc1.data()).thenReturn({
-        'id': '1', // legacy
+        'id': '1', 
         'action_type': 'CALL',
         'executed_at': Timestamp.fromDate(now),
         'success': true,
-        'constituent_id': 'c1'
+        'constituent_id': 'c1',
+        'executed_by': tUserId,
       });
       
       final mockDoc2 = MockQueryDocumentSnapshot();
@@ -103,22 +111,26 @@ void main() {
         'action_type': 'SMS',
         'executed_at': Timestamp.fromDate(now.subtract(const Duration(days: 1))),
         'success': false,
-        'constituent_id': 'c2'
+        'constituent_id': 'c2',
+        'executed_by': tUserId,
       });
 
-      // 1. collection.where('executed_at', isGreaterThanOrEqualTo: start)
+      // 1. collection.where calls - including executed_by
       when(() => mockActionLogs.where(
         any(), 
+        isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
       )).thenReturn(mockQuery); 
 
-      // 2. query.where('executed_at', isLessThanOrEqualTo: end)
+      // 2. query.where chains
       when(() => mockQuery.where(
         any(),
+        isEqualTo: any(named: 'isEqualTo'),
+        isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
       )).thenReturn(mockQuery);
 
-      when(() => mockQuery.orderBy(any())).thenReturn(mockQuery); // assuming we order by date
+      when(() => mockQuery.orderBy(any(), descending: any(named: 'descending'))).thenReturn(mockQuery);
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn([mockDoc1, mockDoc2]);
 
@@ -129,7 +141,7 @@ void main() {
       result.fold(
         (l) => fail('Returned Failure: ${l.message}'),
         (summaries) {
-          expect(summaries.length, 2); // 2 distinct days
+          expect(summaries.length, 2); 
           expect(summaries.first.actions.length, 1);
         }
       );

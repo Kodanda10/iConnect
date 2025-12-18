@@ -33,22 +33,14 @@ export function generateCSVContent(constituents: Constituent[]): string {
     }
 
     const dataRows = constituents.map((c) => {
-        const legacy = c as unknown as {
-            full_name?: string;
-            mobile_number?: string;
-            ward_number?: string;
-            gp_ulb?: string;
-            birthday_mmdd?: string;
-            anniversary_mmdd?: string;
-        };
         const fields = [
-            escapeCSVField(c.fullName || legacy.full_name || c.name),
-            escapeCSVField(c.phone || c.mobileNumber || legacy.mobile_number),
-            escapeCSVField(c.ward || c.wardNumber || legacy.ward_number),
+            escapeCSVField(c.full_name || c.name),
+            escapeCSVField(c.phone || c.mobile_number),
+            escapeCSVField(c.ward_number || c.ward),
             escapeCSVField(c.block),
-            escapeCSVField(c.gpUlb || legacy.gp_ulb),
-            escapeCSVField(c.birthdayMmdd || legacy.birthday_mmdd),
-            escapeCSVField(c.anniversaryMmdd || legacy.anniversary_mmdd),
+            escapeCSVField(c.gp_ulb),
+            escapeCSVField(c.birthday_mmdd),
+            escapeCSVField(c.anniversary_mmdd),
         ];
         return fields.join(',');
     });
@@ -118,13 +110,13 @@ export function downloadConstituentsAsPDF(constituents: Constituent[]): void {
                 <tbody>
                     ${constituents.map(c => `
                         <tr>
-                            <td>${c.fullName || (c as unknown as { full_name?: string }).full_name || c.name || '-'}</td>
-                            <td>${c.phone || c.mobileNumber || (c as unknown as { mobile_number?: string }).mobile_number || '-'}</td>
-                            <td>${c.ward || c.wardNumber || (c as unknown as { ward_number?: string }).ward_number || '-'}</td>
+                            <td>${c.full_name || c.name || '-'}</td>
+                            <td>${c.phone || c.mobile_number || '-'}</td>
+                            <td>${c.ward_number || c.ward || '-'}</td>
                             <td>${c.block || '-'}</td>
-                            <td>${c.gpUlb || (c as unknown as { gp_ulb?: string }).gp_ulb || '-'}</td>
-                            <td>${c.birthdayMmdd || (c as unknown as { birthday_mmdd?: string }).birthday_mmdd || '-'}</td>
-                            <td>${c.anniversaryMmdd || (c as unknown as { anniversary_mmdd?: string }).anniversary_mmdd || '-'}</td>
+                            <td>${c.gp_ulb || '-'}</td>
+                            <td>${c.birthday_mmdd || '-'}</td>
+                            <td>${c.anniversary_mmdd || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>

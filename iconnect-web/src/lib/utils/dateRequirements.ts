@@ -33,5 +33,19 @@ export function validateConstituentDates(
         };
     }
 
+    // Future date check
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (hasDob) {
+        const d = new Date(dob);
+        if (d > today) return { isValid: false, error: 'Date of Birth cannot be in the future' };
+    }
+
+    if (hasAnniversary) {
+        const a = new Date(anniversary);
+        if (a > today) return { isValid: false, error: 'Anniversary cannot be in the future' };
+    }
+
     return { isValid: true };
 }

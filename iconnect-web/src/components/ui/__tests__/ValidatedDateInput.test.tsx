@@ -167,7 +167,55 @@ describe('ValidatedDateInput Component', () => {
             expect(container.innerHTML).toContain('border-emerald-500');
         });
 
+        // ============================================
+        // Future Date Validation (DOB/Anniversary Hotfix)
+        // ============================================
+        describe('Hotfix: Future Date Validation', () => {
+            test('Test A: Data Entry - rejects future date for DOB (allowFuture=false)', () => {
+                const { container } = render(
+                    <ValidatedDateInput
+                        label="Date of Birth"
+                        value="01/01/2026"
+                        onChange={() => { }}
+                        allowFuture={false}
+                    />
+                );
+                // Should show RED border for future date when allowFuture is false
+                expect(container.innerHTML).toContain('border-red-500');
+            });
 
+            test('Test B: Data Entry - accepts today for Anniversary (allowFuture=false)', () => {
+                const today = new Date();
+                const d = String(today.getDate()).padStart(2, '0');
+                const m = String(today.getMonth() + 1).padStart(2, '0');
+                const y = today.getFullYear();
+                const todayStr = `${d}/${m}/${y}`;
+
+                const { container } = render(
+                    <ValidatedDateInput
+                        label="Anniversary"
+                        value={todayStr}
+                        onChange={() => { }}
+                        allowFuture={false}
+                    />
+                );
+                // Should show GREEN border for today even when allowFuture is false
+                expect(container.innerHTML).toContain('border-emerald-500');
+            });
+
+            test('Test C: Conference Call Scheduler - accepts future date (allowFuture=true)', () => {
+                const { container } = render(
+                    <ValidatedDateInput
+                        label="Conference Call"
+                        value="01/01/2026"
+                        onChange={() => { }}
+                        allowFuture={true}
+                    />
+                );
+                // Should show GREEN border for future date when allowFuture is true
+                expect(container.innerHTML).toContain('border-emerald-500');
+            });
+        });
     });
 
     // ============================================

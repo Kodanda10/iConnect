@@ -10,7 +10,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getConstituentsForDateMMDD } from '@/lib/services/constituents';
+import { getConstituentsForDateMMDD, getMonthEventDates } from '@/lib/services/constituents';
 import { getUpcomingFestivals, addFestival, deleteFestival, DEFAULT_FESTIVALS } from '@/lib/services/festivals';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock } from '@/lib/services/metrics';
 import { Constituent, Festival, Language } from '@/types';
@@ -79,20 +79,9 @@ export default function SchedulerPage() {
     const [loadingGPs, setLoadingGPs] = useState(false);
     const [newFestivalData, setNewFestivalData] = useState({ name: '', date: '', description: '' });
 
-    // --- Calendar Helpers for Mock Events ---
-    // Generate some mock event dates for the current month view
-    const getMockEventDates = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        // Mock dates: 5th, 12th, 18th, 24th, 28th
-        return [
-            `${year}-${month}-05`,
-            `${year}-${month}-12`,
-            `${year}-${month}-18`,
-            `${year}-${month}-24`,
-            `${year}-${month}-28`
-        ];
-    };
+    // --- State: Calendar Event Dates (Real Data) ---
+    const [calendarEventDates, setCalendarEventDates] = useState<string[]>([]);
+    const [loadingCalendarDates, setLoadingCalendarDates] = useState(false);
 
     const formatMMDD = (date: Date): string => {
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -127,6 +116,24 @@ export default function SchedulerPage() {
         };
         fetchDailyEvents();
     }, [selectedDate]);
+
+    // Load Calendar Event Dates for the current month
+    useEffect(() => {
+        const fetchCalendarDates = async () => {
+            setLoadingCalendarDates(true);
+            try {
+                const year = selectedDate.getFullYear();
+                const month = selectedDate.getMonth() + 1; // 1-indexed
+                const dates = await getMonthEventDates(year, month);
+                setCalendarEventDates(dates);
+            } catch (error) {
+                console.error('Failed to fetch calendar event dates:', error);
+            } finally {
+                setLoadingCalendarDates(false);
+            }
+        };
+        fetchCalendarDates();
+    }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
     // Load Festivals
     useEffect(() => {
@@ -265,7 +272,7 @@ export default function SchedulerPage() {
                     <GlassCalendar
                         selectedDate={selectedDate}
                         onSelect={setSelectedDate}
-                        eventDates={getMockEventDates(selectedDate)}
+                        eventDates={calendarEventDates}
                     />
 
                     <div className="mt-4 flex items-center gap-4 text-xs text-white/40 justify-center">
@@ -308,7 +315,7 @@ export default function SchedulerPage() {
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex justify-between items-start">
-                                                <h4 className="font-bold text-white text-sm truncate">{event.constituent.fullName}</h4>
+                                                <h4 className="font-bold text-white text-sm truncate">{event.constituent.full_name || event.constituent.name}</h4>
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${event.type === 'birthday' ? 'bg-pink-500/20 text-pink-300' : 'bg-purple-500/20 text-purple-300'
                                                     }`}>
                                                     {event.type === 'birthday' ? 'B-Day' : 'Anniv'}
@@ -316,16 +323,16 @@ export default function SchedulerPage() {
                                             </div>
                                             <div className="flex items-center gap-1.5 mt-1 text-white/80 text-xs font-mono">
                                                 <Phone className="w-3 h-3 text-emerald-400" />
-                                                {event.constituent.phone || event.constituent.mobileNumber || 'No number'}
+                                                {event.constituent.phone || event.constituent.mobile_number || 'No number'}
                                             </div>
                                             <div className="flex flex-wrap gap-2 mt-2 text-[10px] text-white/50">
                                                 <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded">
                                                     <MapPin className="w-3 h-3" />
-                                                    Ward {event.constituent.ward || event.constituent.wardNumber || 'N/A'}
+                                                    Ward {event.constituent.ward_number || event.constituent.ward || 'N/A'}
                                                 </span>
-                                                {(event.constituent.block || event.constituent.gpUlb) && (
+                                                {(event.constituent.block || event.constituent.gp_ulb) && (
                                                     <span className="bg-white/5 px-1.5 py-0.5 rounded">
-                                                        {event.constituent.block || event.constituent.gpUlb}
+                                                        {event.constituent.block || event.constituent.gp_ulb}
                                                     </span>
                                                 )}
                                             </div>

@@ -23,6 +23,10 @@ import 'features/ticker/data/repositories/firestore_ticker_repository.dart';
 import 'features/ticker/domain/repositories/ticker_repository.dart';
 import 'features/ticker/presentation/bloc/ticker_bloc.dart';
 
+import 'features/report/data/repositories/firestore_report_repository.dart';
+import 'features/report/domain/repositories/report_repository.dart';
+import 'features/report/presentation/bloc/report_bloc.dart';
+
 final sl = GetIt.instance; // Service Locator
 
 Future<void> init() async {
@@ -41,7 +45,7 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<TaskRepository>(
-    () => FirestoreTaskRepository(firestore: sl()),
+    () => FirestoreTaskRepository(firestore: sl(), auth: sl()),
   );
 
   //! Features - Action (Greetings)
@@ -69,6 +73,16 @@ Future<void> init() async {
   // Repository
   sl.registerLazySingleton<TickerRepository>(
     () => FirestoreTickerRepository(firestore: sl(), auth: sl()),
+  );
+
+// ... (previous content) 
+  //! Features - Report
+  // Bloc
+  sl.registerFactory(() => ReportBloc(repository: sl()));
+
+  // Repository
+  sl.registerLazySingleton<ReportRepository>(
+    () => FirestoreReportRepository(firestore: sl(), auth: sl()),
   );
 
   //! External

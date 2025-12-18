@@ -79,7 +79,7 @@ function getDaysInMonth(month: number, year: number): number {
  * Validate a complete date string in DD/MM/YYYY format
  * Returns true only for valid, real dates
  */
-export function isValidDate(dateStr: string): boolean {
+export function isValidDate(dateStr: string, allowFuture = true): boolean {
     if (!dateStr) return false;
 
     // Must match DD/MM/YYYY pattern exactly (with slashes)
@@ -101,13 +101,21 @@ export function isValidDate(dateStr: string): boolean {
     const maxDays = getDaysInMonth(month, year);
     if (day < 1 || day > maxDays) return false;
 
+    // Strict Future Check if requested
+    if (!allowFuture) {
+        const inputDate = new Date(year, month - 1, day);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (inputDate > today) return false;
+    }
+
     return true;
 }
 
 /**
  * Get validation state for UI feedback (red/green border)
  */
-export function getValidationState(dateStr: string): ValidationState {
+export function getValidationState(dateStr: string, allowFuture = true): ValidationState {
     // Empty = neutral (no red/green)
     if (!dateStr || dateStr.length === 0) {
         return 'neutral';
@@ -115,7 +123,7 @@ export function getValidationState(dateStr: string): ValidationState {
 
     // Check if it's a complete date (10 chars: DD/MM/YYYY)
     if (dateStr.length === 10) {
-        return isValidDate(dateStr) ? 'success' : 'error';
+        return isValidDate(dateStr, allowFuture) ? 'success' : 'error';
     }
 
     // Partial input = error (incomplete)

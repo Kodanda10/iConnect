@@ -11,9 +11,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { getFirebaseDb } from '@/lib/firebase';
+import { writeBatch, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { getConstituents, addConstituent } from '@/lib/services/constituents';
+import { createTask } from '@/lib/services/tasks';
 import { downloadConstituentsAsCSV, downloadConstituentsAsPDF } from '@/lib/utils/download';
-import { Constituent } from '@/types';
+import { Constituent, Task } from '@/types';
 import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
 import {
     Upload,
@@ -23,6 +26,7 @@ import {
     AlertCircle,
     Loader2,
     Database,
+    Trash2,
     Search,
     ChevronLeft,
     ChevronRight,
@@ -37,10 +41,11 @@ import { validateCsvData, CsvDataValidation, CsvRowData } from '@/lib/utils/csvV
 import DataMetricsCard from '@/components/dashboard/DataMetricsCard';
 
 export default function UploadPage() {
-    const { isStaff } = useAuth();
+    const { user, isStaff } = useAuth();
     const [isDragging, setIsDragging] = useState(false);
     const [csvContent, setCsvContent] = useState('');
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,6 +53,7 @@ export default function UploadPage() {
     const [constituents, setConstituents] = useState<Constituent[]>([]);
     const [isLoadingConstituents, setIsLoadingConstituents] = useState(true);
     const [isSeeding, setIsSeeding] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
     const [seedStatus, setSeedStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
     // CSV validation state
@@ -86,6 +92,45 @@ export default function UploadPage() {
             setSeedStatus('error');
         } finally {
             setIsSeeding(false);
+        }
+    };
+
+    // Wipe Database
+    const handleResetDatabase = async () => {
+        if (!window.confirm('WARNING: THIS WILL DELETE ALL CONSTITUENTS AND TASKS.\n\nAre you sure you want to wipe the database?')) {
+            return;
+        }
+
+        setIsResetting(true);
+        try {
+            const db = getFirebaseDb();
+
+            // 1. Clear Constituents
+            const cSnapshot = await getDocs(collection(db, 'constituents'));
+            const cBatch = writeBatch(db);
+            cSnapshot.docs.forEach((d) => cBatch.delete(d.ref));
+            await cBatch.commit();
+
+            // 2. Clear Tasks
+            const tSnapshot = await getDocs(collection(db, 'tasks'));
+            const tBatch = writeBatch(db);
+            tSnapshot.docs.forEach((d) => tBatch.delete(d.ref));
+            await tBatch.commit();
+
+            // 3. Clear Action Logs (Optional but good for clean slate)
+            const aSnapshot = await getDocs(collection(db, 'action_logs'));
+            const aBatch = writeBatch(db);
+            aSnapshot.docs.forEach((d) => aBatch.delete(d.ref));
+            await aBatch.commit();
+
+            await fetchConstituents();
+            alert('Database wiped successfully. Please refresh the page to update metrics.');
+            window.location.reload(); // Force reload to update metrics card
+        } catch (error: any) {
+            console.error('Reset failed:', error);
+            alert(`Failed to reset database: ${error.message}`);
+        } finally {
+            setIsResetting(false);
         }
     };
 
@@ -135,6 +180,27 @@ export default function UploadPage() {
         }
     };
 
+    /**
+     * Helper to convert DD/MM/YYYY to YYYY-MM-DD
+     */
+    const parseDDMMYYYY = (dateStr?: string): string | undefined => {
+        if (!dateStr) return undefined;
+        // Check if already YYYY-MM-DD
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dateStr;
+
+        // Handle DD/MM/YYYY or DD-MM-YYYY
+        const parts = dateStr.split(/[\/\-]/);
+        if (parts.length === 3) {
+            const [d, m, y] = parts;
+            // Ensure padding
+            const day = d.padStart(2, '0');
+            const month = m.padStart(2, '0');
+            // Handle 2 digit year? Assuming 4 for now based on CSV
+            return `${y}-${month}-${day}`;
+        }
+        return undefined;
+    };
+
     const processFile = (file: File) => {
         const reader = new FileReader();
         reader.onload = (evt) => {
@@ -156,12 +222,13 @@ export default function UploadPage() {
         const rows: CsvRowData[] = [];
 
         for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim());
+            // Trim and remove surrounding quotes
+            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
             const row: CsvRowData = {};
 
             headers.forEach((header, index) => {
                 const value = values[index] || '';
-                // Map common header variations
+                // Map common header variations (headers are lowercased)
                 if (header === 'name' || header === 'full_name' || header === 'fullname') {
                     row.name = value;
                 } else if (header === 'mobile' || header === 'mobile_number' || header === 'phone') {
@@ -169,12 +236,14 @@ export default function UploadPage() {
                 } else if (header === 'whatsapp' || header === 'whatsapp_number') {
                     row.whatsapp = value;
                 } else if (header === 'dob' || header === 'date_of_birth' || header === 'birthday') {
-                    row.dob = value;
+                    // Parse DD/MM/YYYY to YYYY-MM-DD immediately
+                    row.dob = parseDDMMYYYY(value) || value;
                 } else if (header === 'anniversary') {
-                    row.anniversary = value;
+                    // Parse DD/MM/YYYY to YYYY-MM-DD immediately
+                    row.anniversary = parseDDMMYYYY(value) || value;
                 } else if (header === 'block') {
                     row.block = value;
-                } else if (header === 'gp_ulb' || header === 'gp' || header === 'ulb') {
+                } else if (header === 'gp_ulb' || header === 'gp' || header === 'ulb' || header === 'gp/ulb') {
                     row.gp_ulb = value;
                 } else if (header === 'ward' || header === 'ward_number') {
                     row.ward = value;
@@ -210,17 +279,81 @@ export default function UploadPage() {
         setIsLoading(true);
         try {
             // Add each valid constituent
+            const currentYear = new Date().getFullYear();
+
+            // Helper to clean date strings for Tasks (returns Date object)
+            const parseDateToObj = (dateStr?: string): Date | null => {
+                const isoStr = parseDDMMYYYY(dateStr);
+                if (!isoStr) return null;
+                return new Date(isoStr);
+            };
+
             for (const row of rows) {
-                await addConstituent({
+                // 1. Create Constituent
+                // FIX: Parse dates before sending
+                const dobISO = parseDDMMYYYY(row.dob);
+                const annISO = parseDDMMYYYY(row.anniversary);
+
+                const constituentId = await addConstituent({
                     name: row.name || '',
-                    mobileNumber: row.mobile || '',
-                    dob: row.dob || undefined,
-                    anniversary: row.anniversary || undefined,
+                    mobile_number: row.mobile || '',
+                    dob: dobISO,
+                    anniversary: annISO,
                     block: row.block || undefined,
-                    gpUlb: row.gp_ulb || undefined,
-                    ward: row.ward || undefined,
+                    gp_ulb: row.gp_ulb || undefined,
+                    ward_number: row.ward || undefined,
                     whatsapp: row.whatsapp || undefined,
                 });
+
+                // 2. Create Tasks (Birthday/Anniversary) for THIS year
+                console.log('[Upload] Creating tasks for:', row.name, 'uid:', user?.uid);
+                if (user?.uid) {
+                    // Birthday
+                    const dob = parseDateToObj(row.dob);
+                    console.log('[Upload] DOB parsed:', row.dob, '->', dob);
+                    if (dob) {
+                        const bdayDueDate = new Date(currentYear, dob.getMonth(), dob.getDate(), 12, 0, 0);
+                        console.log('[Upload] Creating BIRTHDAY task, due:', bdayDueDate.toISOString());
+                        await createTask({
+                            constituent_id: constituentId,
+                            uid: user.uid,
+                            type: 'BIRTHDAY',
+                            status: 'PENDING',
+                            due_date: bdayDueDate,
+                            call_sent: false,
+                            sms_sent: false,
+                            whatsapp_sent: false,
+                            constituent_name: row.name || '',
+                            constituent_mobile: row.mobile || '',
+                            ward_number: row.ward,
+                        });
+                        console.log('[Upload] BIRTHDAY task created successfully');
+                    }
+
+                    // Anniversary
+                    const ann = parseDateToObj(row.anniversary);
+                    console.log('[Upload] Anniversary parsed:', row.anniversary, '->', ann);
+                    if (ann) {
+                        const annDueDate = new Date(currentYear, ann.getMonth(), ann.getDate(), 12, 0, 0);
+                        console.log('[Upload] Creating ANNIVERSARY task, due:', annDueDate.toISOString());
+                        await createTask({
+                            constituent_id: constituentId,
+                            uid: user.uid,
+                            type: 'ANNIVERSARY',
+                            status: 'PENDING',
+                            due_date: annDueDate,
+                            call_sent: false,
+                            sms_sent: false,
+                            whatsapp_sent: false,
+                            constituent_name: row.name || '',
+                            constituent_mobile: row.mobile || '',
+                            ward_number: row.ward,
+                        });
+                        console.log('[Upload] ANNIVERSARY task created successfully');
+                    }
+                } else {
+                    console.warn('[Upload] No user.uid - tasks NOT created!');
+                }
             }
 
             setUploadStatus('success');
@@ -246,23 +379,68 @@ export default function UploadPage() {
         const dateValidation = validateConstituentDates(normalizedDob, normalizedAnniversary);
         if (!dateValidation.isValid) {
             setUploadStatus('error');
+            setErrorMessage(dateValidation.error || 'Invalid date selection');
             // Allow the error toast to show
-            setTimeout(() => setUploadStatus('idle'), 3000);
+            setTimeout(() => {
+                setUploadStatus('idle');
+                setErrorMessage('');
+            }, 3000);
             return;
         }
 
         setIsLoading(true);
         try {
-            await addConstituent({
+            const constituentId = await addConstituent({
                 name: formData.name,
-                mobileNumber: formData.mobile,
+                mobile_number: formData.mobile,
                 dob: normalizedDob || undefined,
                 anniversary: normalizedAnniversary || undefined,
                 block: formData.block || undefined,
-                gpUlb: formData.gp_ulb || undefined,
-                ward: formData.ward || undefined,
+                gp_ulb: formData.gp_ulb || undefined,
+                ward_number: formData.ward || undefined,
                 whatsapp: formData.whatsapp || undefined,
             });
+
+            // Create Tasks manually for the single entry too
+            if (user?.uid) {
+                const currentYear = new Date().getFullYear();
+
+                if (normalizedDob) {
+                    const dob = new Date(normalizedDob);
+                    const bdayDueDate = new Date(currentYear, dob.getMonth(), dob.getDate(), 12, 0, 0);
+                    await createTask({
+                        constituent_id: constituentId,
+                        uid: user.uid,
+                        type: 'BIRTHDAY',
+                        status: 'PENDING',
+                        due_date: bdayDueDate,
+                        call_sent: false,
+                        sms_sent: false,
+                        whatsapp_sent: false,
+                        constituent_name: formData.name,
+                        constituent_mobile: formData.mobile,
+                        ward_number: formData.ward,
+                    });
+                }
+
+                if (normalizedAnniversary) {
+                    const ann = new Date(normalizedAnniversary);
+                    const annDueDate = new Date(currentYear, ann.getMonth(), ann.getDate(), 12, 0, 0);
+                    await createTask({
+                        constituent_id: constituentId,
+                        uid: user.uid,
+                        type: 'ANNIVERSARY',
+                        status: 'PENDING',
+                        due_date: annDueDate,
+                        call_sent: false,
+                        sms_sent: false,
+                        whatsapp_sent: false,
+                        constituent_name: formData.name,
+                        constituent_mobile: formData.mobile,
+                        ward_number: formData.ward,
+                    });
+                }
+            }
             setUploadStatus('success');
             setFormData({
                 name: '',
@@ -289,9 +467,11 @@ export default function UploadPage() {
     // Filter constituents
     const filteredConstituents = constituents.filter(c =>
         !searchTerm ||
-        c.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.phone?.includes(searchTerm) ||
+        c.mobile_number?.includes(searchTerm) ||
+        c.ward_number?.includes(searchTerm) ||
         c.ward?.includes(searchTerm)
     );
 
@@ -323,25 +503,6 @@ export default function UploadPage() {
                 </div>
             </div>
 
-            {/* Success/Error Toast */}
-            {uploadStatus !== 'idle' && (
-                <div
-                    className={`
-                        fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-full shadow-2xl
-                        animate-spring-bounce
-                        ${uploadStatus === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
-                    `}
-                >
-                    {uploadStatus === 'success' ? (
-                        <CheckCircle className="w-5 h-5" />
-                    ) : (
-                        <AlertCircle className="w-5 h-5" />
-                    )}
-                    <span className="font-medium">
-                        {uploadStatus === 'success' ? 'Data saved successfully!' : 'Upload failed'}
-                    </span>
-                </div>
-            )}
 
             {/* --- 50/50 Layout: CSV Upload | Manual Entry --- */}
             <div className="grid lg:grid-cols-2 gap-6">
@@ -489,6 +650,23 @@ export default function UploadPage() {
                         <h2 className="font-bold">Add Constituent</h2>
                     </div>
 
+                    {/* Inline Error/Success Banner */}
+                    {uploadStatus !== 'idle' && (
+                        <div className={`
+                            flex items-center gap-3 px-4 py-3 rounded-xl animate-slide-up
+                            ${uploadStatus === 'success' ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-200' : 'bg-red-500/20 border border-red-500/30 text-red-200'}
+                        `}>
+                            {uploadStatus === 'success' ? (
+                                <CheckCircle className="w-5 h-5 shrink-0" />
+                            ) : (
+                                <AlertCircle className="w-5 h-5 shrink-0" />
+                            )}
+                            <span className="font-medium text-sm">
+                                {uploadStatus === 'success' ? 'Data saved successfully!' : (errorMessage || 'Upload failed')}
+                            </span>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-2 gap-3">
                         {/* Full Name */}
                         <div className="col-span-2">
@@ -614,15 +792,29 @@ export default function UploadPage() {
                         {/* Ward Number */}
                         <div className="col-span-2">
                             <label className="block text-sm font-medium text-white/70 mb-1.5">
-                                Ward
+                                Ward No.
                             </label>
-                            <input
-                                type="text"
-                                value={formData.ward}
-                                onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-                                className="glass-input-dark h-11 w-full px-3 text-sm"
-                                placeholder="Ward #"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={formData.ward}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+                                        setFormData({ ...formData, ward: val });
+                                    }}
+                                    className={`
+                                        glass-input-dark h-11 w-full px-3 text-sm transition-colors
+                                        ${formData.ward && formData.ward.length >= 1 ? '!border-emerald-500/50 focus:!border-emerald-500' : ''}
+                                        ${!formData.ward && uploadStatus === 'error' ? '!border-red-500/50 focus:!border-red-500' : ''}
+                                    `}
+                                    placeholder="Ward #"
+                                />
+                                {formData.ward && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Date of Birth */}
@@ -633,20 +825,20 @@ export default function UploadPage() {
                             allowFuture={false}
                         />
 
-                    {/* Anniversary */}
-                    <ValidatedDateInput
-                        label="Anniversary"
-                        value={formData.anniversary}
-                        onChange={(val) => setFormData(prev => ({ ...prev, anniversary: val }))}
-                        allowFuture={false}
-                    />
-                </div>
+                        {/* Anniversary */}
+                        <ValidatedDateInput
+                            label="Anniversary"
+                            value={formData.anniversary}
+                            onChange={(val) => setFormData(prev => ({ ...prev, anniversary: val }))}
+                            allowFuture={false}
+                        />
+                    </div>
 
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-2.5 flex items-center justify-center gap-2 font-semibold text-white text-sm rounded-full transition-all duration-300 disabled:opacity-50"
-                    style={{ background: 'linear-gradient(135deg, #00A896 0%, #00C4A7 100%)', boxShadow: '0 4px 16px rgba(0, 168, 150, 0.4)' }}
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-2.5 flex items-center justify-center gap-2 font-semibold text-white text-sm rounded-full transition-all duration-300 disabled:opacity-50"
+                        style={{ background: 'linear-gradient(135deg, #00A896 0%, #00C4A7 100%)', boxShadow: '0 4px 16px rgba(0, 168, 150, 0.4)' }}
                     >
                         {isLoading ? (
                             <>
@@ -678,29 +870,44 @@ export default function UploadPage() {
                             {filteredConstituents.length} records
                         </span>
                         {constituents.length === 0 && (
-                            <button
-                                onClick={handleSeedDatabase}
-                                disabled={isSeeding}
-                                className="btn-secondary text-sm py-2 px-4 flex items-center gap-2"
-                            >
-                                {isSeeding ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Seeding...
-                                    </>
-                                ) : seedStatus === 'success' ? (
-                                    <>
-                                        <CheckCircle className="w-4 h-4" />
-                                        Seeded!
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-4 h-4" />
-                                        Seed 50 Test
-                                    </>
-                                )}
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSeedDatabase}
+                                    disabled={isSeeding}
+                                    className="btn-secondary text-sm py-2 px-4 flex items-center gap-2"
+                                >
+                                    {isSeeding ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Seeding...
+                                        </>
+                                    ) : seedStatus === 'success' ? (
+                                        <>
+                                            <CheckCircle className="w-4 h-4" />
+                                            Seeded!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4" />
+                                            Seed 50 Test
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         )}
+                        {/* Reset DB Button (Always visible for Staff for now) */}
+                        <button
+                            onClick={handleResetDatabase}
+                            disabled={isResetting}
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-sm py-2 px-4 rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                            {isResetting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="w-4 h-4" />
+                            )}
+                            Reset DB
+                        </button>
                         {/* Download Buttons */}
                         {constituents.length > 0 && (
                             <div className="flex gap-2">
@@ -793,25 +1000,25 @@ export default function UploadPage() {
                                         className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}
                                     >
                                         <td className="py-3 px-3 font-medium text-white">
-                                            {c.fullName || c.name}
+                                            {c.full_name || c.name}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.phone || c.mobileNumber}
+                                            {c.phone || c.mobile_number}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.ward || c.wardNumber || '-'}
+                                            {c.ward_number || c.ward || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
                                             {c.block || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.gpUlb || '-'}
+                                            {c.gp_ulb || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.birthdayMmdd || '-'}
+                                            {c.dob || c.birthday_mmdd || '-'}
                                         </td>
                                         <td className="py-3 px-3 text-white/80">
-                                            {c.anniversaryMmdd || '-'}
+                                            {typeof c.anniversary === 'string' ? c.anniversary : c.anniversary_mmdd || '-'}
                                         </td>
                                     </tr>
                                 ))

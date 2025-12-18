@@ -216,12 +216,15 @@ export const dailyScan = onSchedule({
         }
 
         // Fetch existing tasks for today and tomorrow
-        const todayStr = today.toISOString().split('T')[0];
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const tomorrowEnd = new Date(tomorrow);
+        tomorrowEnd.setHours(23, 59, 59, 999);
 
         const tasksSnapshot = await db
             .collection('tasks')
-            .where('due_date', 'in', [todayStr, tomorrowStr])
+            .where('due_date', '>=', admin.firestore.Timestamp.fromDate(todayStart))
+            .where('due_date', '<=', admin.firestore.Timestamp.fromDate(tomorrowEnd))
             .get();
 
         const existingTasks: Task[] = [];
@@ -229,8 +232,8 @@ export const dailyScan = onSchedule({
             existingTasks.push({ id: doc.id, ...doc.data() } as Task);
         });
 
-        // Run the scan
-        const result = scanForTasks(constituents, existingTasks);
+        // Run the scan with admin.firestore.Timestamp class passed for object creation
+        const result = scanForTasks(constituents, existingTasks, admin.firestore.Timestamp);
 
         // Write new tasks to Firestore
         if (result.newTasks.length > 0) {

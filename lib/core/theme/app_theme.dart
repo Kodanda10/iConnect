@@ -4,7 +4,7 @@
 /// matching the web portal's Emerald/Amethyst Glass theme.
 /// 
 /// @changelog
-/// - 2024-12-11: Initial implementation
+/// - 2024-12-18: Refactored for Deep Veridian theme parity
 library;
 
 import 'package:flutter/material.dart';
@@ -22,22 +22,22 @@ class AppColors {
   static const Color secondaryLight = Color(0xFF7B6FA6);
   
   // Text Colors
-  static const Color textPrimary = Color(0xFF1A2A24);
-  static const Color textSecondary = Color(0xFF4F6F65);
-  static const Color textMuted = Color(0xFF8A9A92);
+  static const Color textPrimary = Color(0xFFFFFFFF); // White for Dark Theme
+  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400
+  static const Color textMuted = Color(0xFF64748B); // Slate 500
   static const Color textOnDark = Colors.white;
   
-  // Background - Mesh Gradient colors
-  static const Color bgGradientStart = Color(0xFF0D3B2E);
-  static const Color bgGradientEnd = Color(0xFF2A2D4E);
+  // Background - Mesh Gradient colors (Matches Web globals.css)
+  static const Color bgGradientStart = Color(0xFF0D3B2E); // Web: --bg-gradient-start
+  static const Color bgGradientEnd = Color(0xFF2A2D4E);   // Web: --bg-gradient-end
   
-  // Glass Surface
-  static const Color glassSurface = Color(0x1FFFFFFF); // 12% white
-  static const Color glassBorder = Color(0x4DFFFFFF); // 30% white
-  static const Color glassSurfaceLight = Color(0xCCFFFFFF); // 80% white
+  // Glass Surface (Smoked)
+  static const Color glassSurface = Color(0x66000000); // Black 40%
+  static const Color glassBorder = Color(0x4DFFFFFF); // White 30%
+  static const Color glassSurfaceLight = Color(0xCCFFFFFF); 
   
   // Status Colors
-  static const Color success = Color(0xFF22C55E);
+  static const Color success = Color(0xFF10B981); // Emerald 500
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
   static const Color info = Color(0xFF3B82F6);
@@ -71,52 +71,55 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.dark, // Force Dark Mode
+      scaffoldBackgroundColor: AppColors.bgGradientEnd,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
+        brightness: Brightness.dark,
         primary: AppColors.primary,
         secondary: AppColors.secondary,
-        surface: AppColors.glassSurfaceLight,
+        surface: AppColors.glassSurface,
         error: AppColors.error,
       ),
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w800, // ExtraBold
           color: AppColors.textPrimary,
         ),
         displayMedium: GoogleFonts.inter(
           fontSize: 28,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800, // ExtraBold
           color: AppColors.textPrimary,
         ),
         headlineLarge: GoogleFonts.inter(
           fontSize: 24,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w700, // Bold
           color: AppColors.textPrimary,
         ),
         headlineMedium: GoogleFonts.inter(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700, // Bold
           color: AppColors.textPrimary,
         ),
         titleLarge: GoogleFonts.inter(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w600, // SemiBold
           color: AppColors.textPrimary,
         ),
         titleMedium: GoogleFonts.inter(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w600, // SemiBold
           color: AppColors.textPrimary,
         ),
         bodyLarge: GoogleFonts.inter(
           fontSize: 16,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w600, // SemiBold for Premium feel
           color: AppColors.textPrimary,
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w400, // Regular
           color: AppColors.textSecondary,
         ),
         bodySmall: GoogleFonts.inter(
@@ -130,6 +133,7 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
+      // Overridden by PrimaryButton usually, but keep fallback
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -144,14 +148,6 @@ class AppTheme {
             fontWeight: FontWeight.w700,
           ),
         ),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: AppColors.secondary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        elevation: 8,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -175,7 +171,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
-        color: AppColors.glassSurfaceLight,
+        color: AppColors.glassSurface,
       ),
       appBarTheme: AppBarTheme(
         elevation: 0,
@@ -190,7 +186,7 @@ class AppTheme {
     );
   }
   
-  /// Mesh gradient background decoration
+  /// Mesh gradient background decoration (Legacy helper, use AppBackground widget)
   static BoxDecoration get meshGradient => const BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
@@ -199,14 +195,14 @@ class AppTheme {
     ),
   );
   
-  /// Glass card decoration
-  static BoxDecoration glassCard({double opacity = 0.12}) => BoxDecoration(
-    color: Colors.white.withOpacity(opacity),
+  /// Glass card decoration (Smoked)
+  static BoxDecoration glassCard({double opacity = 0.4}) => BoxDecoration(
+    color: Colors.black.withOpacity(opacity),
     borderRadius: BorderRadius.circular(AppRadius.xl),
-    border: Border.all(color: Colors.white.withOpacity(0.3)),
+    border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.1),
+        color: Colors.black.withOpacity(0.2),
         blurRadius: 32,
         offset: const Offset(0, 8),
       ),
@@ -218,12 +214,5 @@ class AppTheme {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [AppColors.primary, AppColors.primaryLight],
-  );
-  
-  /// Secondary gradient
-  static const LinearGradient secondaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [AppColors.secondary, AppColors.secondaryLight],
   );
 }

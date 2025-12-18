@@ -18,37 +18,36 @@ export interface User {
 // Constituent (Citizen) data
 export interface Constituent {
     id: string;
-    // Name fields
     name?: string;
-    fullName?: string; // full_name -> fullName
-    firstName?: string; // first_name -> firstName
-    lastName?: string; // last_name -> lastName
+    full_name?: string;
+    first_name?: string;
+    last_name?: string;
     // Contact
-    mobileNumber?: string; // mobile_number -> mobileNumber
+    mobile_number?: string;
     phone?: string;
     whatsapp?: string;
     // Birthday
     dob?: string; // YYYY-MM-DD
-    dobMonth?: number; // dob_month -> dobMonth
-    dobDay?: number; // dob_day -> dobDay
+    dob_month?: number;
+    dob_day?: number;
     birthday?: Date | { seconds: number; nanoseconds: number }; // Firestore Timestamp
-    birthdayMmdd?: string; // birthday_mmdd -> birthdayMmdd // MM-DD format
+    birthday_mmdd?: string;
     // Anniversary
-    anniversary?: string | Date | { seconds: number; nanoseconds: number }; // YYYY-MM-DD or Timestamp
-    anniversaryMonth?: number; // anniversary_month -> anniversaryMonth
-    anniversaryDay?: number; // anniversary_day -> anniversaryDay
-    anniversaryMmdd?: string; // anniversary_mmdd -> anniversaryMmdd // MM-DD format
+    anniversary?: string | Date | { seconds: number; nanoseconds: number };
+    anniversary_month?: number;
+    anniversary_day?: number;
+    anniversary_mmdd?: string;
     // Location
     block?: string;
-    gpUlb?: string; // gp_ulb -> gpUlb // Gram Panchayat or ULB
-    wardNumber?: string; // ward_number -> wardNumber
+    gp_ulb?: string;
+    ward_number?: string;
     ward?: string;
     village?: string;
     address?: string;
     // Metadata
     tags?: string[];
-    createdAt?: string | Date | { seconds: number; nanoseconds: number }; // created_at -> createdAt
-    updatedAt?: string | Date | { seconds: number; nanoseconds: number }; // updated_at -> updatedAt
+    created_at?: string | Date | { seconds: number; nanoseconds: number };
+    updated_at?: string | Date | { seconds: number; nanoseconds: number };
 }
 
 // Task types
@@ -59,15 +58,25 @@ export type CompletedBy = 'LEADER' | 'STAFF';
 
 export interface Task {
     id: string;
-    constituentId: string; // constituent_id -> constituentId
+    uid?: string;
+    constituent_id: string;
     type: TaskType;
-    dueDate: string; // due_date -> dueDate
+    due_date: Date | { seconds: number; nanoseconds: number }; // Strictly Timestamp/Date
     status: TaskStatus;
     notes?: string;
-    generatedMessage?: string; // generated_message -> generatedMessage
-    createdAt: string; // created_at -> createdAt
-    completedBy?: CompletedBy; // completed_by -> completedBy
-    actionTaken?: ActionType; // action_taken -> actionTaken
+    generated_message?: string;
+    created_at: Date | { seconds: number; nanoseconds: number };
+    completed_by?: CompletedBy;
+    action_taken?: ActionType;
+    updated_at?: Date | { seconds: number; nanoseconds: number };
+    // Denormalized fields
+    constituent_name?: string;
+    constituent_mobile?: string;
+    ward_number?: string;
+    // Helper fields
+    call_sent?: boolean;
+    sms_sent?: boolean;
+    whatsapp_sent?: boolean;
 }
 
 // Enriched task with constituent data joined
@@ -109,6 +118,7 @@ export interface GreetingRequest {
     name: string;
     type: TaskType;
     language: Language;
+    ward_number?: string;
     ward?: string;
 }
 
@@ -119,8 +129,8 @@ export interface Campaign {
     audience: 'ALL' | 'WARD' | 'CUSTOM';
     message: string;
     language: Language;
-    scheduledFor: string;
+    scheduled_for: string;
     status: 'SCHEDULED' | 'SENT' | 'CANCELLED';
-    recipientCount: number;
-    createdAt: string;
+    recipient_count: number;
+    created_at: string;
 }

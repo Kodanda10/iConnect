@@ -3,13 +3,17 @@
 /// Glassmorphism design with email/password authentication.
 /// 
 /// @changelog
-/// - 2024-12-11: Initial implementation
+/// - 2024-12-18: Theme Mirroring Update (Deep Veridian + Smoked Glass)
 library;
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/glass_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -21,36 +25,13 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   
-  late AnimationController _animController;
-  late Animation<double> _fadeAnim;
-  late Animation<Offset> _slideAnim;
-
-  @override
-  void initState() {
-    super.initState();
-    _animController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.2),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
-    
-    _animController.forward();
-  }
-
   @override
   void dispose() {
-    _animController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -69,8 +50,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocListener<AuthBloc, AuthState>(
+    return AppBackground(
+      child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -81,184 +62,105 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             );
           }
         },
-        child: Container(
-          decoration: AppTheme.meshGradient,
-          child: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: FadeTransition(
-                  opacity: _fadeAnim,
-                  child: SlideTransition(
-                    position: _slideAnim,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.4),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.hub_outlined,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ).animate().fade(duration: 600.ms).scale(delay: 200.ms),
+                
+                const SizedBox(height: 24),
+                
+                // Title
+                Text(
+                  'iConnect',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ).animate().fade().slideY(begin: 0.3, end: 0, delay: 100.ms),
+                
+                const SizedBox(height: 48),
+                
+                // Glass Card Form
+                GlassContainer(
+                  borderRadius: AppRadius.xl,
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Logo
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(AppRadius.xl),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.4),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.hub_outlined,
-                            size: 40,
+                        Text(
+                          'Sign In',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 24),
                         
-                        // Title
-                        Text(
-                          'iConnect',
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        // Email Field
+                        GlassTextField(
+                          controller: _emailController,
+                          hintText: 'Email address',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          keyboardType: TextInputType.emailAddress,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Constituent Relationship Management',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 16),
                         
-                        // Glass Card Form
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.xl),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                            child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: AppTheme.glassCard(),
-                              child: Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(
-                                      'Sign In',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 24),
-                                    
-                                    // Email Field
-                                    TextFormField(
-                                      controller: _emailController,
-                                      keyboardType: TextInputType.emailAddress,
-                                      style: const TextStyle(color: Colors.white),
-                                      decoration: InputDecoration(
-                                        hintText: 'Email address',
-                                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                                        prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.6)),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Email is required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: 16),
-                                    
-                                    // Password Field
-                                    TextFormField(
-                                      controller: _passwordController,
-                                      obscureText: true,
-                                      style: const TextStyle(color: Colors.white),
-                                      decoration: InputDecoration(
-                                        hintText: 'Password',
-                                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                                        prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.6)),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Password is required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: 24),
-                                                                        
-                                    // Sign In Button
-                                    BlocBuilder<AuthBloc, AuthState>(
-                                      builder: (context, state) {
-                                        return Container(
-                                          height: 56,
-                                          decoration: BoxDecoration(
-                                            gradient: AppTheme.primaryGradient,
-                                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppColors.primary.withOpacity(0.4),
-                                                blurRadius: 16,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: ElevatedButton(
-                                            onPressed: state is AuthLoading ? null : _onSignInPressed,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.transparent,
-                                              shadowColor: Colors.transparent,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(AppRadius.lg),
-                                              ),
-                                            ),
-                                            child: state is AuthLoading
-                                              ? const SizedBox(
-                                                  width: 24,
-                                                  height: 24,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  'Sign In',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                        // Password Field
+                        GlassTextField(
+                          controller: _passwordController,
+                          hintText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          obscureText: true,
                         ),
-                        
                         const SizedBox(height: 24),
-                        Text(
-                          '© 2024 iConnect CRM',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.3),
-                            fontSize: 12,
-                          ),
+                        
+                        // Sign In Button
+                        BlocBuilder<AuthBloc, AuthState>(
+                          builder: (context, state) {
+                            return PrimaryButton(
+                              label: 'Sign In',
+                              isLoading: state is AuthLoading,
+                              onPressed: _onSignInPressed,
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
+                ).animate().fade().slideY(begin: 0.2, end: 0, delay: 300.ms),
+                
+                const SizedBox(height: 24),
+                Text(
+                  '© 2024 iConnect CRM',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.3),
+                    fontSize: 12,
+                  ),
+                ).animate().fade(delay: 500.ms),
+              ],
             ),
           ),
         ),

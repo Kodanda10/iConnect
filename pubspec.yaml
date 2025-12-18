@@ -1,7 +1,7 @@
 name: iconnect_mobile
 description: "iConnect CRM - Constituent Relationship Management Mobile App"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.8.1
@@ -40,6 +40,7 @@ dependencies:
   dartz: ^0.10.1
   cloud_functions: ^5.6.2
   shimmer: ^3.0.0
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
