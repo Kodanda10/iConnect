@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar, Check, AlertCircle } from 'lucide-react';
 import {
@@ -39,6 +39,7 @@ export default function ValidatedDateInput({
     allowFuture = true,
     className = '',
 }: ValidatedDateInputProps) {
+    const id = useId();
     const [displayValue, setDisplayValue] = useState(formatDateForDisplay(value));
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
@@ -135,7 +136,7 @@ export default function ValidatedDateInput({
     return (
         <div className={`relative ${className}`}>
             {label && (
-                <label className="block text-sm font-medium text-white/80 mb-2">
+                <label htmlFor={id} className="block text-sm font-medium text-white/80 mb-2">
                     {label}
                 </label>
             )}
@@ -152,12 +153,14 @@ export default function ValidatedDateInput({
                     onClick={openCalendar}
                     disabled={disabled || !showCalendar}
                     className="focus:outline-none"
+                    aria-label="Toggle calendar"
                 >
                     {getIcon()}
                 </button>
 
                 {/* Text Input */}
                 <input
+                    id={id}
                     ref={inputRef}
                     type="text"
                     value={displayValue}
@@ -166,6 +169,7 @@ export default function ValidatedDateInput({
                     placeholder={placeholder}
                     disabled={disabled}
                     maxLength={10}
+                    aria-invalid={validationState === 'error'}
                     className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
                 />
             </div>
