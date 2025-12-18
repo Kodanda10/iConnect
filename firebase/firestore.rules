@@ -56,7 +56,8 @@ service cloud.firestore {
     match /settings/{docId} {
       // Keep the public surface area minimal: only the singleton app config is public-read.
       // Any additional settings docs require authentication.
-      allow read: if docId == 'app_config' || isSignedIn();
+      // SECURITY UPDATE: Restricted read access of non-public settings to STAFF only.
+      allow read: if docId == 'app_config' || isStaff();
       allow write: if isStaff(); // Only authenticated staff can modify settings
     }
     

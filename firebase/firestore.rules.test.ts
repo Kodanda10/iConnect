@@ -217,13 +217,33 @@ describe('Firestore Security Rules', () => {
     });
 
     describe('settings collection', () => {
-        test('anyone can read settings', async () => {
+        test('anyone can read app_config', async () => {
             await testEnv.withSecurityRulesDisabled(async (context) => {
                 await context.firestore().collection('settings').doc('app_config').set({ appName: 'Test' });
             });
 
             const db = testEnv.unauthenticatedContext().firestore();
             await assertSucceeds(db.collection('settings').doc('app_config').get());
+        });
+
+        test('authenticated non-staff user cannot read other settings', async () => {
+            await testEnv.withSecurityRulesDisabled(async (context) => {
+                await context.firestore().collection('users').doc('leader1').set({ role: 'LEADER' });
+                await context.firestore().collection('settings').doc('secret_config').set({ secret: '123' });
+            });
+
+            const db = testEnv.authenticatedContext('leader1').firestore();
+            await assertFails(db.collection('settings').doc('secret_config').get());
+        });
+
+        test('STAFF can read other settings', async () => {
+            await testEnv.withSecurityRulesDisabled(async (context) => {
+                await context.firestore().collection('users').doc('staff1').set({ role: 'STAFF' });
+                await context.firestore().collection('settings').doc('secret_config').set({ secret: '123' });
+            });
+
+            const db = testEnv.authenticatedContext('staff1').firestore();
+            await assertSucceeds(db.collection('settings').doc('secret_config').get());
         });
 
         test('only STAFF can write settings', async () => {
