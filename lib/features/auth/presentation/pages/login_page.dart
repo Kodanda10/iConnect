@@ -69,36 +69,24 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.hub_outlined,
-                    size: 40,
-                    color: Colors.white,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  child: Image.asset(
+                    'assets/images/app_icon.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                   ),
                 ).animate().fade(duration: 600.ms).scale(delay: 200.ms),
                 
                 const SizedBox(height: 24),
                 
-                // Title
-                Text(
-                  'iConnect',
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                  ),
-                ).animate().fade().slideY(begin: 0.3, end: 0, delay: 100.ms),
+                // Title - Using logo text image
+                Image.asset(
+                  'assets/images/logo_text.png',
+                  height: 40,
+                  fit: BoxFit.contain,
+                ).animate().fade(delay: 300.ms).slideY(begin: 0.2),
                 
                 const SizedBox(height: 48),
                 
