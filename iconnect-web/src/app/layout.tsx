@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   description: "Constituent Relationship Management for Political Leaders",
   keywords: ["CRM", "Politics", "Constituents", "Engagement"],
   authors: [{ name: "iConnect Team" }],
+  manifest: "/manifest.json",
+  themeColor: "#022C22",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
+  appleWebApp: {
+    title: "iConnect",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({

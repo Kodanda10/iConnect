@@ -58,12 +58,14 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/launcher/icon_foreground.png"
-  min_sdk_android: 21
+  image_path: "assets/icon/icon_foreground.png" # Fallback for old phones
+  
+  # THE CRITICAL FIX FOR SAMSUNG/ANDROID 12+:
+  adaptive_icon_background: "#022C22" # Solid Color Hex (Removes White Border)
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png" # Floating Symbol
+  
   remove_alpha_ios: true
-  # Adaptive Icons - White Background to blend with JPEG asset
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/launcher/icon_foreground.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
