@@ -82,7 +82,7 @@ class FCMService {
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
       
-      debugPrint('[FCM] Token synced for user $uid');
+      debugPrint('[FCM] Token synced for user (redacted)');
     } catch (e) {
       debugPrint('[FCM] Token sync error: $e');
     }
@@ -90,24 +90,24 @@ class FCMService {
   
   /// Handle foreground messages (app is open)
   void _handleForegroundMessage(RemoteMessage message) {
-    debugPrint('[FCM] Foreground message: ${message.notification?.title}');
+    debugPrint('[FCM] Foreground message received');
     
     // TODO: Show local notification or update UI
     // For now, just log the message
     if (message.notification != null) {
-      debugPrint('[FCM] Title: ${message.notification!.title}');
-      debugPrint('[FCM] Body: ${message.notification!.body}');
+      debugPrint('[FCM] Title: (redacted)');
+      debugPrint('[FCM] Body: (redacted)');
     }
   }
   
   /// Handle when user taps notification (app was in background)
   void _handleMessageOpenedApp(RemoteMessage message) {
-    debugPrint('[FCM] Message opened app: ${message.notification?.title}');
+    debugPrint('[FCM] Message opened app (redacted)');
     
     // TODO: Navigate to relevant screen based on message data
     // For now, just log
     if (message.data.isNotEmpty) {
-      debugPrint('[FCM] Data: ${message.data}');
+      debugPrint('[FCM] Data keys: ${message.data.keys}');
     }
   }
   
@@ -121,7 +121,7 @@ class FCMService {
 /// Background message handler - must be top-level function
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('[FCM] Background message: ${message.notification?.title}');
+  debugPrint('[FCM] Background message received');
   // Handle background message
   // Note: Cannot use context-dependent operations here
 }
