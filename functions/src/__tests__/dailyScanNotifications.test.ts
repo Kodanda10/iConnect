@@ -155,4 +155,47 @@ describe('scheduleDailyNotifications', () => {
         expect(headsUpCall).toBeDefined();
         expect(headsUpCall[1].body).toContain('1 birthdays tomorrow.');
     });
+
+    test('should SANITIZE hardcoded clean-up text from templates', async () => {
+        const today = new Date('2025-12-18T10:00:00Z');
+        jest.setSystemTime(today);
+
+        // Mock Dirty Settings
+        const dirtySettings = {
+            leaderUid: 'leader123',
+            alertSettings: {
+                headsUp: true,
+                action: true,
+                headsUpMessage: "Tomorrow's Celebrations! 5 constituents have birthdays tomorrow. Tap to view...",
+                actionMessage: "Action Required! Send wishes to 5 people celebrating today. Don't miss..."
+            }
+        };
+
+        // Override mock for this test
+        mockDb.collection.mockImplementation((name: string) => {
+            if (name === 'settings') {
+                return {
+                    doc: () => ({ get: jest.fn().mockResolvedValue({ data: () => dirtySettings }) })
+                };
+            }
+            return mockCollection(name); // Use default for others
+        });
+
+        const constituents: Constituent[] = [
+            { id: '1', name: 'A', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+        ];
+
+        await scheduleDailyNotifications(mockDb, constituents);
+
+        const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
+        expect(headsUpCall).toBeDefined();
+
+        // Assert: Dynamic Count (1) represents reality. Hardcoded (5) is removed.
+        // Expected: "1 birthdays tomorrow. Tomorrow's Celebrations! Tap to view..."
+        const body = headsUpCall[1].body;
+        expect(body).toContain('1 birthdays tomorrow.');
+        expect(body).not.toContain('5 constituents');
+        expect(body).not.toContain('have birthdays tomorrow.'); // The hardcoded part
+        expect(body).toContain("Tomorrow's Celebrations!");
+    });
 });

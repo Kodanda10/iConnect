@@ -77,8 +77,12 @@ export default function SettingsPage() {
                     alertSettings: {
                         headsUp: savedSettings.alertSettings?.headsUp ?? true,
                         action: savedSettings.alertSettings?.action ?? true,
-                        headsUpMessage: savedSettings.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.",
-                        actionMessage: savedSettings.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!",
+                        headsUpMessage: (savedSettings.alertSettings?.headsUpMessage && !savedSettings.alertSettings.headsUpMessage.includes("5 constituents"))
+                            ? savedSettings.alertSettings.headsUpMessage
+                            : "Tomorrow's Celebrations! Tap to view the list and prepare.",
+                        actionMessage: (savedSettings.alertSettings?.actionMessage && !savedSettings.alertSettings.actionMessage.includes("5 people"))
+                            ? savedSettings.alertSettings.actionMessage
+                            : "Action Required! Send wishes to people celebrating today. Don't miss out!",
                     },
                 });
                 if (savedSettings.headerImageUrl) {
@@ -440,7 +444,7 @@ export default function SettingsPage() {
                                                         <div>
                                                             <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Birthday:</p>
                                                             <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-purple-400/50">
-                                                                {previewData.headsUpBirthdays.map((name, i) => <li key={i}>{name}</li>)}
+                                                                {previewData.headsUpBirthdays.map((name, i) => <li key={i} className="truncate">{name}</li>)}
                                                             </ul>
                                                         </div>
                                                     )}
@@ -448,7 +452,7 @@ export default function SettingsPage() {
                                                         <div>
                                                             <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Anniversary:</p>
                                                             <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-amber-400/50">
-                                                                {previewData.headsUpAnniversaries.map((name, i) => <li key={i}>{name}</li>)}
+                                                                {previewData.headsUpAnniversaries.map((name, i) => <li key={i} className="truncate">{name}</li>)}
                                                             </ul>
                                                         </div>
                                                     )}

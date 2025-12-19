@@ -194,8 +194,8 @@ export async function scheduleDailyNotifications(
     // Logic matches SettingsPage.tsx
     const headsUpEnabled = settings?.alertSettings?.headsUp ?? true;
     const actionEnabled = settings?.alertSettings?.action ?? true;
-    const headsUpTemplate = settings?.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.";
-    const actionTemplate = settings?.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!";
+    let headsUpTemplate = settings?.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.";
+    let actionTemplate = settings?.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!";
 
     let targetUid = settings?.leaderUid;
     if (!targetUid) {
@@ -207,6 +207,19 @@ export async function scheduleDailyNotifications(
             return;
         }
     }
+
+    // --- Sanitization Logic ---
+    // Remove "5 constituents have birthdays tomorrow" and "5 people celebrating today" 
+    // to fix legacy hardcoded templates if they exist in DB.
+    if (headsUpTemplate) {
+        headsUpTemplate = headsUpTemplate.replace(/5 constituents have birthdays tomorrow\.?/gi, "").trim();
+    }
+    if (actionTemplate) {
+        actionTemplate = actionTemplate.replace(/5 people celebrating today\.?/gi, "").trim();
+    }
+    // Also remove any double spaces created by removal
+    headsUpTemplate = headsUpTemplate.replace(/\s\s+/g, ' ');
+    actionTemplate = actionTemplate.replace(/\s\s+/g, ' ');
 
     const batch = db.batch();
     const Timestamp = admin.firestore.Timestamp;
