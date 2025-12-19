@@ -71,13 +71,24 @@ class _LoginPageState extends State<LoginPage> {
                 // Logo
                 // Logo
                 // Logo
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  child: Image.asset(
-                    'assets/images/app_icon_final.png',
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/app_icon_final.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ).animate().fade(duration: 600.ms).scale(delay: 200.ms),
                 

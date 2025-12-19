@@ -93,7 +93,7 @@ export default function LoginPage() {
                     <img
                         src="/app-logo-final.png"
                         alt="iConnect"
-                        className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg"
+                        className="w-20 h-20 mx-auto mb-4 rounded-full shadow-lg"
                     />
                     <h1 className="text-4xl font-bold text-white tracking-tight mb-2">
                         iConnect
