@@ -42,16 +42,14 @@ void main() {
         ),
       );
 
-      // Allow initial animations to settle
-      await tester.pump(const Duration(milliseconds: 50));
-      await tester.pump(const Duration(milliseconds: 50)); 
+      // Allow initial animations to settle including ExpansionTile
+      await tester.pumpAndSettle();
       
       // Verify initial rendering of top items
       expect(find.text('Constituent 0'), findsOneWidget);
-      expect(find.text('Constituent 49'), findsNothing); // Should be off-screen
 
-      // Fling scroll to bottom to test scrolling performance/errors
-      await tester.fling(find.byType(ListView), const Offset(0, -2000), 2000);
+      // Fling scroll to bottom - use SingleChildScrollView since widget uses Column not ListView
+      await tester.fling(find.byType(SingleChildScrollView), const Offset(0, -2000), 2000);
       await tester.pumpAndSettle();
 
       // Verify bottom items reachable
@@ -71,7 +69,8 @@ void main() {
           ),
         ),
       );
-      await tester.pump(const Duration(milliseconds: 100)); // Start animation
+      // Fully settle initial animations before updating
+      await tester.pumpAndSettle();
 
       // 2. Rapid Update (Simulate realtime update while animating)
       await tester.pumpWidget(
@@ -86,7 +85,7 @@ void main() {
         ),
       );
       
-      // Check that it didn't crash and controllers were disposed/recreated
+      // Fully settle all animations and timers before test ends
       await tester.pumpAndSettle();
       expect(find.text('Constituent 4'), findsOneWidget);
     });

@@ -1,0 +1,15 @@
+lib/core/services/fcm_service.dart:36:        debugPrint('[FCM] Permission denied by user');
+lib/core/services/fcm_service.dart:41:        debugPrint('[FCM] Permission not determined');
+lib/core/services/fcm_service.dart:45:      debugPrint('[FCM] Permission granted: ${settings.authorizationStatus}');
+lib/core/services/fcm_service.dart:60:      debugPrint('[FCM] Initialization complete');
+lib/core/services/fcm_service.dart:62:      debugPrint('[FCM] Initialization error: $e');
+lib/core/services/fcm_service.dart:69:      debugPrint('[FCM] Token is null, skipping sync');
+lib/core/services/fcm_service.dart:75:      debugPrint('[FCM] No authenticated user, skipping token sync');
+lib/core/services/fcm_service.dart:85:      debugPrint('[FCM] Token synced for user $uid');
+lib/core/services/fcm_service.dart:87:      debugPrint('[FCM] Token sync error: $e');
+lib/core/services/fcm_service.dart:93:    debugPrint('[FCM] Foreground message: ${message.notification?.title}');
+lib/core/services/fcm_service.dart:98:      debugPrint('[FCM] Title: ${message.notification!.title}');
+lib/core/services/fcm_service.dart:99:      debugPrint('[FCM] Body: ${message.notification!.body}');
+lib/core/services/fcm_service.dart:105:    debugPrint('[FCM] Message opened app: ${message.notification?.title}');
+lib/core/services/fcm_service.dart:110:      debugPrint('[FCM] Data: ${message.data}');
+lib/core/services/fcm_service.dart:124:  debugPrint('[FCM] Background message: ${message.notification?.title}');

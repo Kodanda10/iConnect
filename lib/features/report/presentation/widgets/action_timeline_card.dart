@@ -23,7 +23,8 @@ class ActionTimelineCard extends StatefulWidget {
 class _ActionTimelineCardState extends State<ActionTimelineCard>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
-  Timer? _scrollTimer;
+  Timer? _delayTimer;  // Timer for initial 2-second delay
+  Timer? _scrollTimer; // Timer for periodic scrolling
 
   @override
   void initState() {
@@ -37,9 +38,13 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
   }
 
   void _startAutoScroll() {
+    // Cancel any existing timers first
+    _delayTimer?.cancel();
     _scrollTimer?.cancel();
-    // Conveyor Belt Engine: Auto-start
-    Future.delayed(const Duration(seconds: 2), () {
+    
+    // Conveyor Belt Engine: Auto-start after 2-second delay
+    // Using Timer instead of Future.delayed for proper cancellation
+    _delayTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       
       // Move 1 pixel every 50ms (Slow & Steady, Assembly Line)
@@ -69,6 +74,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
   void didUpdateWidget(ActionTimelineCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.actions.length != widget.actions.length) {
+      _delayTimer?.cancel();
       _scrollTimer?.cancel();
       // Restart engine if data refreshes
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,6 +87,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _scrollTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -251,6 +258,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                       ),

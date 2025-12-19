@@ -52,12 +52,15 @@ void main() {
   group('getTodaySummary', () {
     test('returns correct stats using aggregation queries', () async {
       // Mock CollectionReference.where -> Query
-      // Expect executed_by filter first or anywhere
+      // The actual code chains multiple where() calls, so mock needs to return mockQuery
+      // for any where() invocation on both CollectionReference and Query
+      
       when(() => mockActionLogs.where(
         any(), 
         isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
+        isLessThan: any(named: 'isLessThan'),
       )).thenReturn(mockQuery);
 
       when(() => mockTasks.where(
@@ -65,16 +68,19 @@ void main() {
         isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'), 
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
+        isLessThan: any(named: 'isLessThan'),
       )).thenReturn(mockQuery);
 
-      // Mock chainable where calls on Query
+      // Mock chainable where calls on Query (for chained .where().where() patterns)
       when(() => mockQuery.where(
         any(), 
         isEqualTo: any(named: 'isEqualTo'),
         isGreaterThanOrEqualTo: any(named: 'isGreaterThanOrEqualTo'),
         isLessThanOrEqualTo: any(named: 'isLessThanOrEqualTo'),
+        isLessThan: any(named: 'isLessThan'),
       )).thenReturn(mockQuery);
 
+      // Mock count() and get() for aggregation
       when(() => mockQuery.count()).thenReturn(mockAggregateQuery);
       when(() => mockAggregateQuery.get()).thenAnswer((_) async => mockAggregateSnapshot);
       when(() => mockAggregateSnapshot.count).thenReturn(5);

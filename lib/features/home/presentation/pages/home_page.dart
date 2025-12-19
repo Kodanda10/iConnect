@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For HapticFeedback
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -96,18 +97,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
+              // Header - Simplified to "Status"
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Outcome for ${task.name}?',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
                   IconButton(
@@ -115,6 +114,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     icon: const Icon(Icons.close, color: Colors.grey),
                   ),
                 ],
+              ),
+              // Constituent Name (2 lines max, centered)
+              const SizedBox(height: 8),
+              Text(
+                task.name,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF00A896),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                ),
               ),
               const SizedBox(height: 16),
               
@@ -133,25 +145,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       color: Colors.grey
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Action taken: $actionType',
-                            style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
-                          ),
-                          Text(
-                            task.name,
-                            style: const TextStyle(
-                              color: Color(0xFF00A896),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                    Text(
+                      'Action taken: $actionType',
+                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
                     ),
                   ],
                 ),
@@ -218,10 +214,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       onPressed: () {
                         Navigator.pop(ctx);
-                        // TODO: Implement reschedule logic if needed
                       },
                       icon: const Icon(Icons.schedule, size: 18),
-                      label: const Text('Reschedule'),
+                      label: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text('Reschedule'),
+                      ),
                     ),
                   ),
                 ],
@@ -1576,7 +1574,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(width: 10),
                   Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, Colors.purpleAccent, task.smsSent, () => _openAiWizard(task, 'SMS'))),
                   const SizedBox(width: 10),
-                  Expanded(child: _buildLiquidGlassButton("WhatsApp", Icons.chat_bubble, const Color(0xFF10B981), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
+                  Expanded(child: _buildLiquidGlassButton("WhatsApp", FontAwesomeIcons.whatsapp, const Color(0xFF25D366), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
               ],
             )
           ],
@@ -1633,16 +1631,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Icon(icon, size: 16, color: effectiveIconColor),
                   const SizedBox(width: 6),
                   Flexible(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        color: effectiveTextColor, 
-                        fontWeight: FontWeight.w600, 
-                        fontSize: 11,
-                        decoration: isCompleted ? TextDecoration.none : null,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          color: effectiveTextColor, 
+                          fontWeight: FontWeight.w600, 
+                          fontSize: 12,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                     ),
                   ),
                 ],
