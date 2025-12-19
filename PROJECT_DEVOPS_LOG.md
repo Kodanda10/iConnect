@@ -51,4 +51,5 @@
     - Flutter Tests: 85/85 Passed. 
     - Cloud Functions: 27/27 Passed.
     - Web Tests: 182/182 Passed.
-    - Production APK (`v2.4.0`) built and ready.
+    - **UI Polish**: Applied circular branding to App Icon in Mobile Auth, Web Auth, and Web NavBar to eliminate "White Box" artifacts.
+    - **Production APK** (`v2.4.0`) built and ready.
