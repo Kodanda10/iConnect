@@ -44,10 +44,8 @@ export default function SettingsPage() {
             headsUp: true,
             action: true,
             // New Editable Fields
-            headsUpMessage: "Tomorrow's Celebrations! 5 constituents have birthdays tomorrow. Tap to view the list and prepare.",
-            includeNamesHeadsUp: false,
-            actionMessage: "Action Required! Send wishes to 5 people celebrating today. Don't miss out!",
-            includeNamesAction: false,
+            headsUpMessage: "Tomorrow's Celebrations! Tap to view the list and prepare.",
+            actionMessage: "Action Required! Send wishes to people celebrating today. Don't miss out!",
         },
     });
 
@@ -79,10 +77,8 @@ export default function SettingsPage() {
                     alertSettings: {
                         headsUp: savedSettings.alertSettings?.headsUp ?? true,
                         action: savedSettings.alertSettings?.action ?? true,
-                        headsUpMessage: savedSettings.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! 5 constituents have birthdays tomorrow. Tap to view the list and prepare.",
-                        includeNamesHeadsUp: savedSettings.alertSettings?.includeNamesHeadsUp || false,
-                        actionMessage: savedSettings.alertSettings?.actionMessage || "Action Required! Send wishes to 5 people celebrating today. Don't miss out!",
-                        includeNamesAction: savedSettings.alertSettings?.includeNamesAction || false,
+                        headsUpMessage: savedSettings.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.",
+                        actionMessage: savedSettings.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!",
                     },
                 });
                 if (savedSettings.headerImageUrl) {
@@ -117,10 +113,10 @@ export default function SettingsPage() {
                 const todayAnns = await getConstituentsForDate(today.getMonth() + 1, today.getDate(), 'anniversary');
 
                 setPreviewData({
-                    headsUpBirthdays: tmrwBdays.map(c => c.name || 'Unknown'),
-                    headsUpAnniversaries: tmrwAnns.map(c => c.name || 'Unknown'),
-                    actionBirthdays: todayBdays.map(c => c.name || 'Unknown'),
-                    actionAnniversaries: todayAnns.map(c => c.name || 'Unknown'),
+                    headsUpBirthdays: tmrwBdays.map(c => c.gp_ulb ? `${c.name || 'Unknown'} (${c.gp_ulb})` : (c.name || 'Unknown')),
+                    headsUpAnniversaries: tmrwAnns.map(c => c.gp_ulb ? `${c.name || 'Unknown'} (${c.gp_ulb})` : (c.name || 'Unknown')),
+                    actionBirthdays: todayBdays.map(c => c.gp_ulb ? `${c.name || 'Unknown'} (${c.gp_ulb})` : (c.name || 'Unknown')),
+                    actionAnniversaries: todayAnns.map(c => c.gp_ulb ? `${c.name || 'Unknown'} (${c.gp_ulb})` : (c.name || 'Unknown')),
                 });
             } catch (error) {
                 console.error("Failed to fetch preview data:", error);
@@ -364,12 +360,6 @@ export default function SettingsPage() {
                                         className="w-full glass-input-dark h-64 text-xs leading-relaxed resize-none p-3 flex-1"
                                         placeholder="Enter notification message..."
                                     />
-                                    <div className="flex items-center gap-2 cursor-pointer pt-2" onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, includeNamesHeadsUp: !settings.alertSettings.includeNamesHeadsUp } })}>
-                                        <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${settings.alertSettings.includeNamesHeadsUp ? 'bg-emerald-500 border-emerald-500' : 'border-white/40'}`}>
-                                            {settings.alertSettings.includeNamesHeadsUp && <CheckCircle className="w-3 h-3 text-white" />}
-                                        </div>
-                                        <span className="text-xs text-white/80 select-none">Include names list</span>
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -400,12 +390,6 @@ export default function SettingsPage() {
                                         className="w-full glass-input-dark h-64 text-xs leading-relaxed resize-none p-3 flex-1"
                                         placeholder="Enter notification message..."
                                     />
-                                    <div className="flex items-center gap-2 cursor-pointer pt-2" onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, includeNamesAction: !settings.alertSettings.includeNamesAction } })}>
-                                        <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${settings.alertSettings.includeNamesAction ? 'bg-emerald-500 border-emerald-500' : 'border-white/40'}`}>
-                                            {settings.alertSettings.includeNamesAction && <CheckCircle className="w-3 h-3 text-white" />}
-                                        </div>
-                                        <span className="text-xs text-white/80 select-none">Include names list</span>
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -445,30 +429,33 @@ export default function SettingsPage() {
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-bold text-white">Tomorrow&apos;s Celebrations 🎉</h4>
-                                                <p className="text-xs text-white/90 mt-0.5 leading-relaxed">{settings.alertSettings.headsUpMessage}</p>
-                                                {settings.alertSettings.includeNamesHeadsUp && (
-                                                    <div className="mt-2 pt-2 border-t border-white/10 space-y-2">
-                                                        {previewData.headsUpBirthdays.length > 0 && (
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Birthday:</p>
-                                                                <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-purple-400/50">
-                                                                    {previewData.headsUpBirthdays.map((name, i) => <li key={i}>{name}</li>)}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {previewData.headsUpAnniversaries.length > 0 && (
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Anniversary:</p>
-                                                                <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-amber-400/50">
-                                                                    {previewData.headsUpAnniversaries.map((name, i) => <li key={i}>{name}</li>)}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {previewData.headsUpBirthdays.length === 0 && previewData.headsUpAnniversaries.length === 0 && (
-                                                            <p className="text-[10px] text-white/50 italic">No events found for tomorrow in DB.</p>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                <p className="text-xs text-white/90 mt-0.5 leading-relaxed">
+                                                    {previewData.headsUpBirthdays.length > 0 || previewData.headsUpAnniversaries.length > 0
+                                                        ? `${previewData.headsUpBirthdays.length} birthdays & ${previewData.headsUpAnniversaries.length} anniversaries tomorrow. ${settings.alertSettings.headsUpMessage}`
+                                                        : settings.alertSettings.headsUpMessage
+                                                    }
+                                                </p>
+                                                <div className="mt-2 pt-2 border-t border-white/10 space-y-2">
+                                                    {previewData.headsUpBirthdays.length > 0 && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Birthday:</p>
+                                                            <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-purple-400/50">
+                                                                {previewData.headsUpBirthdays.map((name, i) => <li key={i}>{name}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {previewData.headsUpAnniversaries.length > 0 && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Anniversary:</p>
+                                                            <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-amber-400/50">
+                                                                {previewData.headsUpAnniversaries.map((name, i) => <li key={i}>{name}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {previewData.headsUpBirthdays.length === 0 && previewData.headsUpAnniversaries.length === 0 && (
+                                                        <p className="text-[10px] text-white/50 italic">No events found for tomorrow in DB.</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -487,30 +474,33 @@ export default function SettingsPage() {
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-bold text-white">Action Required ⚡️</h4>
-                                                <p className="text-xs text-white/90 mt-0.5 leading-relaxed">{settings.alertSettings.actionMessage}</p>
-                                                {settings.alertSettings.includeNamesAction && (
-                                                    <div className="mt-2 pt-2 border-t border-white/10 space-y-2">
-                                                        {previewData.actionBirthdays.length > 0 && (
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Birthday:</p>
-                                                                <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-purple-400/50">
-                                                                    {previewData.actionBirthdays.map((name, i) => <li key={i}>{name}</li>)}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {previewData.actionAnniversaries.length > 0 && (
-                                                            <div>
-                                                                <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Anniversary:</p>
-                                                                <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-amber-400/50">
-                                                                    {previewData.actionAnniversaries.map((name, i) => <li key={i}>{name}</li>)}
-                                                                </ul>
-                                                            </div>
-                                                        )}
-                                                        {previewData.actionBirthdays.length === 0 && previewData.actionAnniversaries.length === 0 && (
-                                                            <p className="text-[10px] text-white/50 italic">No events found for today in DB.</p>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                <p className="text-xs text-white/90 mt-0.5 leading-relaxed">
+                                                    {previewData.actionBirthdays.length > 0 || previewData.actionAnniversaries.length > 0
+                                                        ? `${previewData.actionBirthdays.length} birthdays & ${previewData.actionAnniversaries.length} anniversaries today. ${settings.alertSettings.actionMessage}`
+                                                        : settings.alertSettings.actionMessage
+                                                    }
+                                                </p>
+                                                <div className="mt-2 pt-2 border-t border-white/10 space-y-2">
+                                                    {previewData.actionBirthdays.length > 0 && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Birthday:</p>
+                                                            <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-purple-400/50">
+                                                                {previewData.actionBirthdays.map((name, i) => <li key={i}>{name}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {previewData.actionAnniversaries.length > 0 && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wider mb-0.5">Anniversary:</p>
+                                                            <ul className="text-[10px] text-white/90 space-y-0.5 pl-1.5 border-l-2 border-amber-400/50">
+                                                                {previewData.actionAnniversaries.map((name, i) => <li key={i}>{name}</li>)}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+                                                    {previewData.actionBirthdays.length === 0 && previewData.actionAnniversaries.length === 0 && (
+                                                        <p className="text-[10px] text-white/50 italic">No events found for today in DB.</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
