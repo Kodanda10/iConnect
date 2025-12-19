@@ -64,13 +64,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="glass-navbar flex items-center justify-between h-14 px-4 sm:px-6">
                         {/* Logo */}
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
-                                <Database className="w-4 h-4 text-white" />
-                            </div>
+                            <img
+                                src="/app-icon.png"
+                                alt="iConnect"
+                                className="w-9 h-9 rounded-xl shadow-lg"
+                            />
                             <div className="hidden sm:block">
-                                <h1 className="text-base font-bold text-white">
-                                    iConnect
-                                </h1>
+                                <img
+                                    src="/logo-text.png"
+                                    alt="iConnect"
+                                    className="h-6"
+                                />
                                 <p className="text-[10px] text-white/50 -mt-0.5">
                                     Staff Portal
                                 </p>

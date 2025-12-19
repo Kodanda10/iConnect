@@ -90,12 +90,16 @@ export default function LoginPage() {
             <div className="w-full max-w-md">
                 {/* Logo Section */}
                 <div className="text-center mb-8 animate-fade-in">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary shadow-lg mb-4">
-                        <Database className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">
-                        iConnect
-                    </h1>
+                    <img
+                        src="/app-icon.png"
+                        alt="iConnect"
+                        className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg"
+                    />
+                    <img
+                        src="/logo-text.png"
+                        alt="iConnect"
+                        className="h-10 mx-auto"
+                    />
                     <p className="text-white/60 mt-2">
                         Constituent Relationship Management
                     </p>
