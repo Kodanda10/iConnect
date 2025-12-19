@@ -53,3 +53,5 @@
     - Web Tests: 182/182 Passed.
     - **UI Polish**: Applied circular branding to App Icon in Mobile Auth, Web Auth, and Web NavBar to eliminate "White Box" artifacts.
     - **Production APK** (`v2.4.0`) built and ready.
+    - **Notification Fix**: Implemented backend sanitization (`dailyScan.ts`) to auto-remove legacy "5 constituents/5 people" hardcoded text. Verified by TDD.
+    - **Frontend Fix**: Added self-healing logic in Settings page and `truncate` to preview lists to fix text overflow.

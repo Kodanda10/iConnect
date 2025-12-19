@@ -73,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                 // Logo
                 Container(
                   decoration: BoxDecoration(
+                    color: Colors.white, // Enforce white background for transparency
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(

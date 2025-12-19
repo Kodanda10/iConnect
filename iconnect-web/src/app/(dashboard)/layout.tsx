@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             <img
                                 src="/app-logo-final.png"
                                 alt="iConnect"
-                                className="w-9 h-9 rounded-full shadow-lg"
+                                className="w-9 h-9 rounded-full shadow-lg bg-white object-cover"
                             />
                             <div className="hidden sm:block">
                                 <span className="text-xl font-bold text-white tracking-tight leading-none block">
