@@ -58,12 +58,12 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/launcher/icon_dark.jpg"
+  image_path: "assets/launcher/icon_foreground.png"
   min_sdk_android: 21
   remove_alpha_ios: true
-  # Adaptive Icons - Using Dark BG image to blend with background
-  adaptive_icon_background: "#022C22"
-  adaptive_icon_foreground: "assets/launcher/icon_dark.jpg"
+  # Adaptive Icons - White Background to blend with JPEG asset
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/launcher/icon_foreground.png"
 
 flutter:
   uses-material-design: true

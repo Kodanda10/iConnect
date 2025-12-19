@@ -11,12 +11,12 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onTaskDispatched } from "firebase-functions/v2/tasks";
 import * as admin from 'firebase-admin';
 import { generateGreetingMessage, GreetingRequest } from './greeting';
-import { scanForTasks, Constituent, Task } from './dailyScan';
+import { scanForTasks, Constituent, Task, scheduleDailyNotifications } from './dailyScan';
 import { formatAudioMessage } from "./notifications";
 import { sendSMS } from "./messaging";
 
 // Explicit re-exports to avoid ambiguity
-export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailyScan';
+export { scanForTasks, Constituent, Task, TaskType, ScanResult, scheduleDailyNotifications } from './dailyScan';
 export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
 export { onMeetingCreated, onConstituentWritten } from "./triggers";
@@ -244,6 +244,9 @@ export const dailyScan = onSchedule({
             }
             await batch.commit();
         }
+
+        // Schedule dynamic notifications
+        await scheduleDailyNotifications(db, constituents);
 
         console.log(`[DAILY_SCAN] Complete. Created ${result.count} new tasks.`);
     } catch (error) {

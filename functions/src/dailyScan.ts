@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import * as admin from 'firebase-admin';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type TaskStatus = 'PENDING' | 'COMPLETED';
@@ -50,7 +51,7 @@ function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     // Handle YYYY-MM-DD format
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
-    
+
     const day = parseInt(parts[2], 10);
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
@@ -99,7 +100,7 @@ function taskExists(
         } else if (typeof task.due_date === 'string') {
             taskDateStr = task.due_date;
         }
-        
+
         return (
             (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
             task.type === type &&
@@ -161,4 +162,103 @@ export function scanForTasks(
         count: newTasks.length,
         newTasks,
     };
+}
+
+/**
+ * Schedule daily push notifications (Action Reminder & Heads Up)
+ */
+export async function scheduleDailyNotifications(
+    db: admin.firestore.Firestore,
+    constituents: Constituent[]
+): Promise<void> {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    // 1. Calculate Counts
+    let todayCount = { birthdays: 0, anniversaries: 0 };
+    let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+
+    for (const c of constituents) {
+        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
+        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+
+        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
+        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+    }
+
+    // 2. Fetch Settings & Leader
+    const settingsDoc = await db.collection('settings').doc('app_config').get();
+    const settings = settingsDoc.data();
+
+    // Logic matches SettingsPage.tsx
+    const headsUpEnabled = settings?.alertSettings?.headsUp ?? true;
+    const actionEnabled = settings?.alertSettings?.action ?? true;
+    const headsUpTemplate = settings?.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.";
+    const actionTemplate = settings?.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!";
+
+    let targetUid = settings?.leaderUid;
+    if (!targetUid) {
+        const leaderQuery = await db.collection('users').where('role', '==', 'LEADER').limit(1).get();
+        if (!leaderQuery.empty) {
+            targetUid = leaderQuery.docs[0].id;
+        } else {
+            console.warn('[DAILY_SCAN] No LEADER found to notify.');
+            return;
+        }
+    }
+
+    const batch = db.batch();
+    const Timestamp = admin.firestore.Timestamp;
+
+    // --- 3. Action Reminder (Today 8:00 AM) ---
+    if (actionEnabled && (todayCount.birthdays + todayCount.anniversaries > 0)) {
+        let prefix = "";
+        const parts = [];
+        if (todayCount.birthdays > 0) parts.push(`${todayCount.birthdays} birthdays`);
+        if (todayCount.anniversaries > 0) parts.push(`${todayCount.anniversaries} anniversaries`);
+
+        if (parts.length > 0) prefix = `${parts.join(' & ')} today. `;
+
+        const docId = `action_${today.toISOString().split('T')[0]}_${targetUid}`;
+        const scheduledFor = new Date(today);
+        scheduledFor.setHours(8, 0, 0, 0);
+
+        batch.set(db.collection('scheduled_notifications').doc(docId), {
+            leaderUid: targetUid,
+            title: "Action Required ⚡️",
+            body: `${prefix}${actionTemplate}`,
+            scheduledFor: Timestamp.fromDate(scheduledFor),
+            type: 'ACTION_REMINDER',
+            sent: false,
+            createdAt: Timestamp.now()
+        });
+    }
+
+    // --- 4. Heads Up Alert (Today 8:00 PM) ---
+    if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
+        let prefix = "";
+        const parts = [];
+        if (tomorrowCount.birthdays > 0) parts.push(`${tomorrowCount.birthdays} birthdays`);
+        if (tomorrowCount.anniversaries > 0) parts.push(`${tomorrowCount.anniversaries} anniversaries`);
+
+        if (parts.length > 0) prefix = `${parts.join(' & ')} tomorrow. `;
+
+        const docId = `heads_up_${today.toISOString().split('T')[0]}_${targetUid}`;
+        const scheduledFor = new Date(today);
+        scheduledFor.setHours(20, 0, 0, 0);
+
+        batch.set(db.collection('scheduled_notifications').doc(docId), {
+            leaderUid: targetUid,
+            title: "Tomorrow's Celebrations 🎉",
+            body: `${prefix}${headsUpTemplate}`,
+            scheduledFor: Timestamp.fromDate(scheduledFor),
+            type: 'HEADS_UP',
+            sent: false,
+            createdAt: Timestamp.now()
+        });
+    }
+
+    await batch.commit();
+    console.log(`[DAILY_SCAN] Scheduled notifications for ${targetUid}`);
 }

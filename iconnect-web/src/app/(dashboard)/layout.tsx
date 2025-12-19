@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {/* Logo */}
                         <div className="flex items-center gap-3">
                             <img
-                                src="/app-logo.jpg"
+                                src="/app-logo-final.png"
                                 alt="iConnect"
                                 className="w-9 h-9 rounded-xl shadow-lg"
                             />
