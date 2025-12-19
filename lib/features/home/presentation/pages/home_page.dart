@@ -1563,14 +1563,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           
             const SizedBox(height: 16),
           
-            // Row E: Action Buttons (Call, SMS, WhatsApp)
+            // Row E: Action Buttons (Call, SMS, WhatsApp) - Vertical Icon Layout
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                  Expanded(child: _buildLiquidGlassButton("Call", Icons.call, const Color(0xFF00A896), task.callSent, () => _launchPhone(task))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildLiquidGlassButton("SMS", Icons.message, Colors.purpleAccent, task.smsSent, () => _openAiWizard(task, 'SMS'))),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildLiquidGlassButton("WhatsApp", FontAwesomeIcons.whatsapp, const Color(0xFF25D366), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP'))),
+                _buildVerticalActionButton(Icons.call, "Call", const Color(0xFF00A896), task.callSent, () => _launchPhone(task)),
+                _buildVerticalActionButton(Icons.message, "SMS", Colors.purpleAccent, task.smsSent, () => _openAiWizard(task, 'SMS')),
+                _buildVerticalActionButton(FontAwesomeIcons.whatsapp, "WhatsApp", const Color(0xFF25D366), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP')),
               ],
             )
           ],
