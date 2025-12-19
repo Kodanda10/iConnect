@@ -164,6 +164,15 @@ export function scanForTasks(
     };
 }
 
+// Helper to get IST Date
+function getISTDate(): Date {
+    const now = new Date();
+    // Get date parts in IST
+    const istString = now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+    const istDate = new Date(istString);
+    return istDate;
+}
+
 /**
  * Schedule daily push notifications (Action Reminder & Heads Up)
  */
@@ -171,7 +180,8 @@ export async function scheduleDailyNotifications(
     db: admin.firestore.Firestore,
     constituents: Constituent[]
 ): Promise<void> {
-    const today = new Date();
+    // 1. Force IST Date consistency
+    const today = getISTDate();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
@@ -179,6 +189,8 @@ export async function scheduleDailyNotifications(
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
+    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
+    // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
         if (isDateMatch(c.dob, today)) todayCount.birthdays++;
         if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
@@ -212,10 +224,10 @@ export async function scheduleDailyNotifications(
     // Remove "5 constituents have birthdays tomorrow" and "5 people celebrating today" 
     // to fix legacy hardcoded templates if they exist in DB.
     if (headsUpTemplate) {
-        headsUpTemplate = headsUpTemplate.replace(/5 constituents have birthdays tomorrow\.?/gi, "").trim();
+        headsUpTemplate = headsUpTemplate.replace(/\d+ constituents have birthdays tomorrow\.?/gi, "").trim();
     }
     if (actionTemplate) {
-        actionTemplate = actionTemplate.replace(/5 people celebrating today\.?/gi, "").trim();
+        actionTemplate = actionTemplate.replace(/\d+ people celebrating today\.?/gi, "").trim();
     }
     // Also remove any double spaces created by removal
     headsUpTemplate = headsUpTemplate.replace(/\s\s+/g, ' ');
@@ -226,12 +238,34 @@ export async function scheduleDailyNotifications(
 
     // --- 3. Action Reminder (Today 8:00 AM) ---
     if (actionEnabled && (todayCount.birthdays + todayCount.anniversaries > 0)) {
+        // Collect names for today
+        const names: string[] = [];
+        constituents.forEach(c => {
+            if (isDateMatch(c.dob, today) || isDateMatch(c.anniversary, today)) {
+                names.push(c.name.split(' ')[0]); // First name only
+            }
+        });
+
+        // Smart Summary
+        let nameSummary = "";
+        if (names.length > 0) {
+            const displayCount = 2; // Show first 2 names
+            const firstNames = names.slice(0, displayCount).join(', ');
+            const remaining = names.length - displayCount;
+
+            if (remaining > 0) {
+                nameSummary = `(${firstNames} & ${remaining} others)`;
+            } else {
+                nameSummary = `(${firstNames})`;
+            }
+        }
+
         let prefix = "";
         const parts = [];
         if (todayCount.birthdays > 0) parts.push(`${todayCount.birthdays} birthdays`);
         if (todayCount.anniversaries > 0) parts.push(`${todayCount.anniversaries} anniversaries`);
 
-        if (parts.length > 0) prefix = `${parts.join(' & ')} today. `;
+        if (parts.length > 0) prefix = `${parts.join(' & ')} today ${nameSummary}. `;
 
         const docId = `action_${today.toISOString().split('T')[0]}_${targetUid}`;
         const scheduledFor = new Date(today);
@@ -250,12 +284,34 @@ export async function scheduleDailyNotifications(
 
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
+        // Collect names for tomorrow
+        const names: string[] = [];
+        constituents.forEach(c => {
+            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+                names.push(c.name.split(' ')[0]);
+            }
+        });
+
+        // Smart Summary
+        let nameSummary = "";
+        if (names.length > 0) {
+            const displayCount = 2;
+            const firstNames = names.slice(0, displayCount).join(', ');
+            const remaining = names.length - displayCount;
+
+            if (remaining > 0) {
+                nameSummary = `(${firstNames} & ${remaining} others)`;
+            } else {
+                nameSummary = `(${firstNames})`;
+            }
+        }
+
         let prefix = "";
         const parts = [];
         if (tomorrowCount.birthdays > 0) parts.push(`${tomorrowCount.birthdays} birthdays`);
         if (tomorrowCount.anniversaries > 0) parts.push(`${tomorrowCount.anniversaries} anniversaries`);
 
-        if (parts.length > 0) prefix = `${parts.join(' & ')} tomorrow. `;
+        if (parts.length > 0) prefix = `${parts.join(' & ')} tomorrow ${nameSummary}. `;
 
         const docId = `heads_up_${today.toISOString().split('T')[0]}_${targetUid}`;
         const scheduledFor = new Date(today);
