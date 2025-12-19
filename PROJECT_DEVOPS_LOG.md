@@ -35,3 +35,20 @@
         - **UI Polish**: Relabeled to `ActionTimelineCard` and implemented "Timeline Accordion" design (vertical line connectivity, glassmorphism) matching user reference. Applied validity to both Today's Tasks and Historic 7-Day timeline.
         - **Bug Fix**: Resolved `permission-denied` error in `FirestoreReportRepository` by injecting `FirebaseAuth` and enforcing `executed_by == uid` filter in all queries to comply with security rules.
 
+
+## [2025-12-19] Final UI Polish & Brand Identity (v2.4.0)
+- **Objective**: Implement comprehensive branding update (logos, icons, naming) and polish notification management for release.
+- **Changes**:
+    - **Mobile App (Flutter)**:
+        - **Adaptive Icons**: Implemented deep teal (`#022C22`) adaptive background with transparent foreground logo to fix Android "Squircle" white border issue.
+        - **Label Update**: Changed app label from `iconnect_mobile` to `iConnect` (Android & iOS).
+        - **Auth UI**: Replaced generic icons/gradients with high-fidelity `app_icon.png` and `logo_text.png` assets.
+        - **Status Modal**: Improved button labeling ("Call Later" vs "Send Later") based on action type.
+    - **Web Portal**:
+        - **Notification Manager**: Removed "Include names list" checkbox (names always visible), updated name format to `Name (GP)`, and added dynamic counts in preview message.
+        - **Tests**: Verified 182 web tests passed.
+- **Status**: **PASS**. 
+    - Flutter Tests: 85/85 Passed. 
+    - Cloud Functions: 27/27 Passed.
+    - Web Tests: 182/182 Passed.
+    - Production APK (`v2.4.0`) built and ready.
