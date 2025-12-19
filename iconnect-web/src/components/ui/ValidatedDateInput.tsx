@@ -40,6 +40,7 @@ export default function ValidatedDateInput({
     className = '',
 }: ValidatedDateInputProps) {
     const id = useId();
+    const calendarId = `${id}-calendar`;
     const [displayValue, setDisplayValue] = useState(formatDateForDisplay(value));
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
@@ -154,6 +155,9 @@ export default function ValidatedDateInput({
                     disabled={disabled || !showCalendar}
                     className="focus:outline-none"
                     aria-label="Toggle calendar"
+                    aria-expanded={isCalendarOpen}
+                    aria-haspopup="dialog"
+                    aria-controls={isCalendarOpen ? calendarId : undefined}
                 >
                     {getIcon()}
                 </button>
@@ -163,6 +167,7 @@ export default function ValidatedDateInput({
                     id={id}
                     ref={inputRef}
                     type="text"
+                    inputMode="numeric"
                     value={displayValue}
                     onChange={handleInputChange}
                     onFocus={openCalendar}
@@ -170,6 +175,7 @@ export default function ValidatedDateInput({
                     disabled={disabled}
                     maxLength={10}
                     aria-invalid={validationState === 'error'}
+                    title={validationState === 'error' ? "Date must be DD/MM/YYYY" : undefined}
                     className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
                 />
             </div>
@@ -185,6 +191,10 @@ export default function ValidatedDateInput({
 
                     {/* Popup */}
                     <div
+                        id={calendarId}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Calendar date picker"
                         className="fixed z-[99999] w-[320px] animate-in fade-in zoom-in-95 duration-100"
                         style={{
                             top: `${calendarPosition.top}px`,
