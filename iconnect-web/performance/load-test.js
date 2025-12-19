@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @file iconnect-web/performance/load-test.js
  * @description k6 Load Testing Script for iConnect CRM
