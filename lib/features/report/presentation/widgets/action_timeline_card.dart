@@ -230,49 +230,42 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
             ),
           ),
           
-          // Content
+          // Content - Vertical Layout
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 0, bottom: 32, right: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                       Text(
-                        timeStr,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                          child: Text(
-                            action.constituentName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ),
-                    ],
+                  // Line 1: Full Name (Bold, Full Width)
+                  Text(
+                    action.constituentName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 0),
-                    child: Text(
-                      action.messagePreview ?? _getDefaultText(action.actionType),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.5),
-                        fontSize: 14,
-                      ),
+                  // Line 2: Time (Small, Grey)
+                  Text(
+                    timeStr,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Line 3: Action Status (Colored)
+                  Text(
+                    action.messagePreview ?? _getDefaultText(action.actionType),
+                    style: TextStyle(
+                      color: color.withOpacity(0.8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

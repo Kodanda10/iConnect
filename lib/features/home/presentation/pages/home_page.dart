@@ -205,21 +205,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.grey[600],
-                        side: BorderSide(color: Colors.grey[300]!),
+                        foregroundColor: Colors.white.withOpacity(0.7),
+                        side: BorderSide(color: Colors.white.withOpacity(0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
                         Navigator.pop(ctx);
                       },
-                      icon: const Icon(Icons.schedule, size: 18),
-                      label: const FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text('Reschedule'),
-                      ),
+                      child: const Text('Reschedule'),
                     ),
                   ),
                 ],
@@ -1623,24 +1619,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Icon(icon, size: 16, color: effectiveIconColor),
-                  const SizedBox(width: 6),
+                  Icon(icon, size: 14, color: effectiveIconColor),
+                  const SizedBox(width: 4),
                   Flexible(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          color: effectiveTextColor, 
-                          fontWeight: FontWeight.w600, 
-                          fontSize: 12,
-                        ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: effectiveTextColor, 
+                        fontWeight: FontWeight.w600, 
+                        fontSize: 13,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
