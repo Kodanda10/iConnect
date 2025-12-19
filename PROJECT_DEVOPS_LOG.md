@@ -42,7 +42,7 @@
     - **Mobile App (Flutter)**:
         - **Adaptive Icons**: Implemented deep teal (`#022C22`) adaptive background with transparent foreground logo to fix Android "Squircle" white border issue.
         - **Label Update**: Changed app label from `iconnect_mobile` to `iConnect` (Android & iOS).
-        - **Auth UI**: Replaced generic icons/gradients with high-fidelity `app_icon.png` and `logo_text.png` assets.
+        - **Auth UI**: Replaced generic icons with `app_logo_dark.jpg` (Dark Square) and used native typography for "iConnect" to resolve white-box artifact issues.
         - **Status Modal**: Improved button labeling ("Call Later" vs "Send Later") based on action type.
     - **Web Portal**:
         - **Notification Manager**: Removed "Include names list" checkbox (names always visible), updated name format to `Name (GP)`, and added dynamic counts in preview message.

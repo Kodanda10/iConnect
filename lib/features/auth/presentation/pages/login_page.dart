@@ -69,10 +69,11 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
+                // Logo
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                   child: Image.asset(
-                    'assets/images/app_icon.png',
+                    'assets/images/app_logo_dark.jpg',
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -81,11 +82,14 @@ class _LoginPageState extends State<LoginPage> {
                 
                 const SizedBox(height: 24),
                 
-                // Title - Using logo text image
-                Image.asset(
-                  'assets/images/logo_text.png',
-                  height: 40,
-                  fit: BoxFit.contain,
+                // Title
+                Text(
+                  'iConnect',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
                 ).animate().fade(delay: 300.ms).slideY(begin: 0.2),
                 
                 const SizedBox(height: 48),

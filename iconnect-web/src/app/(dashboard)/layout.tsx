@@ -65,16 +65,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {/* Logo */}
                         <div className="flex items-center gap-3">
                             <img
-                                src="/app-icon.png"
+                                src="/app-logo.jpg"
                                 alt="iConnect"
                                 className="w-9 h-9 rounded-xl shadow-lg"
                             />
                             <div className="hidden sm:block">
-                                <img
-                                    src="/logo-text.png"
-                                    alt="iConnect"
-                                    className="h-6"
-                                />
+                                <span className="text-xl font-bold text-white tracking-tight leading-none block">
+                                    iConnect
+                                </span>
                                 <p className="text-[10px] text-white/50 -mt-0.5">
                                     Staff Portal
                                 </p>

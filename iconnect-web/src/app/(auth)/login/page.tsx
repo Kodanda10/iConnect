@@ -91,15 +91,13 @@ export default function LoginPage() {
                 {/* Logo Section */}
                 <div className="text-center mb-8 animate-fade-in">
                     <img
-                        src="/app-icon.png"
+                        src="/app-logo.jpg"
                         alt="iConnect"
                         className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg"
                     />
-                    <img
-                        src="/logo-text.png"
-                        alt="iConnect"
-                        className="h-10 mx-auto"
-                    />
+                    <h1 className="text-4xl font-bold text-white tracking-tight mb-2">
+                        iConnect
+                    </h1>
                     <p className="text-white/60 mt-2">
                         Constituent Relationship Management
                     </p>
