@@ -173,9 +173,10 @@ export default function IngestPage() {
             await batch.commit();
             setStatus(`SUCCESS! Ingested ${checkCount} constituents + tasks. Please check app.`);
 
-        } catch (e: any) {
+        } catch (e) {
             console.error(e);
-            setStatus(`ERROR: ${e.message}`);
+            const msg = e instanceof Error ? e.message : String(e);
+            setStatus(`ERROR: ${msg}`);
         } finally {
             setLoading(false);
         }

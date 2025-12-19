@@ -126,9 +126,10 @@ export default function UploadPage() {
             await fetchConstituents();
             alert('Database wiped successfully. Please refresh the page to update metrics.');
             window.location.reload(); // Force reload to update metrics card
-        } catch (error: any) {
+        } catch (error) {
             console.error('Reset failed:', error);
-            alert(`Failed to reset database: ${error.message}`);
+            const msg = error instanceof Error ? error.message : String(error);
+            alert(`Failed to reset database: ${msg}`);
         } finally {
             setIsResetting(false);
         }
