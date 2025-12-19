@@ -571,20 +571,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
              countAnniversary = list.where((t) => t.type == 'ANNIVERSARY').length;
           }
 
-          return SizedBox(
-            width: double.infinity,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // _buildFilterChip('ALL', 'All', null, countAll), // Removed per requirement
-                  _buildFilterChip('BIRTHDAY', 'Birthday', Icons.card_giftcard, countBirthday),
-                  const SizedBox(width: 8),
-                  _buildFilterChip('ANNIVERSARY', 'Anniversary', Icons.favorite, countAnniversary),
-                ],
-              ),
-            ),
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildFilterChip('BIRTHDAY', 'Birthday', Icons.card_giftcard, countBirthday),
+              const SizedBox(width: 12),
+              _buildFilterChip('ANNIVERSARY', 'Anniversary', Icons.favorite, countAnniversary),
+            ],
           );
         }
       ),
@@ -1714,7 +1707,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         mobile: task.mobile,
         actionType: actionType,
       ),
-    );
+    ).then((result) {
+      // Show Outcome Dialog after AI Wizard closes (if action was taken)
+      if (result == true) {
+        _showActionOutcomeDialog(task, actionType);
+      }
+    });
   }
 
   Widget _buildErrorState(String message) {
