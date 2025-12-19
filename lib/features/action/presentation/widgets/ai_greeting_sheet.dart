@@ -191,9 +191,9 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
       }
     }
     
-    // 2. Show Verification Dialog (after a short delay to simulate return)
+    // 2. Pop the sheet and return true to trigger Outcome Dialog in parent
     if (mounted) {
-      _showCompletionDialog();
+      Navigator.pop(context, true);
     }
   }
   
