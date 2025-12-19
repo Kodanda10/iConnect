@@ -1647,6 +1647,52 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  /// Vertical Action Button - Icon with glow on top, small text below
+  Widget _buildVerticalActionButton(IconData icon, String label, Color color, bool isCompleted, VoidCallback onTap) {
+    final effectiveColor = isCompleted ? Colors.grey[400]! : color;
+    final effectiveTextColor = isCompleted ? Colors.grey[500]! : Colors.white.withOpacity(0.7);
+    
+    return GestureDetector(
+      onTap: isCompleted ? null : () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Glowing Icon Container
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: effectiveColor.withOpacity(0.15),
+              border: Border.all(color: effectiveColor.withOpacity(0.3), width: 1.5),
+              boxShadow: isCompleted ? [] : [
+                BoxShadow(
+                  color: effectiveColor.withOpacity(0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(icon, color: effectiveColor, size: 22),
+          ),
+          const SizedBox(height: 6),
+          // Label Text (small, like Block > GP > Ward)
+          Text(
+            label,
+            style: TextStyle(
+              color: effectiveTextColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _openAiWizard(EnrichedTask task, String actionType) {
     HapticFeedback.mediumImpact(); // Haptic feedback on modal open
     showModalBottomSheet(
