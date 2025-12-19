@@ -184,9 +184,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               
-              // No Answer / Reschedule Row
+              // No Answer / Reschedule Row - Equal width buttons with conditional labels
               Row(
                 children: [
                   Expanded(
@@ -200,7 +200,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       onPressed: () {
                         Navigator.pop(ctx);
                       },
-                      child: const Text('No Answer'),
+                      // Conditional label: "No Answer" for CALL, "Not Sent" for SMS/WhatsApp
+                      child: Text(actionType == 'CALL' ? 'No Answer' : 'Not Sent'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -215,7 +216,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       onPressed: () {
                         Navigator.pop(ctx);
                       },
-                      child: const Text('Reschedule'),
+                      // Conditional label: "Call Later" for CALL, "Send Later" for SMS/WhatsApp
+                      child: Text(actionType == 'CALL' ? 'Call Later' : 'Send Later'),
                     ),
                   ),
                 ],
