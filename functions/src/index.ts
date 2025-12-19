@@ -144,7 +144,7 @@ async function fetchConstituentsByDateFields(
  * Region: asia-south1
  */
 export const dailyScan = onSchedule({
-    schedule: '1 0 * * *',
+    schedule: '0 19 * * *', // 7:00 PM IST
     timeZone: 'Asia/Kolkata',
     region: 'asia-south1',
 }, async () => {

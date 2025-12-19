@@ -236,13 +236,15 @@ export async function scheduleDailyNotifications(
     const batch = db.batch();
     const Timestamp = admin.firestore.Timestamp;
 
-    // --- 3. Action Reminder (Today 8:00 AM) ---
-    if (actionEnabled && (todayCount.birthdays + todayCount.anniversaries > 0)) {
-        // Collect names for today
+    // --- 3. Action Reminder (Tomorrow 8:00 AM) ---
+    // Note: Since scan runs at 7 PM, we schedule the Action Reminder for the NEXT morning (Tomorrow 8 AM).
+    // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
+    if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
+        // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, today) || isDateMatch(c.anniversary, today)) {
-                names.push(c.name.split(' ')[0]); // First name only
+            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+                names.push(c.name.split(' ')[0]);
             }
         });
 
@@ -262,13 +264,14 @@ export async function scheduleDailyNotifications(
 
         let prefix = "";
         const parts = [];
-        if (todayCount.birthdays > 0) parts.push(`${todayCount.birthdays} birthdays`);
-        if (todayCount.anniversaries > 0) parts.push(`${todayCount.anniversaries} anniversaries`);
+        if (tomorrowCount.birthdays > 0) parts.push(`${tomorrowCount.birthdays} birthdays`);
+        if (tomorrowCount.anniversaries > 0) parts.push(`${tomorrowCount.anniversaries} anniversaries`);
 
         if (parts.length > 0) prefix = `${parts.join(' & ')} today ${nameSummary}. `;
 
-        const docId = `action_${today.toISOString().split('T')[0]}_${targetUid}`;
-        const scheduledFor = new Date(today);
+        // ID keyed by Tomorrow's date since it's an action for that day
+        const docId = `action_${tomorrow.toISOString().split('T')[0]}_${targetUid}`;
+        const scheduledFor = new Date(tomorrow);
         scheduledFor.setHours(8, 0, 0, 0);
 
         batch.set(db.collection('scheduled_notifications').doc(docId), {
@@ -283,6 +286,7 @@ export async function scheduleDailyNotifications(
     }
 
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
+    // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
         // Collect names for tomorrow
         const names: string[] = [];
@@ -313,6 +317,7 @@ export async function scheduleDailyNotifications(
 
         if (parts.length > 0) prefix = `${parts.join(' & ')} tomorrow ${nameSummary}. `;
 
+        // ID keyed by Today because it's the Heads Up sent today
         const docId = `heads_up_${today.toISOString().split('T')[0]}_${targetUid}`;
         const scheduledFor = new Date(today);
         scheduledFor.setHours(20, 0, 0, 0);
