@@ -14,6 +14,7 @@ export { processPushNotifications } from "./pushProcessor";
 export { createMessagingProvider, MessagingProvider, SMSResult } from "./messagingProvider";
 export { queryConstituentsByAudience, sendBulkSMS } from "./audienceQuery";
 export { schedulePushForLeader, determinePushTimes, formatAudioMessage } from "./notifications";
+export { syncRoleToClaims, setUserRole, getUserClaims } from "./auth";
 /**
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side
