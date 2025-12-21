@@ -3,7 +3,11 @@
  * @description TDD RED PHASE - Failing tests for constituent metrics service
  * @changelog
  * - 2025-12-17: Initial TDD tests for Data Metrics Dashboard restoration
+ * - 2024-05-24: Updated for caching support (Bolt)
  */
+
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Mock Firebase modules
 jest.mock('@/lib/firebase', () => ({
@@ -18,17 +22,19 @@ jest.mock('firebase/firestore', () => ({
     getCountFromServer: jest.fn(),
 }));
 
-import { fetchConstituentMetrics, fetchGPMetricsForBlock } from '@/lib/services/metrics';
-import { getFirebaseDb } from '@/lib/firebase';
-import { collection, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
-
 describe('Metrics Service - Data Metrics Dashboard', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.resetModules(); // Reset cache for each test
     });
 
     describe('fetchConstituentMetrics', () => {
         it('returns total count from Firestore aggregation', async () => {
+            // Require modules inside test to handle resetModules
+            const { fetchConstituentMetrics } = require('@/lib/services/metrics');
+            const { getFirebaseDb } = require('@/lib/firebase');
+            const { collection, getDocs, getCountFromServer } = require('firebase/firestore');
+
             // Arrange
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});
@@ -48,6 +54,10 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
         });
 
         it('returns block-wise breakdown with counts', async () => {
+            const { fetchConstituentMetrics } = require('@/lib/services/metrics');
+            const { getFirebaseDb } = require('@/lib/firebase');
+            const { collection, getDocs, getCountFromServer } = require('firebase/firestore');
+
             // Arrange
             const mockBlockDocs = [
                 { id: '1', data: () => ({ block: 'Block A' }) },
@@ -63,6 +73,7 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
             (getDocs as jest.Mock).mockResolvedValue({
                 docs: mockBlockDocs,
                 forEach: (cb: (doc: typeof mockBlockDocs[0]) => void) => mockBlockDocs.forEach(cb),
+                size: 3
             });
 
             // Act
@@ -70,11 +81,15 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
 
             // Assert
             expect(result.blocks).toHaveLength(2);
-            expect(result.blocks.find(b => b.name === 'Block A')?.count).toBe(2);
-            expect(result.blocks.find(b => b.name === 'Block B')?.count).toBe(1);
+            expect(result.blocks.find((b: any) => b.name === 'Block A')?.count).toBe(2);
+            expect(result.blocks.find((b: any) => b.name === 'Block B')?.count).toBe(1);
         });
 
         it('handles empty constituents collection gracefully', async () => {
+            const { fetchConstituentMetrics } = require('@/lib/services/metrics');
+            const { getFirebaseDb } = require('@/lib/firebase');
+            const { collection, getDocs, getCountFromServer } = require('firebase/firestore');
+
             // Arrange
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});
@@ -84,6 +99,7 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
             (getDocs as jest.Mock).mockResolvedValue({
                 docs: [],
                 forEach: jest.fn(),
+                size: 0
             });
 
             // Act
@@ -97,6 +113,10 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
 
     describe('fetchGPMetricsForBlock', () => {
         it('returns GP breakdown for a specific block', async () => {
+            const { fetchGPMetricsForBlock } = require('@/lib/services/metrics');
+            const { getFirebaseDb } = require('@/lib/firebase');
+            const { collection, query, where, getDocs } = require('firebase/firestore');
+
             // Arrange
             const mockGPDocs = [
                 { id: '1', data: () => ({ gp_ulb: 'GP1', block: 'Block A' }) },
@@ -118,11 +138,15 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
 
             // Assert
             expect(result).toHaveLength(2);
-            expect(result.find(gp => gp.name === 'GP1')?.count).toBe(2);
-            expect(result.find(gp => gp.name === 'GP2')?.count).toBe(1);
+            expect(result.find((gp: any) => gp.name === 'GP1')?.count).toBe(2);
+            expect(result.find((gp: any) => gp.name === 'GP2')?.count).toBe(1);
         });
 
         it('returns empty array when block has no constituents', async () => {
+            const { fetchGPMetricsForBlock } = require('@/lib/services/metrics');
+            const { getFirebaseDb } = require('@/lib/firebase');
+            const { collection, query, where, getDocs } = require('firebase/firestore');
+
             // Arrange
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});

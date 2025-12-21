@@ -3,6 +3,7 @@
  * @description Firestore service for constituent metrics aggregation
  * @changelog
  * - 2025-12-17: Initial implementation for Data Metrics Dashboard (TDD GREEN phase)
+ * - 2024-05-24: Added in-memory caching to reduce Firestore reads (Bolt Optimization)
  */
 
 import {
@@ -30,11 +31,31 @@ export interface ConstituentMetrics {
     blocks: BlockMetric[];
 }
 
+// Cache configuration
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+// Module-level cache
+let constituentMetricsCache: CacheEntry<ConstituentMetrics> | null = null;
+const gpMetricsCache: Record<string, CacheEntry<GPMetric[]>> = {};
+
 /**
  * Fetch constituent metrics with block-wise breakdown
  * Optimized for dashboard display with aggregation
  */
 export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
+    const now = Date.now();
+
+    // Check cache
+    if (constituentMetricsCache && (now - constituentMetricsCache.timestamp < CACHE_TTL)) {
+        console.log('[Metrics] Returning cached constituent metrics');
+        return constituentMetricsCache.data;
+    }
+
     const db = getFirebaseDb();
     const constituentsRef = collection(db, 'constituents');
 
@@ -70,7 +91,15 @@ export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
         // Sort by count descending
         blocks.sort((a, b) => b.count - a.count);
 
-        return { total, blocks };
+        const result = { total, blocks };
+
+        // Update cache
+        constituentMetricsCache = {
+            data: result,
+            timestamp: now,
+        };
+
+        return result;
     } catch (error) {
         console.error('[Metrics] Error fetching metrics:', error);
         throw error;
@@ -82,6 +111,14 @@ export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
  * Called when user hovers/clicks on a block
  */
 export async function fetchGPMetricsForBlock(blockName: string): Promise<GPMetric[]> {
+    const now = Date.now();
+
+    // Check cache
+    if (gpMetricsCache[blockName] && (now - gpMetricsCache[blockName].timestamp < CACHE_TTL)) {
+        // console.log(`[Metrics] Returning cached GP metrics for ${blockName}`);
+        return gpMetricsCache[blockName].data;
+    }
+
     const db = getFirebaseDb();
     const constituentsRef = collection(db, 'constituents');
 
@@ -107,6 +144,12 @@ export async function fetchGPMetricsForBlock(blockName: string): Promise<GPMetri
 
     // Sort by count descending
     gps.sort((a, b) => b.count - a.count);
+
+    // Update cache
+    gpMetricsCache[blockName] = {
+        data: gps,
+        timestamp: now,
+    };
 
     return gps;
 }
