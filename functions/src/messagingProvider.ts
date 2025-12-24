@@ -17,6 +17,8 @@
  * - 2025-12-17: Initial TDD implementation (P0 System Integrity)
  */
 
+import { redactPhoneNumber, redactMessageContent } from './utils/security';
+
 export interface SMSResult {
     success: boolean;
     messageId?: string;
@@ -54,7 +56,7 @@ class MockProvider implements MessagingProvider {
     name = 'MockProvider';
 
     async sendSMS(mobile: string, message: string): Promise<SMSResult> {
-        console.log(`[MOCK SMS] To: ${mobile} | Message: ${message}`);
+        console.log(`[MOCK SMS] To: ${redactPhoneNumber(mobile)} | Message: ${redactMessageContent(message)}`);
         return {
             success: true,
             messageId: `mock-${Date.now()}`,
@@ -63,7 +65,7 @@ class MockProvider implements MessagingProvider {
     }
 
     async sendWhatsApp(mobile: string, template: string, params: Record<string, string>): Promise<SMSResult> {
-        console.log(`[MOCK WhatsApp] To: ${mobile} | Template: ${template} | Params: ${JSON.stringify(params)}`);
+        console.log(`[MOCK WhatsApp] To: ${redactPhoneNumber(mobile)} | Template: ${template} | Params: ${JSON.stringify(params)}`);
         return {
             success: true,
             messageId: `mock-wa-${Date.now()}`,

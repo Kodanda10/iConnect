@@ -2,6 +2,7 @@ import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/fire
 import * as admin from 'firebase-admin';
 import { determinePushTimes, formatAudioMessage } from './notifications';
 import { sendPushNotification, sendSMS } from './messaging';
+import { redactPhoneNumber, safeError } from './utils/security';
 
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
@@ -120,7 +121,8 @@ export async function handleMeetingCreated(meetingData: any) {
             'Meeting Scheduled',
             `You scheduled "${meetingData.title}" for ${scheduledTime.toLocaleString('en-IN')}`
         );
-        console.log(`[TRIGGER] Sent confirmation push to ${fcmToken} `);
+        // Do not log the token itself in production, or redact it if needed
+        console.log(`[TRIGGER] Sent confirmation push to creator.`);
     } else {
         console.log('[TRIGGER] No FCM token found for creator, skipping confirmation push');
     }
@@ -193,7 +195,7 @@ export async function handleMeetingCreated(meetingData: any) {
                     await sendSMS(mobile, message);
                     return true;
                 } catch (e) {
-                    console.error('[TRIGGER] SMS send failed:', e);
+                    console.error(`[TRIGGER] SMS send failed for ${redactPhoneNumber(mobile)}:`, safeError(e));
                     return false;
                 }
             }));
