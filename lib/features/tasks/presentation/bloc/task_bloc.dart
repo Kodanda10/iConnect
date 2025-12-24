@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/repositories/task_repository.dart';
+import '../../domain/entities/task.dart';
 import 'task_event.dart';
 import 'task_state.dart';
 
@@ -17,6 +18,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<UpdateActionStatus>(_onUpdateActionStatus);
   }
 
+  /// Sort tasks alphabetically A-Z by constituent name
+  List<EnrichedTask> _sortTasksAlphabetically(List<EnrichedTask> tasks) {
+    final sorted = List<EnrichedTask>.from(tasks);
+    sorted.sort((a, b) => a.name.compareTo(b.name));
+    return sorted;
+  }
+
   Future<void> _onLoadTasksForDate(
     LoadTasksForDate event,
     Emitter<TaskState> emit,
@@ -25,7 +33,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final result = await _taskRepository.getTasksForDate(event.date);
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (tasks) => emit(TaskLoaded(tasks)),
+      (tasks) => emit(TaskLoaded(_sortTasksAlphabetically(tasks))),
     );
   }
 
@@ -37,7 +45,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final result = await _taskRepository.getPendingTasks();
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (tasks) => emit(TaskLoaded(tasks)),
+      (tasks) => emit(TaskLoaded(_sortTasksAlphabetically(tasks))),
     );
   }
 
@@ -54,7 +62,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final result = await _taskRepository.getTasksForDateRange(start, end);
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (tasks) => emit(TaskLoaded(tasks)),
+      (tasks) => emit(TaskLoaded(_sortTasksAlphabetically(tasks))),
     );
   }
 
@@ -66,7 +74,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final result = await _taskRepository.getCompletedTasks();
     result.fold(
       (failure) => emit(TaskError(failure.message)),
-      (tasks) => emit(TaskLoaded(tasks)),
+      (tasks) => emit(TaskLoaded(_sortTasksAlphabetically(tasks))),
     );
   }
 
@@ -109,3 +117,4 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     );
   }
 }
+

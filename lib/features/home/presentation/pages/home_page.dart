@@ -33,6 +33,7 @@ import 'package:iconnect_mobile/features/report/domain/entities/action_log.dart'
 import 'package:iconnect_mobile/core/widgets/app_background.dart';
 import 'package:iconnect_mobile/core/widgets/glass_container.dart';
 import 'package:iconnect_mobile/core/widgets/primary_button.dart';
+import 'package:iconnect_mobile/features/tasks/presentation/pages/daily_task_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -290,54 +291,99 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AppBackground(
-      child: Column(
-        children: [
-            // Custom Header Section
-            _buildHeader(),
-            
-            // Sub Filters (hide for Meeting and Report tabs)
-          if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
-            _buildSubFilters(),
-            
-            // Main Content Area - IndexedStack for Persistence (Fix Tab Flash)
-            Expanded(
-              child: IndexedStack(
-                index: _filterStatus == 'MEETING' ? 2 : (_filterStatus == 'COMPLETED' ? 1 : 0),
-                children: [
-                  // Index 0: PENDING (Home)
-                  BlocBuilder<TaskBloc, TaskState>(
-                      builder: (context, state) {
-                        if (state is TaskLoading) {
-                          return const ShimmerTaskList(itemCount: 3);
-                        } else if (state is TaskError) {
-                          return _buildErrorState(state.message);
-                        } else if (state is TaskLoaded) {
-                          final tasks = state.tasks.where((t) => t.status == 'PENDING').toList();
-                          return RefreshIndicator(
-                            color: AppColors.primary,
-                            backgroundColor: Colors.white,
-                            onRefresh: () async {
-                              context.read<TaskBloc>().add(LoadPendingTasks());
-                            },
-                            child: _buildTaskList(tasks),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: _filterStatus == 'PENDING' 
+        ? FloatingActionButton(
+            onPressed: _showDatePicker,
+            backgroundColor: AppColors.primary,
+            child: const Icon(Icons.calendar_month, color: Colors.white),
+          )
+        : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: AppBackground(
+        child: Column(
+          children: [
+              // Custom Header Section
+              _buildHeader(),
+              
+              // Sub Filters (hide for Meeting and Report tabs)
+            if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
+              _buildSubFilters(),
+              
+              // Main Content Area - IndexedStack for Persistence (Fix Tab Flash)
+              Expanded(
+                child: IndexedStack(
+                  index: _filterStatus == 'MEETING' ? 2 : (_filterStatus == 'COMPLETED' ? 1 : 0),
+                  children: [
+                    // Index 0: PENDING (Home)
+                    BlocBuilder<TaskBloc, TaskState>(
+                        builder: (context, state) {
+                          if (state is TaskLoading) {
+                            return const ShimmerTaskList(itemCount: 3);
+                          } else if (state is TaskError) {
+                            return _buildErrorState(state.message);
+                          } else if (state is TaskLoaded) {
+                            final tasks = state.tasks.where((t) => t.status == 'PENDING').toList();
+                            return RefreshIndicator(
+                              color: AppColors.primary,
+                              backgroundColor: Colors.white,
+                              onRefresh: () async {
+                                context.read<TaskBloc>().add(LoadPendingTasks());
+                              },
+                              child: _buildTaskList(tasks),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
 
-                  // Index 1: COMPLETED (Report)
-                  _buildReportTab(),
+                    // Index 1: COMPLETED (Report)
+                    _buildReportTab(),
 
-                  // Index 2: MEETING
-                  _buildMeetingTab(),
-                ],
+                    // Index 2: MEETING
+                    _buildMeetingTab(),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  /// Show date picker for Calendar "Time Travel"
+  Future<void> _showDatePicker() async {
+    final now = DateTime.now();
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2024, 1, 1),
+      lastDate: DateTime(2025, 12, 31),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: const Color(0xFF1E293B),
+              onSurface: Colors.white,
+            ),
+            dialogBackgroundColor: const Color(0xFF0F172A),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (selectedDate != null && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DailyTaskView(selectedDate: selectedDate),
+        ),
+      );
+    }
   }
 
   // --- Header Implementation ---
@@ -1734,40 +1780,55 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       'createdAt': FieldValue.serverTimestamp(),
     });
     
-    // 2. Seed Tasks
+    // 2. Seed Dharmasala Tasks for Dec 24-30 with A-Z names
     final batch = firestore.batch();
     
-    // Birthday Task
-    final taskRef1 = firestore.collection('tasks').doc('demo_task_1');
-    batch.set(taskRef1, {
-      'name': 'Ramesh Kumar',
-      'constituentId': '', 
-      'ward': '12',
-      'type': 'BIRTHDAY',
-      'dueDate': Timestamp.fromDate(DateTime.now()), // Today
-      'status': 'PENDING',
-      'priority': 'HIGH',
-      'createdAt': FieldValue.serverTimestamp(),
-      'mobile': '9876543210',
-      'block': 'Dharmasala', 
-      'gram_panchayat': 'Jaraka',
-    });
+    // A-Z sorted names for testing sorting
+    final names = [
+      'Abhijeet Mohapatra', 'Basanti Devi', 'Chinmay Rath', 
+      'Debashish Nayak', 'Gyanendra Mishra', 'Harish Panda',
+      'Jagdish Dash', 'Kamal Sahu', 'Laxman Patra', 
+      'Manoj Swain', 'Narayan Das', 'Omkar Mohanty',
+      'Prakash Jena', 'Rajesh Kumar', 'Sanjay Tripathy',
+      'Tapan Rout', 'Umesh Parida', 'Vinod Nanda',
+      'Yashwant Singh', 'Zara Begum',
+    ];
     
-    // Anniversary Task
-    final taskRef2 = firestore.collection('tasks').doc('demo_task_2');
-    batch.set(taskRef2, {
-      'name': 'Sunita & Raj',
-      'constituentId': '',
-      'ward': '05',
-      'type': 'ANNIVERSARY',
-      'dueDate': Timestamp.fromDate(DateTime.now()), // Today
-      'status': 'PENDING',
-      'priority': 'MEDIUM',
-      'createdAt': FieldValue.serverTimestamp(),
-      'mobile': '9876543211',
-      'block': 'Dharmasala',
-      'gram_panchayat': 'Chahata',
-    });
+    final gps = ['Jaraka', 'Jenapur', 'Kotapur', 'Aruha', 'Chahata', 'Deoka'];
+    final types = ['BIRTHDAY', 'ANNIVERSARY'];
+    
+    // Seed for Dec 24-30, 2024
+    for (int day = 24; day <= 30; day++) {
+      final dueDate = DateTime(2024, 12, day);
+      
+      // 5 tasks per day with different names
+      for (int i = 0; i < 5; i++) {
+        final nameIndex = ((day - 24) * 5 + i) % names.length;
+        final taskId = 'dharmasala_${day}_$i';
+        final taskRef = firestore.collection('tasks').doc(taskId);
+        
+        batch.set(taskRef, {
+          'name': names[nameIndex],
+          'constituent_name': names[nameIndex],
+          'constituentId': 'const_$nameIndex',
+          'ward': ((i + 1) * 2).toString().padLeft(2, '0'),
+          'type': types[i % 2],
+          'due_date': Timestamp.fromDate(dueDate),
+          'dueDate': Timestamp.fromDate(dueDate),
+          'status': 'PENDING',
+          'priority': 'HIGH',
+          'createdAt': FieldValue.serverTimestamp(),
+          'mobile': '98765432${10 + nameIndex}',
+          'block': 'Dharmasala',
+          'gram_panchayat': gps[i % gps.length],
+          'gp_ulb': gps[i % gps.length],
+          'uid': uid,
+          'call_sent': false,
+          'sms_sent': false,
+          'whatsapp_sent': false,
+        });
+      }
+    }
     
     await batch.commit();
     
@@ -1775,7 +1836,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('✅ Demo Data Seeded! Refreshing...'),
+        content: Text('✅ Seeded 35 Dharmasala tasks (Dec 24-30)! Refreshing...'),
         backgroundColor: Colors.green,
       ),
     );
