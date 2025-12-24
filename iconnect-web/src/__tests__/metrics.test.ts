@@ -3,6 +3,7 @@
  * @description TDD RED PHASE - Failing tests for constituent metrics service
  * @changelog
  * - 2025-12-17: Initial TDD tests for Data Metrics Dashboard restoration
+ * - 2025-05-21: Updated for caching support (Bolt optimization)
  */
 
 // Mock Firebase modules
@@ -15,29 +16,28 @@ jest.mock('firebase/firestore', () => ({
     query: jest.fn(),
     where: jest.fn(),
     getDocs: jest.fn(),
-    getCountFromServer: jest.fn(),
+    // getCountFromServer removed as it is optimized out
 }));
 
-import { fetchConstituentMetrics, fetchGPMetricsForBlock } from '@/lib/services/metrics';
+import { fetchConstituentMetrics, fetchGPMetricsForBlock, clearMetricsCache } from '@/lib/services/metrics';
 import { getFirebaseDb } from '@/lib/firebase';
-import { collection, query, where, getDocs, getCountFromServer } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 describe('Metrics Service - Data Metrics Dashboard', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        clearMetricsCache(); // Ensure cache is cleared before each test
     });
 
     describe('fetchConstituentMetrics', () => {
-        it('returns total count from Firestore aggregation', async () => {
+        it('returns total count from snapshot size', async () => {
             // Arrange
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});
-            (getCountFromServer as jest.Mock).mockResolvedValue({
-                data: () => ({ count: 1000 })
-            });
             (getDocs as jest.Mock).mockResolvedValue({
                 docs: [],
                 forEach: jest.fn(),
+                size: 1000
             });
 
             // Act
@@ -57,12 +57,10 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
 
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});
-            (getCountFromServer as jest.Mock).mockResolvedValue({
-                data: () => ({ count: 3 })
-            });
             (getDocs as jest.Mock).mockResolvedValue({
                 docs: mockBlockDocs,
                 forEach: (cb: (doc: typeof mockBlockDocs[0]) => void) => mockBlockDocs.forEach(cb),
+                size: 3
             });
 
             // Act
@@ -78,12 +76,10 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
             // Arrange
             (getFirebaseDb as jest.Mock).mockReturnValue({});
             (collection as jest.Mock).mockReturnValue({});
-            (getCountFromServer as jest.Mock).mockResolvedValue({
-                data: () => ({ count: 0 })
-            });
             (getDocs as jest.Mock).mockResolvedValue({
                 docs: [],
                 forEach: jest.fn(),
+                size: 0
             });
 
             // Act
@@ -92,6 +88,24 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
             // Assert
             expect(result.total).toBe(0);
             expect(result.blocks).toHaveLength(0);
+        });
+
+        it('uses cached data on subsequent calls', async () => {
+            // Arrange
+            (getFirebaseDb as jest.Mock).mockReturnValue({});
+            (collection as jest.Mock).mockReturnValue({});
+            (getDocs as jest.Mock).mockResolvedValue({
+                docs: [],
+                forEach: jest.fn(),
+                size: 0
+            });
+
+            // Act
+            await fetchConstituentMetrics(); // First call (fetches)
+            await fetchConstituentMetrics(); // Second call (cached)
+
+            // Assert
+            expect(getDocs).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -138,6 +152,25 @@ describe('Metrics Service - Data Metrics Dashboard', () => {
 
             // Assert
             expect(result).toHaveLength(0);
+        });
+
+        it('uses cached data on subsequent calls for same block', async () => {
+            // Arrange
+            (getFirebaseDb as jest.Mock).mockReturnValue({});
+            (collection as jest.Mock).mockReturnValue({});
+            (query as jest.Mock).mockReturnValue({});
+            (where as jest.Mock).mockReturnValue({});
+            (getDocs as jest.Mock).mockResolvedValue({
+                docs: [],
+                forEach: jest.fn(),
+            });
+
+            // Act
+            await fetchGPMetricsForBlock('Block X'); // First call
+            await fetchGPMetricsForBlock('Block X'); // Second call (cached)
+
+            // Assert
+            expect(getDocs).toHaveBeenCalledTimes(1);
         });
     });
 });

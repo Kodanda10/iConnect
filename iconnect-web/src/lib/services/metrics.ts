@@ -3,6 +3,7 @@
  * @description Firestore service for constituent metrics aggregation
  * @changelog
  * - 2025-12-17: Initial implementation for Data Metrics Dashboard (TDD GREEN phase)
+ * - 2025-05-21: Added in-memory caching to reduce Firestore reads (Bolt optimization)
  */
 
 import {
@@ -10,9 +11,30 @@ import {
     query,
     where,
     getDocs,
-    getCountFromServer,
 } from 'firebase/firestore';
 import { getFirebaseDb } from '@/lib/firebase';
+
+// Cache configuration
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 50; // Prevent memory leaks
+
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+// Module-level cache
+let constituentMetricsCache: CacheEntry<ConstituentMetrics> | null = null;
+let gpMetricsCache: Record<string, CacheEntry<GPMetric[]>> = {};
+
+/**
+ * Clears the in-memory cache.
+ * Useful for testing or forcing a refresh.
+ */
+export function clearMetricsCache() {
+    constituentMetricsCache = null;
+    gpMetricsCache = {};
+}
 
 export interface BlockMetric {
     name: string;
@@ -35,19 +57,24 @@ export interface ConstituentMetrics {
  * Optimized for dashboard display with aggregation
  */
 export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
+    // Check cache
+    const now = Date.now();
+    if (constituentMetricsCache && (now - constituentMetricsCache.timestamp < CACHE_TTL)) {
+        console.log('[Metrics] Returning cached constituent metrics');
+        return constituentMetricsCache.data;
+    }
+
     const db = getFirebaseDb();
     const constituentsRef = collection(db, 'constituents');
 
     try {
-        // Get total count using Firestore aggregation
-        const countSnapshot = await getCountFromServer(constituentsRef);
-        const total = countSnapshot.data().count;
-        console.log('[Metrics] Total count from server:', total);
-
         // Get all constituents to calculate block breakdown
         // Note: For large datasets, consider Cloud Functions aggregation
         const snapshot = await getDocs(constituentsRef);
-        console.log('[Metrics] Docs fetched:', snapshot.size);
+
+        // Optimization: Use snapshot.size instead of separate getCountFromServer call
+        const total = snapshot.size;
+        console.log('[Metrics] Docs fetched:', total);
 
         // Group by block
         const blockCounts: Record<string, number> = {};
@@ -70,7 +97,15 @@ export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
         // Sort by count descending
         blocks.sort((a, b) => b.count - a.count);
 
-        return { total, blocks };
+        const result = { total, blocks };
+
+        // Update cache
+        constituentMetricsCache = {
+            data: result,
+            timestamp: now
+        };
+
+        return result;
     } catch (error) {
         console.error('[Metrics] Error fetching metrics:', error);
         throw error;
@@ -82,6 +117,14 @@ export async function fetchConstituentMetrics(): Promise<ConstituentMetrics> {
  * Called when user hovers/clicks on a block
  */
 export async function fetchGPMetricsForBlock(blockName: string): Promise<GPMetric[]> {
+    // Check cache
+    const now = Date.now();
+    const cached = gpMetricsCache[blockName];
+    if (cached && (now - cached.timestamp < CACHE_TTL)) {
+        console.log(`[Metrics] Returning cached GP metrics for block: ${blockName}`);
+        return cached.data;
+    }
+
     const db = getFirebaseDb();
     const constituentsRef = collection(db, 'constituents');
 
@@ -107,6 +150,17 @@ export async function fetchGPMetricsForBlock(blockName: string): Promise<GPMetri
 
     // Sort by count descending
     gps.sort((a, b) => b.count - a.count);
+
+    // Cache maintenance: simple eviction if too large
+    if (Object.keys(gpMetricsCache).length >= MAX_CACHE_SIZE) {
+        gpMetricsCache = {}; // Clear all if full (simple strategy)
+    }
+
+    // Update cache
+    gpMetricsCache[blockName] = {
+        data: gps,
+        timestamp: now
+    };
 
     return gps;
 }
