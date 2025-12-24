@@ -22,7 +22,7 @@ dependencies:
   equatable: ^2.0.5
   
   # Dependency Injection
-  get_it: ^8.0.2
+  get_it: ^9.2.0
   injectable: ^2.5.0
   
   # HTTP & Networking
