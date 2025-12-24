@@ -1,0 +1,3 @@
+## 2025-01-22 - [Keyboard Accessible Hover Patterns]
+**Learning:** "Hover-to-reveal" patterns are inherently inaccessible to keyboard users unless explicitly mapped to focus events. While standard "disclosure" patterns (click to expand) are preferred, a pure "hover" experience can be made accessible by mapping `onFocus` to the same state change as `onMouseEnter`.
+**Action:** When using hover-driven UIs (like detailed breakdowns), always ensure the container is focusable (`tabIndex={0}` or `button`) and that `onFocus`/`onBlur` mirror the hover behavior. For complex interactions, `role="button"` or `role="tab"` should be used to communicate interactivity.
