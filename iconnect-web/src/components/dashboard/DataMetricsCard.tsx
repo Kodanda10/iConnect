@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-05-21: Bolt Optimization - Memoized subcomponents to prevent re-renders
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -20,6 +21,10 @@ export default function DataMetricsCard() {
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
+
+    // Use ref to track if a fetch is in progress or completed to avoid side effects in render/updater
+    const gpDataRef = useRef<Record<string, GPMetric[]>>({});
+    const gpLoadingRef = useRef<Record<string, boolean>>({});
 
     useEffect(() => {
         loadMetrics();
@@ -40,24 +45,48 @@ export default function DataMetricsCard() {
     };
 
     // Lazy load GP data on hover
-    const loadGPData = useCallback(async (blockName: string) => {
-        if (gpData[blockName] || gpLoading[blockName]) return;
-
-        setGpLoading(prev => ({ ...prev, [blockName]: true }));
-        try {
-            const gps = await fetchGPMetricsForBlock(blockName);
-            setGpData(prev => ({ ...prev, [blockName]: gps }));
-        } catch (err) {
-            console.error('Error loading GP data:', err);
-        } finally {
-            setGpLoading(prev => ({ ...prev, [blockName]: false }));
+    const loadGPData = useCallback((blockName: string) => {
+        // Optimization: Check if data is already loaded or loading using refs
+        // This avoids side effects in state setters and ensures correct concurrency handling
+        if (gpDataRef.current[blockName] || gpLoadingRef.current[blockName]) {
+            return;
         }
-    }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+        // Mark as loading in ref immediately
+        gpLoadingRef.current[blockName] = true;
+
+        // Trigger state update for UI
+        setGpLoading(prev => ({ ...prev, [blockName]: true }));
+
+        // Fetch data
+        fetchGPMetricsForBlock(blockName).then(gps => {
+            // Update ref
+            gpDataRef.current[blockName] = gps;
+            // Update state
+            setGpData(prev => ({ ...prev, [blockName]: gps }));
+        }).catch(err => {
+            console.error('Error loading GP data:', err);
+            // Reset loading state in ref on error so we can retry?
+            // Or keep it to avoid infinite error loops? Let's reset.
+            gpLoadingRef.current[blockName] = false;
+        }).finally(() => {
+            setGpLoading(prev => ({ ...prev, [blockName]: false }));
+            // Note: We don't set gpLoadingRef to false here if success because we have data now.
+            // Only if failed we might want to retry.
+            // But actually, if we have data, the first check `gpDataRef.current[blockName]` handles it.
+            // If we failed, we might want to allow retry.
+        });
+    }, []);
+
+    // Optimization: Memoized handlers to prevent BlockItem re-renders
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -91,6 +120,10 @@ export default function DataMetricsCard() {
         return null;
     }
 
+    // Pre-calculate max count for current block's GPs to avoid recalc on every render
+    const currentBlockGPs = hoveredBlock ? (gpData[hoveredBlock] || []) : [];
+    const maxGPCount = hoveredBlock ? Math.max(...currentBlockGPs.map(g => g.count), 1) : 1;
+
     return (
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
             {/* LEFT: Dynamic Info Card (50%) */}
@@ -118,17 +151,17 @@ export default function DataMetricsCard() {
                                 <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
                                 <span className="text-sm">Fetching GP data...</span>
                             </div>
-                        ) : gpData[hoveredBlock]?.length === 0 ? (
+                        ) : currentBlockGPs.length === 0 ? (
                             <div className="py-12 text-center text-white/40 text-sm">
                                 No GP data available for {hoveredBlock}
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentBlockGPs.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGPCount}
                                         delay={index * 50}
                                         index={index}
                                     />
@@ -218,8 +251,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onHover={handleBlockHover}
+                            onLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +265,11 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onHover: (name: string) => void;
+    onLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = memo(function BlockItem({ block, total, isHovered, onHover, onLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,8 +282,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={() => onHover(block.name)}
+            onMouseLeave={onLeave}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +313,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -301,7 +334,7 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+const GPProgressBar = memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +371,4 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
-
-
+});
