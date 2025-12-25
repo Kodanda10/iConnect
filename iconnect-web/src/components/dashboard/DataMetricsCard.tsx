@@ -95,7 +95,11 @@ export default function DataMetricsCard() {
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
             {/* LEFT: Dynamic Info Card (50%) */}
             {/* Changes based on hover state */}
-            <div className="glass-card-light p-6 rounded-2xl transition-all duration-300 relative overflow-hidden">
+            <div
+                id="metrics-detail-panel"
+                aria-live="polite"
+                className="glass-card-light p-6 rounded-2xl transition-all duration-300 relative overflow-hidden"
+            >
                 {hoveredBlock ? (
                     // BLOCK DETAILS VIEW
                     <div className="animate-fade-in space-y-4">
@@ -211,7 +215,10 @@ export default function DataMetricsCard() {
                 </div>
 
                 {/* Block List */}
-                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
+                <div
+                    role="list"
+                    className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar"
+                >
                     {metrics.blocks.map((block) => (
                         <BlockItem
                             key={block.name}
@@ -240,44 +247,54 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
-        <div
-            data-testid={`block-${block.name}`}
-            className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
-                ${isHovered
-                    ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
-                    : 'bg-white/5 hover:bg-white/10'
-                }
-            `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-        >
-            {/* Progress bar background */}
+        <div role="listitem">
+            <button
+                type="button"
+                data-testid={`block-${block.name}`}
+                aria-expanded={isHovered}
+                aria-controls="metrics-detail-panel"
+                aria-label={`View details for ${block.name}, ${block.count} constituents`}
+                className={`
+                    w-full text-left
+                    p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
+                    focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+                    ${isHovered
+                        ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
+                        : 'bg-white/5 hover:bg-white/10'
+                    }
+                `}
+                onMouseEnter={onMouseEnter}
+                onMouseLeave={onMouseLeave}
+                onFocus={onMouseEnter}
+                onBlur={onMouseLeave}
+            >
+                {/* Progress bar background */}
             <div
                 className="absolute inset-0 bg-emerald-500/5 transition-all duration-500"
                 style={{ width: `${percentage}%` }}
             />
 
-            <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Users className={`w-4 h-4 transition-colors ${isHovered ? 'text-emerald-400' : 'text-white/40'}`} />
-                    <span className={`font-medium transition-colors ${isHovered ? 'text-emerald-300' : 'text-white'}`}>
-                        {block.name}
-                    </span>
+                <div className="relative flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Users className={`w-4 h-4 transition-colors ${isHovered ? 'text-emerald-400' : 'text-white/40'}`} />
+                        <span className={`font-medium transition-colors ${isHovered ? 'text-emerald-300' : 'text-white'}`}>
+                            {block.name}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-emerald-400">
+                            {block.count.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-white/40 w-10 text-right">
+                            {percentage}%
+                        </span>
+                        <ChevronRight
+                            className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90 text-emerald-400' : ''
+                                }`}
+                        />
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-emerald-400">
-                        {block.count.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-white/40 w-10 text-right">
-                        {percentage}%
-                    </span>
-                    <ChevronRight
-                        className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90 text-emerald-400' : ''
-                            }`}
-                    />
-                </div>
-            </div>
+            </button>
         </div>
     );
 }
