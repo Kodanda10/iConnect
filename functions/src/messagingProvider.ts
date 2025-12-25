@@ -31,6 +31,8 @@ export interface MessagingProvider {
     sendBulkSMS(mobiles: string[], message: string): Promise<SMSResult[]>;
 }
 
+import { redactMobile, redactMessage, redactObject } from './utils/security';
+
 /**
  * Factory function to create messaging provider based on environment
  */
@@ -54,7 +56,7 @@ class MockProvider implements MessagingProvider {
     name = 'MockProvider';
 
     async sendSMS(mobile: string, message: string): Promise<SMSResult> {
-        console.log(`[MOCK SMS] To: ${mobile} | Message: ${message}`);
+        console.log(`[MOCK SMS] To: ${redactMobile(mobile)} | Message: ${redactMessage(message)}`);
         return {
             success: true,
             messageId: `mock-${Date.now()}`,
@@ -63,7 +65,7 @@ class MockProvider implements MessagingProvider {
     }
 
     async sendWhatsApp(mobile: string, template: string, params: Record<string, string>): Promise<SMSResult> {
-        console.log(`[MOCK WhatsApp] To: ${mobile} | Template: ${template} | Params: ${JSON.stringify(params)}`);
+        console.log(`[MOCK WhatsApp] To: ${redactMobile(mobile)} | Template: ${template} | Params: ${redactObject(params)}`);
         return {
             success: true,
             messageId: `mock-wa-${Date.now()}`,

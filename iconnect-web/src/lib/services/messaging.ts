@@ -5,6 +5,8 @@
  * - 2025-12-17: Initial implementation with provider abstraction (TDD GREEN phase)
  */
 
+import { redactMobile, redactMessage } from '@/lib/utils/security';
+
 /**
  * Message payload for sending SMS/WhatsApp messages
  */
@@ -71,7 +73,7 @@ export class SMSProvider implements MessageProvider {
         // const client = require('twilio')(accountSid, authToken);
         // const message = await client.messages.create({...});
 
-        console.log(`[SMS_STUB] Sending to ${payload.to}: ${payload.body.slice(0, 50)}...`);
+        console.log(`[SMS_STUB] Sending to ${redactMobile(payload.to)}: ${redactMessage(payload.body)}`);
 
         return {
             success: true,
@@ -108,7 +110,7 @@ export class WhatsAppProvider implements MessageProvider {
         // Example for Meta WhatsApp Business API:
         // const response = await fetch(`https://graph.facebook.com/v17.0/${phoneNumberId}/messages`, {...});
 
-        console.log(`[WHATSAPP_STUB] Sending to ${payload.to}: ${payload.body.slice(0, 50)}...`);
+        console.log(`[WHATSAPP_STUB] Sending to ${redactMobile(payload.to)}: ${redactMessage(payload.body)}`);
 
         return {
             success: true,
