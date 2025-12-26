@@ -77,7 +77,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
               const Text(
                 'Tasks',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -85,7 +85,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
               Text(
                 _formattedDate,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: AppColors.textSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -176,20 +176,20 @@ class _DailyTaskViewState extends State<DailyTaskView> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: AppColors.textSecondary,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.event_available, 
                 size: 64, 
-                color: Colors.white.withOpacity(0.5)
+                color: AppColors.textSecondary
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'No tasks for $_formattedDate',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8), 
+                color: AppColors.textSecondary, 
                 fontSize: 16, 
                 fontWeight: FontWeight.w500
               ),
@@ -214,9 +214,9 @@ class _DailyTaskViewState extends State<DailyTaskView> {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: AppColors.textSecondary,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.25)),
+            border: Border.all(color: AppColors.textSecondary),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.12),
@@ -256,7 +256,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
@@ -265,13 +265,13 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                     // Mobile
                     Row(
                       children: [
-                        Icon(Icons.call, size: 14, color: Colors.white.withOpacity(0.6)),
+                        Icon(Icons.call, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 6),
                         Text(
                           task.mobile.isNotEmpty ? task.mobile : "No Mobile",
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withOpacity(0.8),
+                            color: AppColors.textSecondary,
                             fontFamily: 'monospace',
                           ),
                         ),
@@ -283,7 +283,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                       "${task.block.isNotEmpty ? task.block : 'N/A'} > ${task.gramPanchayat.isNotEmpty ? task.gramPanchayat : 'N/A'} > Ward ${task.ward.isNotEmpty ? task.ward : 'N/A'}",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.5),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -298,7 +298,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                         const SizedBox(width: 6),
                         Text(
                           DateFormat('dd MMM yyyy').format(task.dueDate),
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),

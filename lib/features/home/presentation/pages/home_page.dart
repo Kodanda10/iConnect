@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const Text(
                     'Status',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
@@ -137,9 +137,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: AppColors.textSecondary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  border: Border.all(color: AppColors.textSecondary),
                 ),
                 child: Row(
                   children: [
@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(width: 12),
                     Text(
                       'Action taken: $actionType',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     ),
                   ],
                 ),
@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 icon: const Icon(Icons.check, color: Colors.white),
                 label: Text(
                   actionType == 'CALL' ? 'Mark as Called' : 'Mark as Sent', 
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                  style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)
                 ),
               ),
               ),
@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white.withOpacity(0.7),
-                        side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                        side: BorderSide(color: AppColors.textSecondary),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -423,7 +423,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               // Translucent dark teal for header to blend with mesh gradient
               color: const Color(0xFF134E4A).withOpacity(0.8), 
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
+              border: Border(bottom: BorderSide(color: AppColors.textSecondary)),
             ),
             child: Stack(
               children: [
@@ -477,7 +477,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                              Text(
                                appName,
                                style: const TextStyle(
-                                 color: Colors.white,
+                                 color: AppColors.textPrimary,
                                  fontSize: 32,
                                  fontWeight: FontWeight.w900,
                                  height: 1.1,
@@ -500,7 +500,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                  Text(
                                    leaderName,
                                    style: const TextStyle(
-                                     color: Colors.white,
+                                     color: AppColors.textPrimary,
                                      fontSize: 14, 
                                      fontWeight: FontWeight.w500,
                                      shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
@@ -518,10 +518,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                            child: Container(
                              padding: const EdgeInsets.all(8),
                              decoration: BoxDecoration(
-                               color: Colors.white.withOpacity(0.2),
+                               color: AppColors.textSecondary,
                                shape: BoxShape.circle,
                              ),
-                             child: const Icon(Icons.logout, color: Colors.white, size: 20),
+                             child: const Icon(Icons.logout, color: AppColors.textPrimary, size: 20),
                            ),
                          ),
                       ],
@@ -533,9 +533,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: AppColors.textSecondary,
                         borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        border: Border.all(color: AppColors.textSecondary),
                         boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
                       ),
                       child: Row(
@@ -589,7 +589,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFF134E4A) : Colors.white70,
+                  color: isSelected ? const Color(0xFF134E4A) : AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -812,7 +812,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 // Today's Tasks Title
                 const Text(
                   "TODAY'S TASKS",
-                  style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                 ),
                 const SizedBox(height: 12),
                 
@@ -826,7 +826,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 else
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text("No tasks completed today", style: TextStyle(color: Colors.white30)),
+                    child: Text("No tasks completed today", style: TextStyle(color: AppColors.textMuted)),
                   ),
                 
                 const SizedBox(height: 32),
@@ -834,7 +834,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 // Previous Days Title
                 const Text(
                   'PREVIOUS 7 DAYS',
-                  style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                 ),
                 const SizedBox(height: 16),
                 
@@ -842,7 +842,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 if (previousDays.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text("No previous history available", style: TextStyle(color: Colors.white30)),
+                    child: Text("No previous history available", style: TextStyle(color: AppColors.textMuted)),
                   )
                 else
                   ...previousDays.map((day) => Padding(
@@ -887,7 +887,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Text(
                 "Today's Overview",
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppColors.textSecondary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -901,7 +901,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: AppColors.textSecondary,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -912,7 +912,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Text(
                                 'Wishes Sent',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: AppColors.textSecondary,
                                   fontSize: 12,
                                 ),
                               ),
@@ -933,7 +933,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     end: wishesSent,
                                     duration: const Duration(milliseconds: 1200),
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -941,7 +941,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   Text(
                                     ' / $totalEvents',
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -963,7 +963,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               duration: const Duration(milliseconds: 1200),
                               suffix: '%',
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
+                                color: AppColors.textSecondary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -979,7 +979,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: AppColors.textSecondary,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -988,7 +988,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           Text(
                             'Total Events',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.6),
+                              color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),
@@ -1005,7 +1005,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     end: totalEvents,
                                     duration: const Duration(milliseconds: 1200),
                                     style: const TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -1046,7 +1046,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         Text(
           dateStr,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
@@ -1055,7 +1055,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         Text(
           "$wishesSent Wishes Sent • $totalEvents Events",
           style: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: AppColors.textSecondary,
             fontSize: 12,
           ),
         ),
@@ -1104,11 +1104,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: [
           Text(
             date,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
           ),
           Text(
             "$wishesSent Wishes Sent / ${tasks.length} Total",
-            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -1139,9 +1139,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: AppColors.textSecondary,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.15)),
+        border: Border.all(color: AppColors.textSecondary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1150,11 +1150,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.bold),
           ),
           Text(
             label,
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -1165,9 +1165,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: AppColors.textSecondary,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.1), style: BorderStyle.solid),
+        border: Border.all(color: AppColors.textSecondary, style: BorderStyle.solid),
       ),
       child: Column(
         children: [
@@ -1187,17 +1187,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: AppColors.textSecondary,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
+              border: Border.all(color: AppColors.textSecondary),
             ),
-            child: Icon(Icons.event_busy, size: 64, color: Colors.white.withOpacity(0.3)),
+            child: Icon(Icons.event_busy, size: 64, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 24),
           const Text(
             'No meetings scheduled',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -1207,7 +1207,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             'Active conference calls will appear here\nwhen scheduled via the dashboard.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.textSecondary,
               fontSize: 14,
               height: 1.5,
             ),
@@ -1241,9 +1241,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: AppColors.textSecondary,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(color: AppColors.textSecondary),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.15),
@@ -1297,7 +1297,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1308,12 +1308,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Time
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 16, color: Colors.white.withOpacity(0.6)),
+                      Icon(Icons.access_time, size: 16, color: AppColors.textSecondary),
                       const SizedBox(width: 6),
                       Text(
                         formattedTime,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: AppColors.textSecondary,
                           fontSize: 14,
                         ),
                       ),
@@ -1325,12 +1325,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Target Audience
                   Row(
                     children: [
-                      Icon(Icons.group, size: 16, color: Colors.white.withOpacity(0.6)),
+                      Icon(Icons.group, size: 16, color: AppColors.textSecondary),
                       const SizedBox(width: 6),
                       Text(
                         'Target: $targetAudience',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -1343,9 +1343,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
+                      color: AppColors.textSecondary,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: AppColors.textSecondary),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1353,7 +1353,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         Text(
                           'DIAL-IN DETAILS',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: AppColors.textSecondary,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1,
@@ -1370,7 +1370,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 child: Text(
                                   dialInNumber,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     fontFamily: 'monospace',
@@ -1391,7 +1391,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 child: Text(
                                   'Access Code: $accessCode',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: AppColors.textSecondary,
                                     fontSize: 14,
                                     fontFamily: 'monospace',
                                   ),
@@ -1457,15 +1457,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: AppColors.textSecondary,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.check_circle, size: 64, color: Colors.white.withOpacity(0.5)),
+              child: Icon(Icons.check_circle, size: 64, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             Text(
               'No pending tasks',
-              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -1483,7 +1483,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return Center(
          child: Text(
            "No ${_filterType == 'ALL' ? 'pending' : _filterType.toLowerCase()} tasks", 
-           style: TextStyle(color: Colors.white.withOpacity(0.5))
+           style: TextStyle(color: AppColors.textSecondary)
          )
       );
     }
@@ -1513,9 +1513,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // Match web's 12px blur
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
+            color: AppColors.textSecondary,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.25)),
+            border: Border.all(color: AppColors.textSecondary),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.12),
@@ -1558,7 +1558,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -1569,13 +1569,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // Row B: Mobile
             Row(
               children: [
-                Icon(Icons.call, size: 14, color: Colors.white.withOpacity(0.6)),
+                Icon(Icons.call, size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 6),
                 Text(
                   task.mobile.isNotEmpty ? task.mobile : "No Mobile",
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.8),
+                    color: AppColors.textSecondary,
                     fontFamily: 'monospace',
                   ),
                 ),
@@ -1589,7 +1589,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               "${task.block.isNotEmpty ? task.block : 'N/A'} > ${task.gramPanchayat.isNotEmpty ? task.gramPanchayat : 'N/A'} > Ward ${task.ward.isNotEmpty ? task.ward : 'N/A'}",
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.textSecondary,
               ),
             ),
             
@@ -1606,7 +1606,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 const SizedBox(width: 6),
                 Text(
                   DateFormat('dd MMM yyyy').format(task.dueDate),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                 ),
               ],
             ),

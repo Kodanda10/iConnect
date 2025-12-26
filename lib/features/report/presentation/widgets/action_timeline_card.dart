@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iconnect_mobile/features/report/domain/entities/action_log.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ActionTimelineCard extends StatefulWidget {
   final List<ActionLog> actions;
@@ -111,7 +112,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                   child: Text(
                     "No actions taken yet.",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: AppColors.textSecondary,
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
                     ),
@@ -161,7 +162,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
     // Fallback wrapper if title is complex
     return DefaultTextStyle(
        style: TextStyle(
-          color: Colors.white.withOpacity(0.9),
+          color: AppColors.textSecondary,
           fontSize: 18,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
@@ -194,7 +195,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                     child: Center(
                       child: Container(
                         width: 2,
-                        color: Colors.white.withOpacity(0.1),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -213,7 +214,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                     ),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color: AppColors.textSecondary,
                       width: 1,
                     ),
                     boxShadow: [
@@ -224,7 +225,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                       ),
                     ],
                   ),
-                  child: Icon(iconData, color: Colors.white, size: 18),
+                  child: Icon(iconData, color: AppColors.textPrimary, size: 18),
                 ),
               ],
             ),
@@ -241,7 +242,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                   Text(
                     action.constituentName,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -253,7 +254,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                   Text(
                     timeStr,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: AppColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
