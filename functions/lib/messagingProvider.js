@@ -20,6 +20,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.messagingProvider = void 0;
 exports.createMessagingProvider = createMessagingProvider;
+const security_1 = require("./utils/security");
 /**
  * Factory function to create messaging provider based on environment
  */
@@ -42,7 +43,7 @@ class MockProvider {
         this.name = 'MockProvider';
     }
     async sendSMS(mobile, message) {
-        console.log(`[MOCK SMS] To: ${mobile} | Message: ${message}`);
+        console.log(`[MOCK SMS] To: ${(0, security_1.redactMobile)(mobile)} | Message: ${(0, security_1.redactMessage)(message)}`);
         return {
             success: true,
             messageId: `mock-${Date.now()}`,
@@ -50,7 +51,7 @@ class MockProvider {
         };
     }
     async sendWhatsApp(mobile, template, params) {
-        console.log(`[MOCK WhatsApp] To: ${mobile} | Template: ${template} | Params: ${JSON.stringify(params)}`);
+        console.log(`[MOCK WhatsApp] To: ${(0, security_1.redactMobile)(mobile)} | Template: ${template} | Params: [REDACTED]`);
         return {
             success: true,
             messageId: `mock-wa-${Date.now()}`,
