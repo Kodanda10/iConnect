@@ -534,10 +534,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: AppColors.textSecondary,
+                        color: Colors.white,  // White background
                         borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: AppColors.textSecondary),
-                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+                        border: Border.all(color: AppColors.glassBorder),  // Green border
+                        boxShadow: [
+                          BoxShadow(color: AppColors.primary.withOpacity(0.1), blurRadius: 12, offset: const Offset(0, 4)),
+                          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -547,6 +550,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ],
                       ),
                     ),
+
                   ],
                 ),
               ),
