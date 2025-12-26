@@ -126,30 +126,38 @@ class _ScrollAwareFabWithListenerState
     super.dispose();
   }
 
-  void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollStartNotification ||
-        notification is ScrollUpdateNotification) {
-      if (!_isScrolling) {
-        setState(() => _isScrolling = true);
-      }
-      _idleTimer?.cancel();
-    } else if (notification is ScrollEndNotification) {
-      _idleTimer?.cancel();
-      _idleTimer = Timer(widget.idleDelay, () {
-        if (mounted) {
-          setState(() => _isScrolling = false);
+  bool _handleScrollNotification(ScrollNotification notification) {
+    // Only handle scrollable widgets (ListView, CustomScrollView, etc)
+    if (notification.depth == 0) {
+      if (notification is ScrollStartNotification) {
+        if (!_isScrolling) {
+          setState(() => _isScrolling = true);
         }
-      });
+        _idleTimer?.cancel();
+      } else if (notification is ScrollUpdateNotification) {
+        // Only react to actual scroll movement (not just touch)
+        if ((notification.scrollDelta ?? 0).abs() > 0.5) {
+          if (!_isScrolling) {
+            setState(() => _isScrolling = true);
+          }
+          _idleTimer?.cancel();
+        }
+      } else if (notification is ScrollEndNotification) {
+        _idleTimer?.cancel();
+        _idleTimer = Timer(widget.idleDelay, () {
+          if (mounted) {
+            setState(() => _isScrolling = false);
+          }
+        });
+      }
     }
+    return false; // Allow notification to continue bubbling
   }
 
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        _handleScrollNotification(notification);
-        return false; // Allow notification to continue
-      },
+      onNotification: _handleScrollNotification,
       child: Stack(
         children: [
           widget.child,
@@ -173,3 +181,4 @@ class _ScrollAwareFabWithListenerState
     );
   }
 }
+
