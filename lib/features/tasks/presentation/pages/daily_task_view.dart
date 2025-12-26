@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/glass_pill.dart';
+import '../../../../core/widgets/scroll_aware_fab.dart';
 import '../../domain/entities/task.dart';
 import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
@@ -90,27 +92,73 @@ class _DailyTaskViewState extends State<DailyTaskView> {
             ],
           ),
         ),
-        body: BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            if (state is TaskLoading) {
-              return const ShimmerTaskList(itemCount: 3);
-            } else if (state is TaskError) {
-              return _buildErrorState(state.message);
-            } else if (state is TaskLoaded) {
-              return RefreshIndicator(
-                color: AppColors.primary,
-                backgroundColor: Colors.white,
-                onRefresh: () async {
-                  context.read<TaskBloc>().add(LoadTasksForDate(widget.selectedDate));
+        body: ScrollAwareFabWithListener(
+          idleDelay: const Duration(milliseconds: 500),
+          fabBuilder: (isScrolling) => GlassPill(
+            items: [
+              // Home button - returns to today's tasks (landing page)
+              GlassPillItem(
+                icon: Icons.home,
+                onTap: () {
+                  context.read<TaskBloc>().add(LoadPendingTasks());
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
-                child: _buildTaskList(state.tasks),
-              );
-            }
-            return const SizedBox.shrink();
-          },
+              ),
+              // Calendar button - pick another date for time travel
+              GlassPillItem(
+                icon: Icons.calendar_today,
+                onTap: _showDatePicker,
+              ),
+            ],
+          ),
+          child: BlocBuilder<TaskBloc, TaskState>(
+            builder: (context, state) {
+              if (state is TaskLoading) {
+                return const ShimmerTaskList(itemCount: 3);
+              } else if (state is TaskError) {
+                return _buildErrorState(state.message);
+              } else if (state is TaskLoaded) {
+                return RefreshIndicator(
+                  color: AppColors.primary,
+                  backgroundColor: Colors.white,
+                  onRefresh: () async {
+                    context.read<TaskBloc>().add(LoadTasksForDate(widget.selectedDate));
+                  },
+                  child: _buildTaskList(state.tasks),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> _showDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: widget.selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF00897B),
+              surface: Color(0xFF1A237E),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != widget.selectedDate) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => DailyTaskView(selectedDate: picked)),
+      );
+    }
   }
 
   Widget _buildErrorState(String message) {

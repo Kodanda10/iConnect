@@ -59,3 +59,28 @@
 ## [2025-12-22] Repository Handoff Preparation
 - **Objective**: Ensure all local changes are verified, logged, and pushed for cloning on a secondary machine.
 - **Status**: Repository verified clean. Latest state pushed to `origin/main`.
+
+## [2025-12-26] Apple-Inspired Glass Pill FAB & Unified Data Pipeline
+- **Objective**: Implement scroll-aware FAB with Apple-like animation + fix seed data.
+- **Changes**:
+    - **New Widgets**:
+        - `lib/core/widgets/glass_pill.dart` - Vertical glass pill with liquid glass styling
+        - `lib/core/widgets/scroll_aware_fab.dart` - Scroll-aware wrapper with auto-hide animation
+        - `lib/core/widgets/glass_fab.dart` - Single glass FAB (deprecated, replaced by GlassPill)
+    - **Animation Specs**:
+        - Hide: 200ms, `easeInCubic` (quick exit)
+        - Show: 300ms, `easeOutBack` (spring bounce)
+        - Idle delay: 500ms
+    - **Integration**:
+        - `home_page.dart`: Today tab uses `ScrollAwareFabWithListener` with calendar icon
+        - `daily_task_view.dart`: Uses `ScrollAwareFabWithListener` with Home + Calendar icons
+    - **Seed Data Fix**:
+        - Fixed `seed_unified.cjs`: Correct phones (`6370502503`, `9695528000`, `7093322157`)
+        - Date range: Dec 20, 2025 → Jan 5, 2026
+        - Marked all test data with `source: 'TEST_SEED'`
+        - No data deletion (as per user requirement)
+    - **TDD**:
+        - `test/widgets/glass_pill_test.dart` (3 tests)
+        - `test/widgets/scroll_aware_fab_test.dart` (3 tests)
+        - `test/features/home/home_scroll_fab_test.dart` (4 tests)
+- **Status**: **PASS**. 100 tests passing.

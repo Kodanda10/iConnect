@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/glass_pill.dart';
+import '../../../../core/widgets/scroll_aware_fab.dart';
 import 'package:iconnect_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:iconnect_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:iconnect_mobile/features/tasks/domain/entities/task.dart';
@@ -293,31 +295,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: _filterStatus == 'PENDING' 
-        ? FloatingActionButton(
-            onPressed: _showDatePicker,
-            backgroundColor: AppColors.primary,
-            child: const Icon(Icons.calendar_month, color: Colors.white),
-          )
-        : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: AppBackground(
-        child: Column(
-          children: [
-              // Custom Header Section
-              _buildHeader(),
-              
-              // Sub Filters (hide for Meeting and Report tabs)
-            if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
-              _buildSubFilters(),
-              
-              // Main Content Area - IndexedStack for Persistence (Fix Tab Flash)
-              Expanded(
-                child: IndexedStack(
-                  index: _filterStatus == 'MEETING' ? 2 : (_filterStatus == 'COMPLETED' ? 1 : 0),
+      body: _filterStatus == 'PENDING'
+          ? ScrollAwareFabWithListener(
+              idleDelay: const Duration(milliseconds: 500),
+              fabBuilder: (isScrolling) => GlassPill(
+                items: [
+                  GlassPillItem(
+                    icon: Icons.calendar_month,
+                    onTap: _showDatePicker,
+                  ),
+                ],
+              ),
+              child: AppBackground(
+                child: Column(
                   children: [
-                    // Index 0: PENDING (Home)
-                    BlocBuilder<TaskBloc, TaskState>(
+                    _buildHeader(),
+                    if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
+                      _buildSubFilters(),
+                    Expanded(
+                      child: BlocBuilder<TaskBloc, TaskState>(
                         builder: (context, state) {
                           if (state is TaskLoading) {
                             return const ShimmerTaskList(itemCount: 3);
@@ -337,18 +333,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           return const SizedBox.shrink();
                         },
                       ),
-
-                    // Index 1: COMPLETED (Report)
-                    _buildReportTab(),
-
-                    // Index 2: MEETING
-                    _buildMeetingTab(),
+                    ),
                   ],
                 ),
               ),
-          ],
-        ),
-      ),
+            )
+          : AppBackground(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  if (_filterStatus != 'MEETING' && _filterStatus != 'COMPLETED')
+                    _buildSubFilters(),
+                  Expanded(
+                    child: IndexedStack(
+                      index: _filterStatus == 'MEETING' ? 1 : 0,
+                      children: [
+                        // Index 0: COMPLETED (Report)
+                        _buildReportTab(),
+                        // Index 1: MEETING
+                        _buildMeetingTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
