@@ -372,18 +372,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              surface: AppColors.bgSecondary,
-              onSurface: Colors.white,
+              surface: Colors.white,
+              onSurface: AppColors.textPrimary,
             ),
-            dialogBackgroundColor: AppColors.bgPrimary,
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
       },
     );
+
     
     if (selectedDate != null && mounted) {
       Navigator.push(
@@ -681,12 +682,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: isSelected 
                     ? activeColor.withOpacity(0.25) 
-                    : Colors.white.withOpacity(0.08),
+                    : Colors.grey.withOpacity(0.1),  // Light gray unselected
                 borderRadius: BorderRadius.circular(50),
                 border: Border.all(
                   color: isSelected 
                       ? activeColor.withOpacity(0.5) 
-                      : Colors.white.withOpacity(0.15),
+                      : AppColors.glassBorder,  // Green border
                   width: 1,
                 ),
                 boxShadow: isSelected
@@ -702,7 +703,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         icon,
                         key: ValueKey('$key-$isSelected'),
                         size: 14,
-                        color: isSelected ? activeColor : Colors.white.withOpacity(0.6),
+                        color: isSelected ? activeColor : AppColors.textSecondary,  // Dark icon
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -710,7 +711,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Text(
                     label.toUpperCase(),
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+                      color: isSelected ? Colors.white : AppColors.textPrimary,  // Dark text
                       fontSize: 11,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     ),
@@ -720,7 +721,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                      Text(
                        "($count)",
                        style: TextStyle(
-                         color: isSelected ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.5),
+                         color: isSelected ? Colors.white.withOpacity(0.9) : AppColors.textSecondary,  // Dark count
                          fontSize: 10,
                          fontWeight: FontWeight.w600,
                        ),
@@ -728,6 +729,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ]
                 ],
               ),
+
             ),
           ),
         ),

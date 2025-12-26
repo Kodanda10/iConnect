@@ -211,23 +211,28 @@ class _DailyTaskViewState extends State<DailyTaskView> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.textSecondary,
+            color: Colors.white,  // White background
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.textSecondary),
+            border: Border.all(color: AppColors.glassBorder),  // Green border
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 32,
+                color: AppColors.primary.withOpacity(0.08),  // Green glow
+                blurRadius: 24,
                 offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Stack(
             children: [
-              // Caustic Light Overlay
+              // Subtle green gradient overlay
               Positioned(
                 top: 0, left: 0, right: 0, height: 60,
                 child: Container(
@@ -237,13 +242,14 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.15),
+                        AppColors.primary.withOpacity(0.06),
                         Colors.transparent,
                       ],
                     ),
                   ),
                 ),
               ),
+
               // Content
               Padding(
                 padding: const EdgeInsets.all(20),
