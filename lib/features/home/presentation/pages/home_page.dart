@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.bgSecondary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -137,9 +137,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondary,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.textSecondary),
+                  border: Border.all(color: AppColors.glassBorder),
                 ),
                 child: Row(
                   children: [
@@ -375,10 +375,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              surface: const Color(0xFF1E293B),
+              surface: AppColors.bgSecondary,
               onSurface: Colors.white,
             ),
-            dialogBackgroundColor: const Color(0xFF0F172A),
+            dialogBackgroundColor: AppColors.bgPrimary,
           ),
           child: child!,
         );
@@ -421,7 +421,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               // Translucent dark teal for header to blend with mesh gradient
-              color: const Color(0xFF134E4A).withOpacity(0.8), 
+              color: AppColors.primary.withOpacity(0.8), 
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
               border: Border(bottom: BorderSide(color: AppColors.textSecondary)),
             ),
@@ -433,12 +433,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ? Image.network(
                           headerImageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
+                          errorBuilder: (_, __, ___) => Container(color: AppColors.primary),
                         )
                       : Image.asset(
                           "assets/images/header_bg.png",
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(color: const Color(0xFF134E4A)),
+                          errorBuilder: (_, __, ___) => Container(color: AppColors.primary),
                         ),
                 ),
             
@@ -589,7 +589,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFF134E4A) : AppColors.textSecondary,
+                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
@@ -1139,9 +1139,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.textSecondary,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.textSecondary),
+        border: Border.all(color: AppColors.glassBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1165,9 +1165,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: AppColors.textSecondary,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.textSecondary, style: BorderStyle.solid),
+        border: Border.all(color: AppColors.glassBorder, style: BorderStyle.solid),
       ),
       child: Column(
         children: [
@@ -1241,9 +1241,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.textSecondary,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.textSecondary),
+              border: Border.all(color: AppColors.glassBorder),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.15),
@@ -1510,23 +1510,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // Match web's 12px blur
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.textSecondary,
+            color: Colors.white,  // White glass background
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.textSecondary),
+            border: Border.all(color: AppColors.glassBorder),  // Green splash border
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 32,
+                color: AppColors.primary.withOpacity(0.08),  // Green glow
+                blurRadius: 24,
                 offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Stack(
             children: [
-              // Caustic Light Overlay (top-left glow)
+              // Subtle green gradient overlay at top
               Positioned(
                 top: 0,
                 left: 0,
@@ -1539,13 +1544,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.15),
+                        AppColors.primary.withOpacity(0.06),
                         Colors.transparent,
                       ],
                     ),
                   ),
                 ),
               ),
+
               // Inner Content
               Padding(
                 padding: const EdgeInsets.all(20),
