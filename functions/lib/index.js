@@ -40,7 +40,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.formatAudioMessage = exports.determinePushTimes = exports.schedulePushForLeader = exports.sendBulkSMS = exports.queryConstituentsByAudience = exports.createMessagingProvider = exports.processPushNotifications = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scanForTasks = void 0;
+exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.getUserClaims = exports.setUserRole = exports.syncRoleToClaims = exports.formatAudioMessage = exports.determinePushTimes = exports.schedulePushForLeader = exports.sendBulkSMS = exports.queryConstituentsByAudience = exports.createMessagingProvider = exports.processPushNotifications = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scheduleDailyNotifications = exports.scanForTasks = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const tasks_1 = require("firebase-functions/v2/tasks");
@@ -52,6 +52,7 @@ const messaging_1 = require("./messaging");
 // Explicit re-exports to avoid ambiguity
 var dailyScan_2 = require("./dailyScan");
 Object.defineProperty(exports, "scanForTasks", { enumerable: true, get: function () { return dailyScan_2.scanForTasks; } });
+Object.defineProperty(exports, "scheduleDailyNotifications", { enumerable: true, get: function () { return dailyScan_2.scheduleDailyNotifications; } });
 var greeting_2 = require("./greeting");
 Object.defineProperty(exports, "generateGreetingMessage", { enumerable: true, get: function () { return greeting_2.generateGreetingMessage; } });
 var meeting_1 = require("./meeting");
@@ -72,6 +73,11 @@ var notifications_2 = require("./notifications");
 Object.defineProperty(exports, "schedulePushForLeader", { enumerable: true, get: function () { return notifications_2.schedulePushForLeader; } });
 Object.defineProperty(exports, "determinePushTimes", { enumerable: true, get: function () { return notifications_2.determinePushTimes; } });
 Object.defineProperty(exports, "formatAudioMessage", { enumerable: true, get: function () { return notifications_2.formatAudioMessage; } });
+// P1 RBAC: Custom claims sync
+var auth_1 = require("./auth");
+Object.defineProperty(exports, "syncRoleToClaims", { enumerable: true, get: function () { return auth_1.syncRoleToClaims; } });
+Object.defineProperty(exports, "setUserRole", { enumerable: true, get: function () { return auth_1.setUserRole; } });
+Object.defineProperty(exports, "getUserClaims", { enumerable: true, get: function () { return auth_1.getUserClaims; } });
 // Initialize Firebase Admin
 if (admin.apps.length === 0) {
     admin.initializeApp();
@@ -159,7 +165,7 @@ async function fetchConstituentsByDateFields(monthField, dayField, month, day) {
  * Region: asia-south1
  */
 exports.dailyScan = (0, scheduler_1.onSchedule)({
-    schedule: '1 0 * * *',
+    schedule: '0 19 * * *', // 7:00 PM IST
     timeZone: 'Asia/Kolkata',
     region: 'asia-south1',
 }, async () => {
@@ -218,18 +224,21 @@ exports.dailyScan = (0, scheduler_1.onSchedule)({
             console.log(`[DAILY_SCAN] Full scan loaded ${constituents.length} constituents`);
         }
         // Fetch existing tasks for today and tomorrow
-        const todayStr = today.toISOString().split('T')[0];
-        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        const tomorrowEnd = new Date(tomorrow);
+        tomorrowEnd.setHours(23, 59, 59, 999);
         const tasksSnapshot = await db
             .collection('tasks')
-            .where('due_date', 'in', [todayStr, tomorrowStr])
+            .where('due_date', '>=', admin.firestore.Timestamp.fromDate(todayStart))
+            .where('due_date', '<=', admin.firestore.Timestamp.fromDate(tomorrowEnd))
             .get();
         const existingTasks = [];
         tasksSnapshot.forEach((doc) => {
             existingTasks.push({ id: doc.id, ...doc.data() });
         });
-        // Run the scan
-        const result = (0, dailyScan_1.scanForTasks)(constituents, existingTasks);
+        // Run the scan with admin.firestore.Timestamp class passed for object creation
+        const result = (0, dailyScan_1.scanForTasks)(constituents, existingTasks, admin.firestore.Timestamp);
         // Write new tasks to Firestore
         if (result.newTasks.length > 0) {
             const batch = db.batch();
@@ -239,6 +248,8 @@ exports.dailyScan = (0, scheduler_1.onSchedule)({
             }
             await batch.commit();
         }
+        // Schedule dynamic notifications
+        await (0, dailyScan_1.scheduleDailyNotifications)(db, constituents);
         console.log(`[DAILY_SCAN] Complete. Created ${result.count} new tasks.`);
     }
     catch (error) {

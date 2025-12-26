@@ -147,7 +147,8 @@ async function handleMeetingCreated(meetingData) {
     const fcmToken = meetingData.fcm_token;
     if (fcmToken) {
         await (0, messaging_1.sendPushNotification)(fcmToken, 'Meeting Scheduled', `You scheduled "${meetingData.title}" for ${scheduledTime.toLocaleString('en-IN')}`);
-        console.log(`[TRIGGER] Sent confirmation push to ${fcmToken} `);
+        // Do not log the token itself
+        console.log(`[TRIGGER] Sent confirmation push to leader.`);
     }
     else {
         console.log('[TRIGGER] No FCM token found for creator, skipping confirmation push');

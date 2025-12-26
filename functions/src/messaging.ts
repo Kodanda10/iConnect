@@ -1,5 +1,6 @@
 
 import * as admin from 'firebase-admin';
+import { redactMobile, redactMessage } from './utils/security';
 
 export async function sendPushNotification(token: string, title: string, body: string): Promise<string> {
     try {
@@ -21,7 +22,7 @@ export async function sendPushNotification(token: string, title: string, body: s
 export async function sendSMS(mobile: string, message: string): Promise<boolean> {
     // MOCK IMPLEMENTATION for Initial Rollout
     // In production, integrate with Twilio / msg91
-    console.log(`[SMS MOCK] To: ${mobile} | Message: ${message}`);
+    console.log(`[SMS MOCK] To: ${redactMobile(mobile)} | Message: ${redactMessage(message)}`);
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 100));
