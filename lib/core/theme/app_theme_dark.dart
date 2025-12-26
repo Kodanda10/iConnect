@@ -1,45 +1,40 @@
-/// iConnect Design System - White Theme with Green Liquid Glass
+/// iConnect Design System - Emerald Amethyst Glass Theme
 /// 
-/// Clean white background with emerald green translucent splash effects.
-/// Apple-inspired subtle liquid glass aesthetic.
+/// This file contains the complete design system for Flutter,
+/// matching the web portal's Emerald/Amethyst Glass theme.
 /// 
 /// @changelog
-/// - 2024-12-18: Original dark theme
-/// - 2025-12-26: Refactored to white theme with green liquid glass splash
+/// - 2024-12-18: Refactored for Deep Veridian theme parity
 library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Primary color palette - White theme with green accents
+/// Primary Emerald color palette
 class AppColors {
-  // Primary - Emerald Green
-  static const Color primary = Color(0xFF10B981);       // Emerald 500
-  static const Color primaryLight = Color(0xFF34D399);  // Emerald 400
-  static const Color primaryDark = Color(0xFF059669);   // Emerald 600
+  // Primary - Veridian Emerald
+  static const Color primary = Color(0xFF008F7A);
+  static const Color primaryLight = Color(0xFF00A896);
+  static const Color primaryDark = Color(0xFF006B5A);
   
-  // Secondary - Teal accent
-  static const Color secondary = Color(0xFF14B8A6);     // Teal 500
-  static const Color secondaryLight = Color(0xFF2DD4BF);
+  // Secondary - Deep Amethyst
+  static const Color secondary = Color(0xFF5E548E);
+  static const Color secondaryLight = Color(0xFF7B6FA6);
   
-  // Text Colors - Dark on light
-  static const Color textPrimary = Color(0xFF1F2937);   // Gray 800
-  static const Color textSecondary = Color(0xFF6B7280); // Gray 500
-  static const Color textMuted = Color(0xFF9CA3AF);     // Gray 400
-  static const Color textOnPrimary = Colors.white;
+  // Text Colors
+  static const Color textPrimary = Color(0xFFFFFFFF); // White for Dark Theme
+  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400
+  static const Color textMuted = Color(0xFF64748B); // Slate 500
+  static const Color textOnDark = Colors.white;
   
-  // Background - Clean white/off-white
-  static const Color bgPrimary = Color(0xFFFAFAFA);     // Near-white
-  static const Color bgSecondary = Color(0xFFF3F4F6);   // Gray 100
-  static const Color bgGradientStart = Color(0xFFFFFFFF); // Pure white
-  static const Color bgGradientEnd = Color(0xFFF9FAFB);   // Gray 50
+  // Background - Mesh Gradient colors (Matches Web globals.css)
+  static const Color bgGradientStart = Color(0xFF0D3B2E); // Web: --bg-gradient-start
+  static const Color bgGradientEnd = Color(0xFF2A2D4E);   // Web: --bg-gradient-end
   
-  // Liquid Glass Splash Effect - Green translucent
-  static const Color glassSplash = Color(0x1A10B981);   // Green 10%
-  static const Color glassBorder = Color(0x3310B981);   // Green 20%
-  static const Color glassSurface = Color(0xFFFFFFFF);  // White surface
-  static const Color glassSurfaceLight = Color(0xFFF9FAFB);
-  static const Color cardShadow = Color(0x0D000000);    // Black 5%
+  // Glass Surface (Smoked)
+  static const Color glassSurface = Color(0x66000000); // Black 40%
+  static const Color glassBorder = Color(0x4DFFFFFF); // White 30%
+  static const Color glassSurfaceLight = Color(0xCCFFFFFF); 
   
   // Status Colors
   static const Color success = Color(0xFF10B981); // Emerald 500
@@ -71,16 +66,16 @@ class AppSpacing {
   static const double xxl = 32.0;
 }
 
-/// Main app theme - White with green liquid glass
+/// Main app theme
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: AppColors.bgPrimary,
+      brightness: Brightness.dark, // Force Dark Mode
+      scaffoldBackgroundColor: AppColors.bgGradientEnd,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.glassSurface,
@@ -89,42 +84,42 @@ class AppTheme {
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w800, // ExtraBold
           color: AppColors.textPrimary,
         ),
         displayMedium: GoogleFonts.inter(
           fontSize: 28,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w800, // ExtraBold
           color: AppColors.textPrimary,
         ),
         headlineLarge: GoogleFonts.inter(
           fontSize: 24,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w700, // Bold
           color: AppColors.textPrimary,
         ),
         headlineMedium: GoogleFonts.inter(
           fontSize: 20,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w700, // Bold
           color: AppColors.textPrimary,
         ),
         titleLarge: GoogleFonts.inter(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w600, // SemiBold
           color: AppColors.textPrimary,
         ),
         titleMedium: GoogleFonts.inter(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w600, // SemiBold
           color: AppColors.textPrimary,
         ),
         bodyLarge: GoogleFonts.inter(
           fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w600, // SemiBold for Premium feel
           color: AppColors.textPrimary,
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.w400, // Regular
           color: AppColors.textSecondary,
         ),
         bodySmall: GoogleFonts.inter(
@@ -138,6 +133,7 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
+      // Overridden by PrimaryButton usually, but keep fallback
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -146,7 +142,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
-          elevation: 0,
+          elevation: 4,
           textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -155,14 +151,14 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.bgSecondary,
+        fillColor: Colors.white.withOpacity(0.1),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: BorderSide(color: AppColors.glassBorder),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -190,42 +186,27 @@ class AppTheme {
     );
   }
   
-  /// White gradient background
+  /// Mesh gradient background decoration (Legacy helper, use AppBackground widget)
   static BoxDecoration get meshGradient => const BoxDecoration(
     gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
       colors: [AppColors.bgGradientStart, AppColors.bgGradientEnd],
     ),
   );
   
-  /// Liquid glass card with green splash effect
-  static BoxDecoration glassCard({double opacity = 0.1}) => BoxDecoration(
-    color: Colors.white,
+  /// Glass card decoration (Smoked)
+  static BoxDecoration glassCard({double opacity = 0.4}) => BoxDecoration(
+    color: Colors.black.withOpacity(opacity),
     borderRadius: BorderRadius.circular(AppRadius.xl),
-    border: Border.all(color: AppColors.glassBorder, width: 1),
+    border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
     boxShadow: [
       BoxShadow(
-        color: AppColors.primary.withOpacity(0.08),
-        blurRadius: 24,
-        offset: const Offset(0, 4),
-      ),
-      BoxShadow(
-        color: AppColors.cardShadow,
-        blurRadius: 8,
-        offset: const Offset(0, 2),
+        color: Colors.black.withOpacity(0.2),
+        blurRadius: 32,
+        offset: const Offset(0, 8),
       ),
     ],
-  );
-  
-  /// Green splash effect decoration
-  static BoxDecoration splashEffect({double intensity = 0.15}) => BoxDecoration(
-    color: AppColors.primary.withOpacity(intensity),
-    borderRadius: BorderRadius.circular(AppRadius.lg),
-    border: Border.all(
-      color: AppColors.primary.withOpacity(intensity * 2),
-      width: 1,
-    ),
   );
   
   /// Primary gradient

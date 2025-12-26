@@ -84,3 +84,26 @@
         - `test/widgets/scroll_aware_fab_test.dart` (3 tests)
         - `test/features/home/home_scroll_fab_test.dart` (4 tests)
 - **Status**: **PASS**. 100 tests passing.
+
+## [2025-12-26] White Theme with Green Liquid Glass
+- **Objective**: Transform app from dark theme to white theme with green liquid glass splash effects.
+- **Reference**: Apple-inspired design with subtle translucent green overlays.
+- **Changes**:
+    - **Archived Old Theme**:
+        - `lib/core/theme/app_theme_dark.dart` (original dark theme)
+        - `lib/core/widgets/app_background_dark.dart` (original dark background)
+    - **New Theme Colors**:
+        - Background: White (`#FAFAFA`) → Gray 50 (`#F9FAFB`) gradient
+        - Primary: Emerald 500 (`#10B981`)
+        - Text: Dark gray (`#1F2937`) on white
+        - Glass Splash: Green 10-20% translucent borders
+    - **Updated Widgets**:
+        - `app_theme.dart` - Complete rewrite for white theme
+        - `app_background.dart` - White gradient with subtle green glow
+        - `glass_container.dart` - White glass with green splash border
+        - `glass_pill.dart` - White pill with green icons
+        - `glass_fab.dart` - White FAB with green icon and splash
+    - **Updated Tests**:
+        - `design_token_parity_test.dart` - Updated for white theme token values
+- **Status**: **PASS**. 101 tests passing.
+

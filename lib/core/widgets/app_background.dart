@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
+/// App background - Clean white with subtle green glow accents
+/// 
+/// @changelog
+/// - 2024-12-18: Original dark gradient background
+/// - 2025-12-26: Refactored to white theme with subtle green accents
 class AppBackground extends StatelessWidget {
   final Widget child;
 
@@ -8,36 +14,36 @@ class AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.bgPrimary,
       body: Stack(
         children: [
-          // Layer 1: Base Linear Gradient (Deep Veridian Theme)
+          // Layer 1: Base White/Off-white gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF022C22), // Deep Veridian (Top-Left)
-                  Color(0xFF2A2D4E), // Dark Slate/Purple hint (Bottom-Right match web)
+                  Color(0xFFFFFFFF), // Pure white (top)
+                  Color(0xFFF9FAFB), // Gray 50 (bottom)
                 ],
               ),
             ),
           ),
 
-          // Layer 2: Overlay 1 - Top Center Emerald Glow (Radial)
+          // Layer 2: Subtle green glow at top (very subtle)
           Positioned(
-            top: -100,
+            top: -50,
             left: 0,
             right: 0,
-            height: 600,
+            height: 300,
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: Alignment.topCenter,
-                  radius: 0.8,
+                  radius: 1.2,
                   colors: [
-                    const Color(0xFF008F7A).withOpacity(0.12), // Emerald at 12%
+                    AppColors.primary.withOpacity(0.04), // Green 4%
                     Colors.transparent,
                   ],
                   stops: const [0.0, 1.0],
@@ -46,28 +52,7 @@ class AppBackground extends StatelessWidget {
             ),
           ),
 
-          // Layer 3: Overlay 2 - Bottom Right Amethyst Glow (Radial)
-          Positioned(
-            bottom: -150,
-            right: -150,
-            width: 500,
-            height: 500,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 0.7,
-                  colors: [
-                    const Color(0xFF5E548E).withOpacity(0.18), // Amethyst at 18%
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-              ),
-            ),
-          ),
-
-          // Layer 4: Content
+          // Layer 3: Content
           SafeArea(child: child),
         ],
       ),

@@ -1,8 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_theme.dart';
 
-/// A single item in a GlassPill
+/// Glass pill with green liquid glass splash effect
+/// 
+/// Vertical layout with green translucent styling.
+/// 
+/// @changelog
+/// - 2025-12-26: Created with dark theme
+/// - 2025-12-26: Updated for white theme with green splash
 class GlassPillItem {
   final IconData icon;
   final VoidCallback onTap;
@@ -15,13 +22,6 @@ class GlassPillItem {
   });
 }
 
-/// Apple-inspired vertical glass pill with multiple icon buttons
-/// 
-/// A sleek, translucent pill-shaped container with vertically stacked
-/// icon buttons. Uses liquid glass styling matching the app's theme.
-/// 
-/// @changelog
-/// - 2025-12-26: Initial implementation for scroll-aware FAB
 class GlassPill extends StatelessWidget {
   final List<GlassPillItem> items;
   final double iconSize;
@@ -41,21 +41,26 @@ class GlassPill extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           decoration: BoxDecoration(
-            // Smoked glass - darker for better contrast
-            color: Colors.black.withOpacity(0.5),
+            // White glass with green splash
+            color: Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
-              color: Colors.white.withOpacity(0.25),
+              color: AppColors.glassBorder,
               width: 1.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.12),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -89,14 +94,14 @@ class GlassPill extends StatelessWidget {
           item.onTap();
         },
         borderRadius: BorderRadius.circular(borderRadius),
-        splashColor: Colors.white.withOpacity(0.1),
-        highlightColor: Colors.white.withOpacity(0.05),
+        splashColor: AppColors.primary.withOpacity(0.15),
+        highlightColor: AppColors.primary.withOpacity(0.08),
         child: Padding(
           padding: EdgeInsets.all(itemPadding),
           child: Icon(
             item.icon,
             size: iconSize,
-            color: Colors.white.withOpacity(0.9),
+            color: AppColors.primary, // Green icon
           ),
         ),
       ),
@@ -107,7 +112,7 @@ class GlassPill extends StatelessWidget {
     return Container(
       width: iconSize + 8,
       height: 1,
-      color: Colors.white.withOpacity(0.15),
+      color: AppColors.glassBorder,
     );
   }
 }

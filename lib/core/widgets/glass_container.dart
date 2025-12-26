@@ -1,6 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
+/// Glass container with green liquid glass splash effect
+/// 
+/// White background with subtle green translucent border and shadow.
+/// Apple-inspired subtle glass aesthetic.
+/// 
+/// @changelog
+/// - 2024-12-18: Original dark smoked glass
+/// - 2025-12-26: White theme with green splash effect
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -26,24 +35,31 @@ class GlassContainer extends StatelessWidget {
     Widget content = ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), // Liquid Blur
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), // Subtle blur
         child: Container(
           width: width,
           height: height,
           padding: padding,
           decoration: BoxDecoration(
-            // Smoked Glass: Black with 0.4 opacity
-            color: Colors.black.withOpacity(0.4),
+            // White glass with green splash
+            color: Colors.white,
             borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3), // White border 0.3
+              color: AppColors.glassBorder, // Green 20%
               width: 1.0,
             ),
             boxShadow: [
+              // Green splash glow
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.08),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
+              ),
+              // Subtle shadow
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
