@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 export default function SettingsPage() {
-    const { isStaff, user } = useAuth();
+    const { isStaff, isLeader, user } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -185,7 +185,7 @@ export default function SettingsPage() {
         }
     };
 
-    if (!isStaff) {
+    if (!isStaff && !isLeader) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">

@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text(
                   'iConnect',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
                   ),
@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                         Text(
                           'Sign In',
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -127,8 +127,9 @@ class _LoginPageState extends State<LoginPage> {
                         GlassTextField(
                           controller: _emailController,
                           hintText: 'Email address',
-                          prefixIcon: const Icon(Icons.email_outlined),
+                          prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
                           keyboardType: TextInputType.emailAddress,
+                          style: const TextStyle(color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 16),
                         
@@ -136,8 +137,9 @@ class _LoginPageState extends State<LoginPage> {
                         GlassTextField(
                           controller: _passwordController,
                           hintText: 'Password',
-                          prefixIcon: const Icon(Icons.lock_outline),
+                          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
                           obscureText: true,
+                          style: const TextStyle(color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 24),
                         
@@ -160,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text(
                   '© 2024 iConnect CRM',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                   ),
                 ).animate().fade(delay: 500.ms),

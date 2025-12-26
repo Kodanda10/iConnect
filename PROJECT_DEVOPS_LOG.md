@@ -107,3 +107,13 @@
         - `design_token_parity_test.dart` - Updated for white theme token values
 - **Status**: **PASS**. 101 tests passing.
 
+
+## [2025-12-26] White Theme Polish & Refactor
+- **Core Theme**: Refactored `AppTheme` to strictly use White/Green palette. Added centralized component themes (DatePicker, Dialog, Buttons).
+- **Fixes**:
+  - Login Page: Fixed white-on-white text issues (now dark text).
+  - Status Modal: Fixed button text visibility and removed dark theme artifacts.
+  - DatePicker: Fixed dark blue background in Daily View; enforced light theme globally.
+  - Icons: Standardized Calendar icon to `calendar_month` across Home and Daily views.
+- **Refactor**: Rewrote `ai_greeting_sheet.dart` to fully support White Theme (removed hardcoded dark theme).
+- **Status**: **PASS**. 101 tests passing.

@@ -10,6 +10,8 @@ class GlassTextField extends StatefulWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
+  final TextStyle? style;
+  final TextStyle? hintStyle;
 
   const GlassTextField({
     super.key,
@@ -20,6 +22,8 @@ class GlassTextField extends StatefulWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.onChanged,
+    this.style,
+    this.hintStyle,
   });
 
   @override
@@ -55,27 +59,18 @@ class _GlassTextFieldState extends State<GlassTextField> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            // Subtle Gradient: White 0.85 -> 0.65 (Simulate CSS .glass-input)
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withOpacity(0.15),
-                Colors.white.withOpacity(0.05),
-              ],
-            ),
+            color: Colors.white.withOpacity(0.5), // More opaque white for input
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              // Glow on focus
               color: _isFocused 
-                  ? const Color(0xFF00A896).withOpacity(0.6) 
-                  : Colors.white.withOpacity(0.1),
+                  ? AppColors.primary 
+                  : AppColors.glassBorder,
               width: 1.0,
             ),
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF00A896).withOpacity(0.2),
+                      color: AppColors.primary.withOpacity(0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 0),
                     )
@@ -88,21 +83,21 @@ class _GlassTextFieldState extends State<GlassTextField> {
             obscureText: widget.obscureText,
             keyboardType: widget.keyboardType,
             onChanged: widget.onChanged,
-            style: const TextStyle(
-              color: Colors.white,
+            style: widget.style ?? TextStyle(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w500,
             ),
-            cursorColor: const Color(0xFF00A896),
+            cursorColor: AppColors.primary,
             decoration: InputDecoration(
               hintText: widget.hintText,
-              hintStyle: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+              hintStyle: widget.hintStyle ?? TextStyle(
+                color: AppColors.textSecondary.withOpacity(0.7),
                 fontSize: 14,
               ),
               prefixIcon: widget.prefixIcon != null 
                   ? IconTheme(
                       data: IconThemeData(
-                        color: _isFocused ? const Color(0xFF00A896) : Colors.white54
+                        color: _isFocused ? AppColors.primary : AppColors.textSecondary
                       ), 
                       child: widget.prefixIcon!
                     ) 
@@ -110,7 +105,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
               suffixIcon: widget.suffixIcon != null
                   ? IconTheme(
                       data: IconThemeData(
-                          color: _isFocused ? const Color(0xFF00A896) : Colors.white54
+                          color: _isFocused ? AppColors.primary : AppColors.textSecondary
                       ),
                       child: widget.suffixIcon!
                     )

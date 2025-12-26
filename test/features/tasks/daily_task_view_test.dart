@@ -8,6 +8,7 @@ import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_event.dart
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_state.dart';
 import 'package:iconnect_mobile/features/tasks/domain/entities/task.dart';
 import 'package:iconnect_mobile/features/tasks/domain/repositories/task_repository.dart';
+import 'package:iconnect_mobile/core/error/failures.dart';
 
 class MockTaskRepository extends Mock implements TaskRepository {}
 
@@ -19,18 +20,21 @@ class MockTaskRepository extends Mock implements TaskRepository {}
 /// 
 /// @changelog
 /// - 2024-12-24: Initial TDD RED phase tests
+/// - 2024-12-25: Fixed constructor issues and Failure import
 void main() {
   late MockTaskRepository mockTaskRepository;
   late TaskBloc taskBloc;
 
   final testDate = DateTime(2024, 12, 25);
+  final testCreatedAt = DateTime(2024, 12, 20);
   
   // Unsorted tasks for testing
-  final unsortedTasks = [
+  final List<EnrichedTask> unsortedTasks = [
     EnrichedTask(
       id: '3',
       type: 'BIRTHDAY',
       dueDate: testDate,
+      createdAt: testCreatedAt,
       status: 'PENDING',
       constituentId: 'c3',
       name: 'Zara Begum',
@@ -46,6 +50,7 @@ void main() {
       id: '1',
       type: 'ANNIVERSARY',
       dueDate: testDate,
+      createdAt: testCreatedAt,
       status: 'PENDING',
       constituentId: 'c1',
       name: 'Abhijeet Mohapatra',
@@ -61,6 +66,7 @@ void main() {
       id: '2',
       type: 'BIRTHDAY',
       dueDate: testDate,
+      createdAt: testCreatedAt,
       status: 'PENDING',
       constituentId: 'c2',
       name: 'Manoj Swain',
@@ -76,7 +82,7 @@ void main() {
 
   setUp(() {
     mockTaskRepository = MockTaskRepository();
-    taskBloc = TaskBloc(mockTaskRepository);
+    taskBloc = TaskBloc(taskRepository: mockTaskRepository);
   });
 
   tearDown(() {
@@ -140,10 +146,4 @@ void main() {
       ],
     );
   });
-}
-
-// Helper class for test
-class ServerFailure {
-  final String message;
-  ServerFailure(this.message);
 }

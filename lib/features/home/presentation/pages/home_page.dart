@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 icon: const Icon(Icons.check, color: Colors.white),
                 label: Text(
                   actionType == 'CALL' ? 'Mark as Called' : 'Mark as Sent', 
-                  style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
                 ),
               ),
               ),
@@ -211,7 +211,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white.withOpacity(0.7),
+                        foregroundColor: AppColors.textSecondary,
                         side: BorderSide(color: AppColors.textSecondary),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -369,20 +369,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       initialDate: now,
       firstDate: DateTime(2024, 1, 1),
       lastDate: DateTime(2025, 12, 31),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: AppColors.textPrimary,
-            ),
-            dialogBackgroundColor: Colors.white,
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => child!,
+
     );
 
     
@@ -477,13 +465,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                            children: [
                              Text(
                                appName,
-                               style: const TextStyle(
-                                 color: AppColors.textPrimary,
-                                 fontSize: 32,
-                                 fontWeight: FontWeight.w900,
-                                 height: 1.1,
-                                 shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
-                               ),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.1,
+                                  shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 2))],
+                                ),
                              ),
                              const SizedBox(height: 8),
                              Row(
@@ -500,12 +488,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                  const SizedBox(width: 8),
                                  Text(
                                    leaderName,
-                                   style: const TextStyle(
-                                     color: AppColors.textPrimary,
-                                     fontSize: 14, 
-                                     fontWeight: FontWeight.w500,
-                                     shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
-                                   ),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14, 
+                                      fontWeight: FontWeight.w500,
+                                      shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+                                    ),
                                  ),
                                ],
                              ),
@@ -519,10 +507,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                            child: Container(
                              padding: const EdgeInsets.all(8),
                              decoration: BoxDecoration(
-                               color: AppColors.textSecondary,
+                               color: Colors.white, border: Border.all(color: AppColors.glassBorder),
                                shape: BoxShape.circle,
                              ),
-                             child: const Icon(Icons.logout, color: AppColors.textPrimary, size: 20),
+                             child: const Icon(Icons.logout, color: AppColors.primary, size: 20),
                            ),
                          ),
                       ],
@@ -595,7 +583,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 label,
                 style: TextStyle(
                   color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
                 ),
@@ -906,10 +894,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     flex: 2,
                     child: Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.textSecondary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                      decoration: AppTheme.glassCard(),
                       child: Row(
                         children: [
                           Column(
@@ -984,10 +969,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.textSecondary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                      decoration: AppTheme.glassCard(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1193,9 +1175,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.textSecondary,
+              color: AppColors.textSecondary.withOpacity(0.1),
               shape: BoxShape.circle,
-              border: Border.all(color: AppColors.textSecondary),
             ),
             child: Icon(Icons.event_busy, size: 64, color: AppColors.textSecondary),
           ),
@@ -1241,23 +1222,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     return Padding(
       padding: const EdgeInsets.all(24),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.glassBorder),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 32,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+      child: Container(
+        decoration: AppTheme.glassCard(),
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -1269,7 +1235,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
+                      color: Colors.white,
+                      border: Border.all(color: AppColors.glassBorder),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -1348,11 +1315,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Dial-in Details Card
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.textSecondary,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.textSecondary),
-                    ),
+                    decoration: AppTheme.glassCard(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1447,8 +1410,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
         ),
-      ),
-      ),
     );
   }
 
@@ -1463,7 +1424,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.textSecondary,
+                color: AppColors.textSecondary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.check_circle, size: 64, color: AppColors.textSecondary),

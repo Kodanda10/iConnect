@@ -41,7 +41,7 @@ import { validateCsvData, CsvDataValidation, CsvRowData } from '@/lib/utils/csvV
 import DataMetricsCard from '@/components/dashboard/DataMetricsCard';
 
 export default function UploadPage() {
-    const { user, isStaff } = useAuth();
+    const { user, isStaff, isLeader } = useAuth();
     const [isDragging, setIsDragging] = useState(false);
     const [csvContent, setCsvContent] = useState('');
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -477,7 +477,7 @@ export default function UploadPage() {
     );
 
     // Redirect non-staff users
-    if (!isStaff) {
+    if (!isStaff && !isLeader) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">

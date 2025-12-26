@@ -247,3 +247,83 @@ export async function getTaskCounts(): Promise<{
         pendingAnniversaries: anniversaryCount,
     };
 }
+
+/**
+ * Get tasks for a specific date (for Scheduler)
+ * @changelog
+ * - 2025-12-26: Added for unified data pipeline
+ */
+export async function getTasksForDate(
+    date: Date,
+    type?: TaskType
+): Promise<Task[]> {
+    const db = getFirebaseDb();
+
+    // Set to start of day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Set to end of day
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const constraints = [
+        where('due_date', '>=', Timestamp.fromDate(startOfDay)),
+        where('due_date', '<=', Timestamp.fromDate(endOfDay)),
+        orderBy('due_date', 'asc'),
+    ];
+
+    if (type) {
+        constraints.push(where('type', '==', type));
+    }
+
+    const q = query(collection(db, COLLECTION_NAME), ...constraints);
+    const snapshot = await getDocs(q);
+
+    const tasks: Task[] = [];
+    snapshot.forEach((docSnapshot) => {
+        tasks.push({ id: docSnapshot.id, ...docSnapshot.data() } as Task);
+    });
+
+    console.log(`[Tasks] Found ${tasks.length} tasks for ${date.toLocaleDateString()}`);
+    return tasks;
+}
+
+/**
+ * Get all dates in a month that have tasks (for calendar indicators)
+ * @changelog
+ * - 2025-12-26: Added for unified data pipeline
+ */
+export async function getMonthTaskDates(year: number, month: number): Promise<string[]> {
+    const db = getFirebaseDb();
+
+    // First day of month
+    const startOfMonth = new Date(year, month - 1, 1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    // Last day of month
+    const endOfMonth = new Date(year, month, 0);
+    endOfMonth.setHours(23, 59, 59, 999);
+
+    const q = query(
+        collection(db, COLLECTION_NAME),
+        where('due_date', '>=', Timestamp.fromDate(startOfMonth)),
+        where('due_date', '<=', Timestamp.fromDate(endOfMonth)),
+        orderBy('due_date', 'asc')
+    );
+
+    const snapshot = await getDocs(q);
+    const eventDates = new Set<string>();
+
+    snapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        if (data.due_date) {
+            const dueDate = data.due_date.toDate ? data.due_date.toDate() : new Date(data.due_date);
+            const dateStr = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, '0')}-${String(dueDate.getDate()).padStart(2, '0')}`;
+            eventDates.add(dateStr);
+        }
+    });
+
+    console.log(`[Tasks] Found ${eventDates.size} event dates for ${year}-${String(month).padStart(2, '0')}`);
+    return Array.from(eventDates);
+}

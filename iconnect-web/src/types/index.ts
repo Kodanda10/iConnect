@@ -69,10 +69,12 @@ export interface Task {
     completed_by?: CompletedBy;
     action_taken?: ActionType;
     updated_at?: Date | { seconds: number; nanoseconds: number };
-    // Denormalized fields
+    // Denormalized fields (for unified data pipeline)
     constituent_name?: string;
     constituent_mobile?: string;
     ward_number?: string;
+    block?: string;
+    gram_panchayat?: string;
     // Helper fields
     call_sent?: boolean;
     sms_sent?: boolean;

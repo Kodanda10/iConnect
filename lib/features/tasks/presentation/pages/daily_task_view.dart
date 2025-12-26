@@ -106,7 +106,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
               ),
               // Calendar button - pick another date for time travel
               GlassPillItem(
-                icon: Icons.calendar_today,
+                icon: Icons.calendar_month,
                 onTap: _showDatePicker,
               ),
             ],
@@ -141,17 +141,8 @@ class _DailyTaskViewState extends State<DailyTaskView> {
       initialDate: widget.selectedDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF00897B),
-              surface: Color(0xFF1A237E),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => child!,
+
     );
     if (picked != null && picked != widget.selectedDate) {
       Navigator.pushReplacement(
@@ -176,15 +167,18 @@ class _DailyTaskViewState extends State<DailyTaskView> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.textSecondary,
+                color: Colors.white,
                 shape: BoxShape.circle,
+                border: Border.all(color: AppColors.glassBorder, width: 2),
+                boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.1), blurRadius: 16)],
               ),
               child: Icon(
                 Icons.event_available, 
                 size: 64, 
-                color: AppColors.textSecondary
+                color: AppColors.primary
               ),
             ),
+
             const SizedBox(height: 16),
             Text(
               'No tasks for $_formattedDate',

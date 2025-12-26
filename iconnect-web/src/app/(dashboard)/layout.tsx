@@ -19,7 +19,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-    const { user, loading, signOut, isStaff } = useAuth();
+    const { user, loading, signOut, isStaff, isLeader } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 
@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         { href: '/meeting', label: 'Meeting', icon: Users, staffOnly: false },
     ];
 
-    const filteredNavItems = navItems.filter(item => !item.staffOnly || isStaff);
+    const filteredNavItems = navItems.filter(item => !item.staffOnly || isStaff || isLeader);
 
     return (
         <div className="min-h-screen">

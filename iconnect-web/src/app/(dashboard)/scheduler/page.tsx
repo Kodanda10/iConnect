@@ -10,10 +10,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getConstituentsForDateMMDD, getMonthEventDates } from '@/lib/services/constituents';
+import { getTasksForDate, getMonthTaskDates } from '@/lib/services/tasks';
 import { getUpcomingFestivals, addFestival, deleteFestival, DEFAULT_FESTIVALS } from '@/lib/services/festivals';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock } from '@/lib/services/metrics';
-import { Constituent, Festival, Language } from '@/types';
+import { Task, Festival, Language } from '@/types';
 import GlassCalendar from '@/components/ui/GlassCalendar';
 import ValidatedDateInput from '@/components/ui/ValidatedDateInput';
 import {
@@ -38,7 +38,7 @@ import {
 // --- Types ---
 
 interface EventItem {
-    constituent: Constituent;
+    task: Task;
     type: 'birthday' | 'anniversary';
 }
 
@@ -83,31 +83,20 @@ export default function SchedulerPage() {
     const [calendarEventDates, setCalendarEventDates] = useState<string[]>([]);
     const [loadingCalendarDates, setLoadingCalendarDates] = useState(false);
 
-    const formatMMDD = (date: Date): string => {
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${month}-${day}`;
-    };
-
-
-
     // --- Effects ---
 
-    // Load Daily Events
+    // Load Daily Events from Tasks collection (Unified Data Pipeline)
     useEffect(() => {
         const fetchDailyEvents = async () => {
             setLoadingDaily(true);
             try {
-                const mmdd = formatMMDD(selectedDate);
-                const [birthdays, anniversaries] = await Promise.all([
-                    getConstituentsForDateMMDD(mmdd, 'birthday'),
-                    getConstituentsForDateMMDD(mmdd, 'anniversary'),
-                ]);
-
-                setDailyEvents([
-                    ...birthdays.map(c => ({ constituent: c, type: 'birthday' as const })),
-                    ...anniversaries.map(c => ({ constituent: c, type: 'anniversary' as const })),
-                ]);
+                const tasks = await getTasksForDate(selectedDate);
+                setDailyEvents(
+                    tasks.map(t => ({
+                        task: t,
+                        type: (t.type?.toLowerCase() || 'birthday') as 'birthday' | 'anniversary',
+                    }))
+                );
             } catch (error) {
                 console.error('Failed to fetch daily events:', error);
             } finally {
@@ -117,14 +106,14 @@ export default function SchedulerPage() {
         fetchDailyEvents();
     }, [selectedDate]);
 
-    // Load Calendar Event Dates for the current month
+    // Load Calendar Event Dates for the current month from Tasks collection
     useEffect(() => {
         const fetchCalendarDates = async () => {
             setLoadingCalendarDates(true);
             try {
                 const year = selectedDate.getFullYear();
                 const month = selectedDate.getMonth() + 1; // 1-indexed
-                const dates = await getMonthEventDates(year, month);
+                const dates = await getMonthTaskDates(year, month);
                 setCalendarEventDates(dates);
             } catch (error) {
                 console.error('Failed to fetch calendar event dates:', error);
@@ -133,6 +122,7 @@ export default function SchedulerPage() {
             }
         };
         fetchCalendarDates();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedDate.getMonth(), selectedDate.getFullYear()]);
 
     // Load Festivals
@@ -315,7 +305,7 @@ export default function SchedulerPage() {
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex justify-between items-start">
-                                                <h4 className="font-bold text-white text-sm truncate">{event.constituent.full_name || event.constituent.name}</h4>
+                                                <h4 className="font-bold text-white text-sm truncate">{event.task.constituent_name || 'Unknown'}</h4>
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${event.type === 'birthday' ? 'bg-pink-500/20 text-pink-300' : 'bg-purple-500/20 text-purple-300'
                                                     }`}>
                                                     {event.type === 'birthday' ? 'B-Day' : 'Anniv'}
@@ -323,16 +313,16 @@ export default function SchedulerPage() {
                                             </div>
                                             <div className="flex items-center gap-1.5 mt-1 text-white/80 text-xs font-mono">
                                                 <Phone className="w-3 h-3 text-emerald-400" />
-                                                {event.constituent.phone || event.constituent.mobile_number || 'No number'}
+                                                {event.task.constituent_mobile || 'No number'}
                                             </div>
                                             <div className="flex flex-wrap gap-2 mt-2 text-[10px] text-white/50">
                                                 <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded">
                                                     <MapPin className="w-3 h-3" />
-                                                    Ward {event.constituent.ward_number || event.constituent.ward || 'N/A'}
+                                                    Ward {event.task.ward_number || 'N/A'}
                                                 </span>
-                                                {(event.constituent.block || event.constituent.gp_ulb) && (
+                                                {(event.task.block || event.task.gram_panchayat) && (
                                                     <span className="bg-white/5 px-1.5 py-0.5 rounded">
-                                                        {event.constituent.block || event.constituent.gp_ulb}
+                                                        {event.task.block || event.task.gram_panchayat}
                                                     </span>
                                                 )}
                                             </div>

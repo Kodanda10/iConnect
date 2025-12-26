@@ -6,6 +6,7 @@
 /// @changelog
 /// - 2024-12-18: Original dark theme
 /// - 2025-12-26: Refactored to white theme with green liquid glass splash
+/// - 2025-12-26: Centralized component themes (DatePicker, Dialog, FAB, etc.)
 library;
 
 import 'package:flutter/material.dart';
@@ -78,87 +79,79 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.bgPrimary,
+      primaryColor: AppColors.primary,
+      
+      // Color Scheme
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
         primary: AppColors.primary,
+        onPrimary: Colors.white,
         secondary: AppColors.secondary,
+        onSecondary: Colors.white,
         surface: AppColors.glassSurface,
+        onSurface: AppColors.textPrimary,
         error: AppColors.error,
+        background: AppColors.bgPrimary,
+        onBackground: AppColors.textPrimary,
       ),
+
+      // Text Theme
       textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: GoogleFonts.inter(
-          fontSize: 32,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textPrimary,
-        ),
-        displayMedium: GoogleFonts.inter(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textPrimary,
-        ),
-        headlineLarge: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
-        headlineMedium: GoogleFonts.inter(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        titleMedium: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: AppColors.textSecondary,
-        ),
-        bodySmall: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: AppColors.textMuted,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
+        displayLarge: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+        displayMedium: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+        headlineLarge: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        headlineMedium: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        titleLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        titleMedium: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        bodyLarge: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        bodyMedium: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+        bodySmall: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textMuted),
+        labelLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
       ),
+
+      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
           elevation: 0,
-          textStyle: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
+          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textSecondary,
+          side: const BorderSide(color: AppColors.glassBorder),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      // Floating Action Button Theme
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: CircleBorder(),
+      ),
+
+      // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.bgSecondary,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          borderSide: BorderSide(color: AppColors.glassBorder),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -170,13 +163,16 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
+
+      // Card Theme
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
         color: AppColors.glassSurface,
+        shadowColor: AppColors.cardShadow,
       ),
+
+      // AppBar Theme
       appBarTheme: AppBarTheme(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -186,6 +182,52 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
+      ),
+
+      // Date Picker Theme
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: Colors.white,
+        headerBackgroundColor: AppColors.primary,
+        headerForegroundColor: Colors.white,
+        dayForegroundColor: MaterialStateProperty.all(AppColors.textPrimary),
+        todayBackgroundColor: MaterialStateProperty.all(AppColors.primary.withOpacity(0.1)),
+        todayForegroundColor: MaterialStateProperty.all(AppColors.primary),
+        yearForegroundColor: MaterialStateProperty.all(AppColors.textPrimary),
+        yearBackgroundColor: MaterialStateProperty.all(Colors.white),
+        surfaceTintColor: Colors.transparent,
+      ),
+      
+
+
+      // Bottom Sheet Theme
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        ),
+      ),
+
+      // Chip Theme
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.grey.withOpacity(0.05),
+        disabledColor: Colors.grey.withOpacity(0.02),
+        selectedColor: AppColors.primary.withOpacity(0.1),
+        secondarySelectedColor: AppColors.primary.withOpacity(0.1),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        labelStyle: GoogleFonts.inter(color: AppColors.textPrimary),
+        secondaryLabelStyle: GoogleFonts.inter(color: AppColors.primary, fontWeight: FontWeight.bold),
+        brightness: Brightness.light,
+        shape: RoundedRectangleBorder(
+           borderRadius: BorderRadius.circular(50),
+           side: const BorderSide(color: AppColors.glassBorder),
+        ),
+      ),
+      
+      // Icon Theme
+      iconTheme: const IconThemeData(
+        color: AppColors.textSecondary,
+        size: 24,
       ),
     );
   }
@@ -201,18 +243,27 @@ class AppTheme {
   
   /// Liquid glass card with green splash effect
   static BoxDecoration glassCard({double opacity = 0.1}) => BoxDecoration(
-    color: Colors.white,
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Colors.white,
+        Colors.white,
+        AppColors.primary.withOpacity(0.05),
+      ],
+      stops: const [0.0, 0.6, 1.0],
+    ),
     borderRadius: BorderRadius.circular(AppRadius.xl),
     border: Border.all(color: AppColors.glassBorder, width: 1),
     boxShadow: [
       BoxShadow(
-        color: AppColors.primary.withOpacity(0.08),
+        color: AppColors.primary.withOpacity(0.05),
         blurRadius: 24,
-        offset: const Offset(0, 4),
+        offset: const Offset(0, 8),
       ),
       BoxShadow(
         color: AppColors.cardShadow,
-        blurRadius: 8,
+        blurRadius: 4,
         offset: const Offset(0, 2),
       ),
     ],

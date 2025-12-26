@@ -13,10 +13,11 @@ import '../../../tasks/presentation/bloc/task_bloc.dart';
 import '../../../tasks/presentation/bloc/task_event.dart';
 
 /// @file lib/features/action/presentation/widgets/ai_greeting_sheet.dart
-/// @description AI Greeting Message Wizard with glassmorphism theme
+/// @description AI Greeting Message Wizard with white glassmorphism theme
 /// @changelog
 /// - 2024-12-17: Initial implementation
-/// - 2025-12-18: Upgraded to dark glassmorphism theme to match portal
+/// - 2025-12-18: Upgraded to dark glassmorphism theme (deprecated)
+/// - 2025-12-26: Migrated to White Theme (White/Green Glass)
 
 class AiGreetingSheet extends StatefulWidget {
   final String taskId;
@@ -46,12 +47,6 @@ class _AiGreetingSheetState extends State<AiGreetingSheet> {
   
   final TextEditingController _messageController = TextEditingController();
   bool _hasGenerated = false;
-
-  // Theme colors matching portal
-  static const Color _primaryTeal = Color(0xFF134E4A);
-  static const Color _accentTeal = Color(0xFF00A896);
-  static const Color _darkBg = Color(0xFF0D1117);
-  static const Color _cardBg = Color(0xFF161B22);
 
   @override
   void initState() {
@@ -197,212 +192,9 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
     }
   }
   
-  void _showCompletionDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Dialog(
-        backgroundColor: _cardBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.15)),
-              ),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Outcome for ${widget.constituentName}?',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: Icon(Icons.close, color: Colors.white.withOpacity(0.6)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Action Summary
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _primaryTeal.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _accentTeal.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.person_outline, color: _accentTeal),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Action taken: ${widget.actionType}',
-                                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
-                              ),
-                              Text(
-                                widget.constituentName,
-                                style: const TextStyle(
-                                  color: _accentTeal,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Connected/Sent Button
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF10B981), Color(0xFF059669)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF10B981).withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        // Mark action as sent
-                        context.read<TaskBloc>().add(UpdateActionStatus(
-                          taskId: widget.taskId,
-                          actionType: widget.actionType,
-                        ));
-                        Navigator.pop(ctx);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Action recorded!'),
-                            backgroundColor: _accentTeal,
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.check, color: Colors.white),
-                      label: const Text('Mark as Sent', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // No Answer only for CALL (not SMS/WhatsApp)
-                  if (widget.actionType == 'CALL')
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red[300],
-                              side: BorderSide(color: Colors.red.withOpacity(0.3)),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              Navigator.pop(context);
-                              // Keep pending, no status update
-                            },
-                            child: const Text('No Answer'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white.withOpacity(0.7),
-                              side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              Navigator.pop(context);
-                              // Remind Later - keeps button active, no status update
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Will remind you later'),
-                                  backgroundColor: Colors.orange[700],
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.notifications_active, size: 18),
-                            label: const Text('Remind Later'),
-                          ),
-                        ),
-                      ],
-                    )
-                  else
-                    // For SMS/WhatsApp - only show Remind Later
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white.withOpacity(0.7),
-                        side: BorderSide(color: Colors.white.withOpacity(0.2)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        Navigator.pop(context);
-                        // Remind Later - keeps button active, no status update
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Will remind you later'),
-                            backgroundColor: Colors.orange[700],
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.notifications_active, size: 18),
-                      label: const Text('Remind Later'),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Dark glassmorphism theme matching web portal
+    // White Theme Implementation
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: BackdropFilter(
@@ -415,18 +207,9 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           decoration: BoxDecoration(
-            // Dark gradient background matching portal
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                const Color(0xFF0D3333).withOpacity(0.95),
-                const Color(0xFF0A1A1A).withOpacity(0.98),
-              ],
-            ),
+            color: Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 24, offset: const Offset(0, -4))],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 24, offset: const Offset(0, -4))],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -438,39 +221,26 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.grey.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
               
-              // Header with glassmorphism
+              // Header
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          _accentTeal.withOpacity(0.3),
-                          _accentTeal.withOpacity(0.1),
-                        ],
-                      ),
+                      color: AppColors.secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _accentTeal.withOpacity(0.3)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _accentTeal.withOpacity(0.2),
-                          blurRadius: 12,
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.secondary.withOpacity(0.2)),
                     ),
                     child: Icon(
                       widget.actionType == 'WHATSAPP' ? Icons.chat_bubble : Icons.message,
-                      color: _accentTeal,
+                      color: AppColors.secondary,
                       size: 24,
                     ),
                   ),
@@ -482,7 +252,7 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                         Text(
                           '${widget.type == "BIRTHDAY" ? "Birthday" : "Anniversary"} Greetings',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                             letterSpacing: 0.5,
@@ -491,7 +261,7 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                         const SizedBox(height: 4),
                         Text(
                           'For ${widget.constituentName}',
-                          style: TextStyle(color: _accentTeal.withOpacity(0.8), fontSize: 14),
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                         ),
                       ],
                     ),
@@ -500,7 +270,7 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
               ),
               const SizedBox(height: 24),
               
-              // Language Toggle Only
+              // Language Toggle
               _buildDropdown(
                 value: _language,
                 items: _languages,
@@ -516,13 +286,11 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
               if (!_hasGenerated)
                 Container(
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [_primaryTeal, Color(0xFF0D3D3D)],
-                    ),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: _primaryTeal.withOpacity(0.3),
+                        color: AppColors.primary.withOpacity(0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -560,11 +328,11 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                       child: Center(
                         child: Column(
                           children: [
-                            const CircularProgressIndicator(color: _accentTeal),
+                            const CircularProgressIndicator(color: AppColors.primary),
                             const SizedBox(height: 16),
                             Text(
                               'Crafting personalized message...',
-                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                              style: TextStyle(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -580,18 +348,18 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                           margin: const EdgeInsets.only(top: 16),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
+                            color: Colors.grey.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withOpacity(0.1)),
+                            border: Border.all(color: AppColors.glassBorder),
                           ),
                           child: TextField(
                             controller: _messageController,
                             maxLines: 5,
-                            style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5),
+                            style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.5),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: 'Message will appear here...',
-                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                              hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
                             ),
                           ),
                         ),
@@ -600,7 +368,7 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                           children: [
                             IconButton(
                               onPressed: _generate, 
-                              icon: Icon(Icons.refresh, color: _accentTeal),
+                              icon: Icon(Icons.refresh, color: AppColors.primary),
                               tooltip: 'Regenerate',
                             ),
                             const Spacer(),
@@ -610,11 +378,11 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                                  ScaffoldMessenger.of(context).showSnackBar(
                                    SnackBar(
                                      content: const Text('Copied!'),
-                                     backgroundColor: _accentTeal,
+                                     backgroundColor: AppColors.primary,
                                    ),
                                  );
                               },
-                              icon: Icon(Icons.copy, color: Colors.white.withOpacity(0.6)),
+                              icon: Icon(Icons.copy, color: AppColors.textSecondary),
                               tooltip: 'Copy',
                             ),
                           ],
@@ -622,11 +390,9 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
                         const SizedBox(height: 16),
                         Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: widget.actionType == 'WHATSAPP' 
-                                  ? [const Color(0xFF25D366), const Color(0xFF128C7E)]
-                                  : [Colors.blue.shade600, Colors.blue.shade800],
-                            ),
+                            color: widget.actionType == 'WHATSAPP' 
+                                ? const Color(0xFF25D366)
+                                : Colors.blue.shade600,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -681,16 +447,16 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.grey.withOpacity(0.05),
         borderRadius: BorderRadius.circular(50),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: AppColors.glassBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          icon: Icon(icon, color: _accentTeal, size: 18),
-          dropdownColor: _cardBg,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+          icon: Icon(icon, color: AppColors.textSecondary, size: 18),
+          dropdownColor: Colors.white,
+          style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14),
           items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           onChanged: onChanged,
         ),
