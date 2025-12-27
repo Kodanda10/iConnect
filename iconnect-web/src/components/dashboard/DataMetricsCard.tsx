@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-12-18: Bolt Optimization - Memoized BlockItem and stabilized callbacks to prevent list re-renders
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -20,6 +21,10 @@ export default function DataMetricsCard() {
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
+
+    // Bolt Optimization: Use refs to track loading/loaded state to avoid dependencies in useCallback
+    const loadingBlocksRef = useRef<Set<string>>(new Set());
+    const loadedBlocksRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
         loadMetrics();
@@ -39,25 +44,40 @@ export default function DataMetricsCard() {
         }
     };
 
-    // Lazy load GP data on hover
+    // Lazy load GP data on hover - Stabilized for performance
     const loadGPData = useCallback(async (blockName: string) => {
-        if (gpData[blockName] || gpLoading[blockName]) return;
+        // Check refs instead of state to avoid dependency chain
+        if (loadedBlocksRef.current.has(blockName) || loadingBlocksRef.current.has(blockName)) return;
 
+        loadingBlocksRef.current.add(blockName);
         setGpLoading(prev => ({ ...prev, [blockName]: true }));
+
         try {
             const gps = await fetchGPMetricsForBlock(blockName);
             setGpData(prev => ({ ...prev, [blockName]: gps }));
+            loadedBlocksRef.current.add(blockName);
         } catch (err) {
             console.error('Error loading GP data:', err);
+            loadingBlocksRef.current.delete(blockName); // Allow retry on error
         } finally {
             setGpLoading(prev => ({ ...prev, [blockName]: false }));
+            // We don't remove from loadingBlocksRef here if success to prevent race conditions,
+            // but actually we rely on loadedBlocksRef for success check.
+            // If we remove it from loadingBlocksRef, and it's in loadedBlocksRef, we are good.
+            loadingBlocksRef.current.delete(blockName);
         }
-    }, [gpData, gpLoading]);
+    }, []); // Empty dependency array = stable reference
 
-    const handleBlockHover = (blockName: string) => {
+    // Stable callback for hover
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    // Stable callback for leave
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +238,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onHover={handleBlockHover}
+                            onLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,12 +252,18 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onHover: (name: string) => void;
+    onLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+// Bolt Optimization: React.memo to prevent re-renders of non-hovered items
+const BlockItem = memo(({ block, total, isHovered, onHover, onLeave }: BlockItemProps) => {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
+
+    // Create stable handler that calls the passed stable callback
+    const handleMouseEnter = useCallback(() => {
+        onHover(block.name);
+    }, [onHover, block.name]);
 
     return (
         <div
@@ -249,8 +275,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={onLeave}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +306,9 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
+
+BlockItem.displayName = 'BlockItem';
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -339,5 +367,3 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
         </div>
     );
 }
-
-
