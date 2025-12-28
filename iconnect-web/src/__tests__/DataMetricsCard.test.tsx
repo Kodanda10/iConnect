@@ -148,4 +148,34 @@ describe('DataMetricsCard Component', () => {
             expect(screen.getByText(/error/i)).toBeInTheDocument();
         });
     });
+
+    it('supports keyboard navigation for block breakdown', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus Block A (simulating Tab key)
+        const blockBtn = screen.getByTestId('block-Block A');
+        blockBtn.focus();
+
+        // Assert - GP details should appear on focus
+        await waitFor(() => {
+            expect(screen.getByText('GP1')).toBeInTheDocument();
+        });
+
+        // Blur Block A (simulating Tab away)
+        blockBtn.blur();
+
+        // Assert - GP details should hide on blur
+        await waitFor(() => {
+            expect(screen.queryByText('GP1')).not.toBeInTheDocument();
+        });
+    });
 });
