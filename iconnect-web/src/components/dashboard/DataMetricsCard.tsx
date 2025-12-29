@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2024-05-20: Performance optimization - Memoized BlockItem and stable handlers to reduce re-renders
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -20,6 +21,12 @@ export default function DataMetricsCard() {
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
+
+    // Ref to track loaded/loading states to avoid dependency on state in useCallback
+    const gpCacheRef = useRef<{ loaded: Set<string>; loading: Set<string> }>({
+        loaded: new Set(),
+        loading: new Set(),
+    });
 
     useEffect(() => {
         loadMetrics();
@@ -39,25 +46,35 @@ export default function DataMetricsCard() {
         }
     };
 
-    // Lazy load GP data on hover
+    // Lazy load GP data on hover - Stable function
     const loadGPData = useCallback(async (blockName: string) => {
-        if (gpData[blockName] || gpLoading[blockName]) return;
+        if (gpCacheRef.current.loaded.has(blockName) || gpCacheRef.current.loading.has(blockName)) return;
 
+        gpCacheRef.current.loading.add(blockName);
         setGpLoading(prev => ({ ...prev, [blockName]: true }));
+
         try {
             const gps = await fetchGPMetricsForBlock(blockName);
             setGpData(prev => ({ ...prev, [blockName]: gps }));
+            gpCacheRef.current.loaded.add(blockName);
         } catch (err) {
             console.error('Error loading GP data:', err);
         } finally {
+            gpCacheRef.current.loading.delete(blockName);
             setGpLoading(prev => ({ ...prev, [blockName]: false }));
         }
-    }, [gpData, gpLoading]);
+    }, []);
 
-    const handleBlockHover = (blockName: string) => {
+    // Stable callback for hover
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    // Stable callback for leave
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +235,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onHover={handleBlockHover}
+                            onLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +249,11 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onHover: (blockName: string) => void;
+    onLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = React.memo(({ block, total, isHovered, onHover, onLeave }: BlockItemProps) => {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,8 +266,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={() => onHover(block.name)}
+            onMouseLeave={onLeave}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +297,9 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
+
+BlockItem.displayName = 'BlockItem';
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -339,5 +358,3 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
         </div>
     );
 }
-
-
