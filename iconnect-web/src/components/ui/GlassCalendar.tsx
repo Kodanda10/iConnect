@@ -102,6 +102,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -118,13 +119,16 @@ export default function GlassCalendar({
                                 setShowYearDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-haspopup="listbox"
+                            aria-expanded={showMonthDropdown}
+                            aria-label={`Select month, current month is ${monthNames[viewDate.getMonth()]}`}
                         >
                             {monthNamesShort[viewDate.getMonth()]}
                             <ChevronDown className="w-3 h-3 text-white/50" />
                         </button>
 
                         {showMonthDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 grid grid-cols-3 gap-1 w-40">
+                            <div className="absolute top-full left-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 grid grid-cols-3 gap-1 w-40" role="listbox">
                                 {monthNamesShort.map((month, index) => (
                                     <button
                                         key={month}
@@ -151,13 +155,16 @@ export default function GlassCalendar({
                                 setShowMonthDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-haspopup="listbox"
+                            aria-expanded={showYearDropdown}
+                            aria-label={`Select year, current year is ${viewDate.getFullYear()}`}
                         >
                             {viewDate.getFullYear()}
                             <ChevronDown className="w-3 h-3 text-white/50" />
                         </button>
 
                         {showYearDropdown && (
-                            <div className="absolute top-full right-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto w-24 scrollbar-thin scrollbar-thumb-white/20">
+                            <div className="absolute top-full right-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto w-24 scrollbar-thin scrollbar-thumb-white/20" role="listbox">
                                 {years.map(year => (
                                     <button
                                         key={year}
@@ -178,6 +185,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -193,7 +201,11 @@ export default function GlassCalendar({
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-7 border-l border-white/5 relative bg-black/20 rounded-lg overflow-hidden">
+            <div
+                className="grid grid-cols-7 border-l border-white/5 relative bg-black/20 rounded-lg overflow-hidden"
+                role="radiogroup"
+                aria-label="Calendar days"
+            >
                 {Array.from({ length: firstDayOfMonth }, (_, i) => (
                     <div key={`empty-${i}`} className="aspect-square border-r border-b border-white/5" />
                 ))}
@@ -209,7 +221,11 @@ export default function GlassCalendar({
                     return (
                         <button
                             key={day}
+                            role="radio"
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            aria-label={`${date.toLocaleDateString(undefined, { dateStyle: 'full' })}${hasEvent ? ', has events' : ''}`}
+                            aria-checked={isSelectedDay}
+                            aria-current={isTodayDay ? 'date' : undefined}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
                                 border-r border-b border-white/5
