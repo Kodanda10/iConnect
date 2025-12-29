@@ -33,33 +33,29 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendPushNotification = sendPushNotification;
-exports.sendSMS = sendSMS;
 const admin = __importStar(require("firebase-admin"));
-const security_1 = require("./utils/security");
-async function sendPushNotification(token, title, body) {
-    try {
-        const message = {
-            notification: {
-                title,
-                body
-            },
-            token
-        };
-        const response = await admin.messaging().send(message);
-        return response;
-    }
-    catch (error) {
-        console.error('Error sending push notification:', error);
-        throw error;
-    }
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+        projectId: 'iconnect-crm',
+    });
 }
-async function sendSMS(mobile, message) {
-    // MOCK IMPLEMENTATION for Initial Rollout
-    // In production, integrate with Twilio / msg91
-    console.log(`[SMS MOCK] To: ${(0, security_1.redactMobile)(mobile)} | Message: ${(0, security_1.redactMessage)(message)}`);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return true;
+const db = admin.firestore();
+const fs = __importStar(require("fs"));
+async function checkData() {
+    let output = 'Checking database state for iconnect-crm...\n';
+    const constituentsSnap = await db.collection('constituents').get();
+    output += `Constituents Count: ${constituentsSnap.size}\n`;
+    if (constituentsSnap.size > 0) {
+        output += 'First 3 Constituents:\n';
+        constituentsSnap.docs.slice(0, 3).forEach(doc => {
+            output += `${doc.id} - ${doc.data().name}\n`;
+        });
+    }
+    const tasksSnap = await db.collection('tasks').get();
+    output += `Tasks Count: ${tasksSnap.size}\n`;
+    fs.writeFileSync('count.txt', output);
+    console.log('Written to count.txt');
 }
-//# sourceMappingURL=messaging.js.map
+checkData().catch(console.error);
+//# sourceMappingURL=check_data.js.map

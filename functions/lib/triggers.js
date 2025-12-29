@@ -39,6 +39,7 @@ const firestore_1 = require("firebase-functions/v2/firestore");
 const admin = __importStar(require("firebase-admin"));
 const notifications_1 = require("./notifications");
 const messaging_1 = require("./messaging");
+const security_1 = require("./utils/security");
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
     admin.initializeApp();
@@ -147,7 +148,7 @@ async function handleMeetingCreated(meetingData) {
     const fcmToken = meetingData.fcm_token;
     if (fcmToken) {
         await (0, messaging_1.sendPushNotification)(fcmToken, 'Meeting Scheduled', `You scheduled "${meetingData.title}" for ${scheduledTime.toLocaleString('en-IN')}`);
-        console.log(`[TRIGGER] Sent confirmation push to ${fcmToken} `);
+        console.log(`[TRIGGER] Sent confirmation push to ${(0, security_1.redactToken)(fcmToken)} `);
     }
     else {
         console.log('[TRIGGER] No FCM token found for creator, skipping confirmation push');
