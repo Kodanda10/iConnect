@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-05-20: Performance optimization - Memoized BlockItem and stable handlers to prevent list re-renders
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -54,10 +55,16 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    // Stable handler for block hover
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    // Stable handler for block leave
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +225,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockHover}
+                            onMouseLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +239,11 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
+    onMouseEnter: (name: string) => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,7 +256,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
+            onMouseEnter={() => onMouseEnter(block.name)}
             onMouseLeave={onMouseLeave}
         >
             {/* Progress bar background */}
@@ -280,7 +287,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -339,5 +346,3 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
         </div>
     );
 }
-
-
