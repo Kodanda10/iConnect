@@ -128,6 +128,7 @@ class FirestoreTaskRepository implements TaskRepository {
         'CALL': 'call_sent',
         'SMS': 'sms_sent',
         'WHATSAPP': 'whatsapp_sent',
+        'WHATSAPP_CALL': 'whatsapp_call_sent',
       };
       
       final fieldName = fieldMap[actionType.toUpperCase()];
@@ -176,6 +177,7 @@ class FirestoreTaskRepository implements TaskRepository {
       case 'CALL': return 'Called';
       case 'SMS': return 'SMS Sent';
       case 'WHATSAPP': return 'WhatsApp Sent';
+      case 'WHATSAPP_CALL': return 'WhatsApp Called';
       default: return 'Action Completed';
     }
   }
@@ -229,6 +231,7 @@ class FirestoreTaskRepository implements TaskRepository {
             callSent: task.callSent,
             smsSent: task.smsSent,
             whatsappSent: task.whatsappSent,
+            whatsappCallSent: task.whatsappCallSent,
         );
       });
       

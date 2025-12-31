@@ -12,6 +12,7 @@ class TaskModel extends Task {
     super.callSent = false,
     super.smsSent = false,
     super.whatsappSent = false,
+    super.whatsappCallSent = false,
   });
 
   /// Parse Firestore document to TaskModel
@@ -39,6 +40,7 @@ class TaskModel extends Task {
     final callSent = data['call_sent'] ?? data['callSent'] ?? false;
     final smsSent = data['sms_sent'] ?? data['smsSent'] ?? false;
     final whatsappSent = data['whatsapp_sent'] ?? data['whatsappSent'] ?? false;
+    final whatsappCallSent = data['whatsapp_call_sent'] ?? data['whatsappCallSent'] ?? false;
     
     return TaskModel(
       id: doc.id,
@@ -50,6 +52,7 @@ class TaskModel extends Task {
       callSent: callSent,
       smsSent: smsSent,
       whatsappSent: whatsappSent,
+      whatsappCallSent: whatsappCallSent,
     );
   }
 
@@ -64,6 +67,7 @@ class TaskModel extends Task {
       'call_sent': callSent,
       'sms_sent': smsSent,
       'whatsapp_sent': whatsappSent,
+      'whatsapp_call_sent': whatsappCallSent,
     };
   }
 }

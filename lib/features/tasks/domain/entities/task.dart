@@ -12,6 +12,7 @@ class Task extends Equatable {
   final bool callSent;
   final bool smsSent;
   final bool whatsappSent;
+  final bool whatsappCallSent; // WhatsApp voice call (distinct from message)
 
   const Task({
     required this.id,
@@ -23,10 +24,11 @@ class Task extends Equatable {
     this.callSent = false,
     this.smsSent = false,
     this.whatsappSent = false,
+    this.whatsappCallSent = false,
   });
 
   @override
-  List<Object?> get props => [id, constituentId, type, status, dueDate, createdAt, callSent, smsSent, whatsappSent];
+  List<Object?> get props => [id, constituentId, type, status, dueDate, createdAt, callSent, smsSent, whatsappSent, whatsappCallSent];
 }
 
 class EnrichedTask extends Task {
@@ -51,6 +53,7 @@ class EnrichedTask extends Task {
     super.callSent = false,
     super.smsSent = false,
     super.whatsappSent = false,
+    super.whatsappCallSent = false,
   });
 
   @override

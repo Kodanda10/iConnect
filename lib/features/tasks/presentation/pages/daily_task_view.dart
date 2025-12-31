@@ -15,6 +15,7 @@ import '../bloc/task_bloc.dart';
 import '../bloc/task_event.dart';
 import '../bloc/task_state.dart';
 import '../widgets/shimmer_task_card.dart';
+import '../widgets/call_options_sheet.dart';
 import '../../../action/presentation/widgets/ai_greeting_sheet.dart';
 
 /// Daily Task View - Shows tasks for a specific selected date
@@ -307,10 +308,7 @@ class _DailyTaskViewState extends State<DailyTaskView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildVerticalActionButton(
-                          Icons.call, "Call", const Color(0xFF00A896), 
-                          task.callSent, () => _launchPhone(task)
-                        ),
+                        _buildCallButton(task),
                         _buildVerticalActionButton(
                           Icons.message, "SMS", Colors.purpleAccent, 
                           task.smsSent, () => _openAiWizard(task, 'SMS')
@@ -335,7 +333,8 @@ class _DailyTaskViewState extends State<DailyTaskView> {
     IconData icon, String label, Color color, bool isCompleted, VoidCallback onTap
   ) {
     final effectiveColor = isCompleted ? Colors.grey[400]! : color;
-    final effectiveTextColor = isCompleted ? Colors.grey[500]! : Colors.white.withOpacity(0.7);
+    // Fix: Text was white on white. Changed to textSecondary (Dark Grey) for visibility when active.
+    final effectiveTextColor = isCompleted ? Colors.grey[500]! : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: isCompleted ? null : () {
@@ -391,13 +390,59 @@ class _DailyTaskViewState extends State<DailyTaskView> {
     );
   }
 
-  Future<void> _launchPhone(EnrichedTask task) async {
-    final number = task.mobile;
-    if (number.isNotEmpty) {
-      final Uri launchUri = Uri(scheme: 'tel', path: number);
-      if (await canLaunchUrl(launchUri)) {
-        await launchUrl(launchUri);
-      }
-    }
+  /// Build the Call button with onTapDown for positioned popover
+  Widget _buildCallButton(EnrichedTask task) {
+    final isCompleted = task.callSent;
+    final color = const Color(0xFF00A896);
+    final effectiveColor = isCompleted ? Colors.grey[400]! : color;
+    final effectiveTextColor = isCompleted ? Colors.grey[500]! : AppColors.textSecondary;
+
+    return GestureDetector(
+      onTapDown: isCompleted ? null : (details) {
+        if (task.mobile.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No phone number available')),
+          );
+          return;
+        }
+        HapticFeedback.lightImpact();
+        CallOptionsPopover.show(
+          context,
+          details,
+          phoneNumber: task.mobile,
+          constituentName: task.name,
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 50, height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: effectiveColor.withOpacity(0.15),
+              border: Border.all(color: effectiveColor.withOpacity(0.3), width: 1.5),
+              boxShadow: isCompleted ? [] : [
+                BoxShadow(
+                  color: effectiveColor.withOpacity(0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(Icons.call, color: effectiveColor, size: 22),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Call',
+            style: TextStyle(
+              color: effectiveTextColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

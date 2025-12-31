@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:iconnect_mobile/features/report/domain/entities/action_log.dart';
 import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -193,10 +194,10 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
                     left: 0,
                     right: 0,
                     child: Center(
-                      child: Container(
-                        width: 2,
-                        color: AppColors.textSecondary,
-                      ),
+                        child: CustomPaint(
+                          size: const Size(1, double.infinity),
+                          painter: DottedLinePainter(color: AppColors.textSecondary.withOpacity(0.5)),
+                        ),
                     ),
                   ),
                 Container(
@@ -285,7 +286,7 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
       case ActionType.sms:
         return Icons.message;
       case ActionType.whatsapp:
-        return Icons.chat_bubble;
+        return FontAwesomeIcons.whatsapp;
     }
   }
 
@@ -310,4 +311,33 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
         return 'WhatsApp Sent';
     }
   }
+}
+
+class DottedLinePainter extends CustomPainter {
+  final Color color;
+  const DottedLinePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    const double dashHeight = 4;
+    const double dashSpace = 4;
+    double startY = 0;
+
+    while (startY < size.height) {
+      canvas.drawLine(
+        Offset(0, startY),
+        Offset(0, startY + dashHeight),
+        paint,
+      );
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -18,6 +18,7 @@ import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_bloc.dart'
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_state.dart';
 import 'package:iconnect_mobile/features/tasks/presentation/bloc/task_event.dart';
 import 'package:iconnect_mobile/features/action/presentation/widgets/ai_greeting_sheet.dart';
+import 'package:iconnect_mobile/features/tasks/presentation/widgets/call_options_sheet.dart';
 import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:iconnect_mobile/features/settings/presentation/cubit/settings_state.dart';
 import 'package:iconnect_mobile/features/settings/domain/entities/app_settings.dart';
@@ -144,12 +145,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Row(
                   children: [
                     Icon(
-                      actionType == 'CALL' ? Icons.phone_callback : Icons.message, 
-                      color: Colors.grey
+                      actionType == 'WHATSAPP_CALL' 
+                          ? FontAwesomeIcons.whatsapp 
+                          : actionType == 'CALL' 
+                              ? Icons.phone_callback 
+                              : Icons.message, 
+                      color: actionType == 'WHATSAPP_CALL' 
+                          ? const Color(0xFF25D366) 
+                          : Colors.grey,
+                      size: 20,
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Action taken: $actionType',
+                      actionType == 'WHATSAPP_CALL' 
+                          ? 'WhatsApp Call' 
+                          : actionType == 'CALL' 
+                              ? 'Mobile Call' 
+                              : actionType,
                       style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                     ),
                   ],
@@ -1590,7 +1602,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildVerticalActionButton(Icons.call, "Call", const Color(0xFF00A896), task.callSent, () => _launchPhone(task)),
+                _buildCallButton(task),
                 _buildVerticalActionButton(Icons.message, "SMS", Colors.purpleAccent, task.smsSent, () => _openAiWizard(task, 'SMS')),
                 _buildVerticalActionButton(FontAwesomeIcons.whatsapp, "WhatsApp", const Color(0xFF25D366), task.whatsappSent, () => _openAiWizard(task, 'WHATSAPP')),
               ],
@@ -1825,6 +1837,70 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     
     // Trigger Refresh
     context.read<TaskBloc>().add(LoadPendingTasks());
+  }
+
+  /// Build the Call button with onTapDown for positioned popover
+  Widget _buildCallButton(EnrichedTask task) {
+    final isCompleted = task.callSent;
+    final color = const Color(0xFF00A896);
+    final effectiveColor = isCompleted ? Colors.grey[400]! : color;
+    final effectiveTextColor = isCompleted ? Colors.grey[500]! : Colors.white.withOpacity(0.7);
+
+    return GestureDetector(
+      onTapDown: isCompleted ? null : (details) {
+        if (task.mobile.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No phone number available')),
+          );
+          return;
+        }
+        HapticFeedback.lightImpact();
+        CallOptionsPopover.show(
+          context,
+          details,
+          phoneNumber: task.mobile,
+          constituentName: task.name,
+          onCallComplete: (actionType) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                _showActionOutcomeDialog(task, actionType);
+              }
+            });
+          },
+        );
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: effectiveColor.withOpacity(0.15),
+              border: Border.all(color: effectiveColor.withOpacity(0.3), width: 1.5),
+              boxShadow: isCompleted ? [] : [
+                BoxShadow(
+                  color: effectiveColor.withOpacity(0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(Icons.call, color: effectiveColor, size: 22),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Call',
+            style: TextStyle(
+              color: effectiveTextColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _launchPhone(dynamic target) async {
