@@ -54,7 +54,9 @@ class MockProvider implements MessagingProvider {
     name = 'MockProvider';
 
     async sendSMS(mobile: string, message: string): Promise<SMSResult> {
-        console.log(`[MOCK SMS] To: ${mobile} | Message: ${message}`);
+        // Redact PII in logs
+        const { redactMobile, redactMessage } = require('./utils/security');
+        console.log(`[MOCK SMS] To: ${redactMobile(mobile)} | Message: ${redactMessage(message)}`);
         return {
             success: true,
             messageId: `mock-${Date.now()}`,
@@ -63,7 +65,10 @@ class MockProvider implements MessagingProvider {
     }
 
     async sendWhatsApp(mobile: string, template: string, params: Record<string, string>): Promise<SMSResult> {
-        console.log(`[MOCK WhatsApp] To: ${mobile} | Template: ${template} | Params: ${JSON.stringify(params)}`);
+        // Redact PII in logs
+        const { redactMobile } = require('./utils/security');
+        // Do not log params as they might contain PII
+        console.log(`[MOCK WhatsApp] To: ${redactMobile(mobile)} | Template: ${template} | Params: [REDACTED]`);
         return {
             success: true,
             messageId: `mock-wa-${Date.now()}`,

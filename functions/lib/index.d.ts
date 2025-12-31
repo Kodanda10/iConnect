@@ -6,7 +6,7 @@
  * - 2024-12-15: Optimized dailyScan to use indexed queries (O(1) vs O(N))
  */
 import { GreetingRequest } from './greeting';
-export { scanForTasks, Constituent, Task, TaskType, ScanResult } from './dailyScan';
+export { scanForTasks, Constituent, Task, TaskType, ScanResult, scheduleDailyNotifications } from './dailyScan';
 export { generateGreetingMessage, GreetingRequest } from './greeting';
 export { createMeetingTicker, createConferenceBridge } from "./meeting";
 export { onMeetingCreated, onConstituentWritten } from "./triggers";
@@ -14,6 +14,7 @@ export { processPushNotifications } from "./pushProcessor";
 export { createMessagingProvider, MessagingProvider, SMSResult } from "./messagingProvider";
 export { queryConstituentsByAudience, sendBulkSMS } from "./audienceQuery";
 export { schedulePushForLeader, determinePushTimes, formatAudioMessage } from "./notifications";
+export { syncRoleToClaims, setUserRole, getUserClaims } from "./auth";
 /**
  * Generate greeting message via Gemini API proxy
  * Callable function to secure API key on server side

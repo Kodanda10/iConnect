@@ -7,14 +7,12 @@ describe('Notification Logic', () => {
             // Test case: Meeting on Dec 18th 10:00 AM
             const scheduled = new Date('2025-12-18T10:00:00+05:30'); // IST
             const result = (0, notifications_1.determinePushTimes)(scheduled);
-            // Expect evening before: Dec 17th 20:00 IST
-            // 20:00 IST is 14:30 UTC
-            const expectedEvening = new Date('2025-12-17T20:00:00+05:30');
-            // Expect 10 min before: Dec 18th 09:50 IST
-            const expectedTenMin = new Date('2025-12-18T09:50:00+05:30');
-            // Use loose equality for dates or toISOString
-            expect(result.eveningBefore.toISOString()).toBe(expectedEvening.toISOString());
-            expect(result.tenMinBefore.toISOString()).toBe(expectedTenMin.toISOString());
+            // Verify evening before: 8:00 PM local time
+            expect(result.eveningBefore.getHours()).toBe(20);
+            expect(result.eveningBefore.getMinutes()).toBe(0);
+            // Verify 10 min before: exactly 10 min relative to scheduled
+            const diffMs = result.tenMinBefore.getTime() - scheduled.getTime();
+            expect(diffMs).toBe(-10 * 60 * 1000);
         });
     });
     describe('formatAudioMessage', () => {

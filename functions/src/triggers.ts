@@ -120,7 +120,8 @@ export async function handleMeetingCreated(meetingData: any) {
             'Meeting Scheduled',
             `You scheduled "${meetingData.title}" for ${scheduledTime.toLocaleString('en-IN')}`
         );
-        console.log(`[TRIGGER] Sent confirmation push to ${fcmToken} `);
+        const { redactToken } = require('./utils/security');
+        console.log(`[TRIGGER] Sent confirmation push to ${redactToken(fcmToken)} `);
     } else {
         console.log('[TRIGGER] No FCM token found for creator, skipping confirmation push');
     }

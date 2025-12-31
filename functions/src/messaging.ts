@@ -21,7 +21,8 @@ export async function sendPushNotification(token: string, title: string, body: s
 export async function sendSMS(mobile: string, message: string): Promise<boolean> {
     // MOCK IMPLEMENTATION for Initial Rollout
     // In production, integrate with Twilio / msg91
-    console.log(`[SMS MOCK] To: ${mobile} | Message: ${message}`);
+    const { redactMobile, redactMessage } = require('./utils/security');
+    console.log(`[SMS MOCK] To: ${redactMobile(mobile)} | Message: ${redactMessage(message)}`);
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 100));
