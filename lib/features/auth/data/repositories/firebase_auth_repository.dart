@@ -48,9 +48,34 @@ class FirebaseAuthRepository implements AuthRepository {
         role: role,
       ));
     } on FirebaseAuthException catch (e) {
-      return Left(AuthFailure(e.message ?? 'Authentication failed'));
+      return Left(AuthFailure(_mapFirebaseError(e.code)));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(AuthFailure(_mapFirebaseError(e.toString())));
+    }
+  }
+
+  /// Maps Firebase auth error codes to user-friendly messages
+  String _mapFirebaseError(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return 'No account found with this email. Please check your email or sign up.';
+      case 'wrong-password':
+        return 'Incorrect password. Please try again.';
+      case 'invalid-email':
+        return 'Please enter a valid email address.';
+      case 'user-disabled':
+        return 'This account has been disabled. Contact support.';
+      case 'too-many-requests':
+        return 'Too many login attempts. Please try again later.';
+      case 'network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      case 'invalid-credential':
+        return 'Invalid email or password. Please try again.';
+      default:
+        if (code.contains('invalid-credential') || code.contains('INVALID_LOGIN_CREDENTIALS')) {
+          return 'Invalid email or password. Please try again.';
+        }
+        return 'Login failed. Please check your credentials and try again.';
     }
   }
 
