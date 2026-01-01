@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         { href: '/settings', label: 'Dashboard', icon: Database, staffOnly: false },
         { href: '/upload', label: 'Data Entry', icon: Upload, staffOnly: true },
         { href: '/scheduler', label: 'Scheduler', icon: Calendar, staffOnly: false },
-        { href: '/meeting', label: 'Meeting', icon: Users, staffOnly: false },
+        // { href: '/meeting', label: 'Meeting', icon: Users, staffOnly: false },
     ];
 
     const filteredNavItems = navItems.filter(item => !item.staffOnly || isStaff || isLeader);

@@ -287,6 +287,8 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
         return Icons.message;
       case ActionType.whatsapp:
         return FontAwesomeIcons.whatsapp;
+      case ActionType.whatsappCall:
+        return FontAwesomeIcons.whatsapp;
     }
   }
 
@@ -298,6 +300,9 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
         return Colors.purpleAccent;
       case ActionType.whatsapp:
         return Colors.teal;
+      case ActionType.whatsappCall:
+        // Use a slightly different shade or same as whatsapp
+        return const Color(0xFF25D366); 
     }
   }
 
@@ -309,6 +314,8 @@ class _ActionTimelineCardState extends State<ActionTimelineCard>
         return 'SMS Sent';
       case ActionType.whatsapp:
         return 'WhatsApp Sent';
+      case ActionType.whatsappCall:
+        return 'WhatsApp Called';
     }
   }
 }

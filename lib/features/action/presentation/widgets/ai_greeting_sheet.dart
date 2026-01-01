@@ -167,16 +167,24 @@ May your married life be filled with happiness, peace and prosperity.${leaderSig
     // 1. Launch App
     if (widget.actionType == 'WHATSAPP') {
       final cleanNumber = widget.mobile.replaceAll(RegExp(r'\D'), '');
-      final uri = Uri.parse('whatsapp://send?phone=$cleanNumber&text=${Uri.encodeComponent(fullMessage)}');
+      final nativeUri = Uri.parse('whatsapp://send?phone=$cleanNumber&text=${Uri.encodeComponent(fullMessage)}');
       
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('WhatsApp not installed')),
-           );
-         }
+      // Try Native Launch
+      bool launched = await launchUrl(nativeUri, mode: LaunchMode.externalApplication);
+      
+      if (!launched) {
+        // Fallback to Web
+        final webUri = Uri.parse('https://wa.me/$cleanNumber?text=${Uri.encodeComponent(fullMessage)}');
+        launched = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+      
+      if (!launched) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not open WhatsApp')),
+            );
+          }
+          return; // Do not pop
       }
     } else {
       final cleanNumber = widget.mobile.replaceAll(RegExp(r'\D'), '');

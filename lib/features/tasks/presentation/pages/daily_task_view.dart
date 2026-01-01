@@ -392,7 +392,8 @@ class _DailyTaskViewState extends State<DailyTaskView> {
 
   /// Build the Call button with onTapDown for positioned popover
   Widget _buildCallButton(EnrichedTask task) {
-    final isCompleted = task.callSent;
+    // Grey out if ANY call (Cellular or WhatsApp) was made
+    final isCompleted = task.callSent || task.whatsappCallSent;
     final color = const Color(0xFF00A896);
     final effectiveColor = isCompleted ? Colors.grey[400]! : color;
     final effectiveTextColor = isCompleted ? Colors.grey[500]! : AppColors.textSecondary;
@@ -411,6 +412,11 @@ class _DailyTaskViewState extends State<DailyTaskView> {
           details,
           phoneNumber: task.mobile,
           constituentName: task.name,
+          onCallComplete: (actionType) {
+            context.read<TaskBloc>().add(
+              UpdateActionStatus(taskId: task.id, actionType: actionType)
+            );
+          },
         );
       },
       child: Column(

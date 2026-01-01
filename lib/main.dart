@@ -34,23 +34,43 @@ import 'features/home/presentation/pages/home_page.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
+  debugPrint('🚀 [STARTUP] Starting main()...');
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('🚀 [STARTUP] WidgetsFlutterBinding initialized');
   
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase (Try-Catch)
+  try {
+    if (Firebase.apps.isEmpty) {
+      debugPrint('🚀 [STARTUP] Initializing Firebase...');
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('🚀 [STARTUP] Firebase initialized');
+    } else {
+      debugPrint('🚀 [STARTUP] Firebase already initialized');
+    }
+  } catch (e) {
+    // Ignore duplicate app error if native layer initialized it first
+    if (e.toString().contains('duplicate-app')) {
+      debugPrint('🚀 [STARTUP] Firebase already initialized (Native Race Condition caught)');
+    } else {
+      rethrow;
+    }
+  }
   
   // Register background message handler (must be before FCM init)
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   
-  // Initialize FCM for push notifications
-  await FCMService().initialize();
-
-  // Initialize Dependency Injection
-  await di.init();
+  // FCM Service (Async)
+  // debugPrint('🚀 [STARTUP] Starting FCM init (async)...');
+  // FCMService().initialize();
   
-  // Set system UI overlay style
+  // DI
+  debugPrint('🚀 [STARTUP] Initializing DI...');
+  await di.init();
+  debugPrint('🚀 [STARTUP] DI initialized');
+  
+  // UI Setup
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: AppColors.bgGradientStart.withOpacity(0),
@@ -65,8 +85,63 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
   
+  debugPrint('🚀 [STARTUP] Calling runApp...');
   runApp(const IConnectApp());
 }
+/*
+Future<void> main() async {
+  debugPrint('🚀 [STARTUP] Starting main()...');
+  WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('🚀 [STARTUP] WidgetsFlutterBinding initialized');
+  
+  // Initialize Firebase (Try-Catch)
+  try {
+    if (Firebase.apps.isEmpty) {
+      debugPrint('🚀 [STARTUP] Initializing Firebase...');
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('🚀 [STARTUP] Firebase initialized');
+    } else {
+      debugPrint('🚀 [STARTUP] Firebase already initialized');
+    }
+  } catch (e) {
+    if (e.toString().contains('duplicate-app')) {
+      debugPrint('🚀 [STARTUP] Firebase already initialized (Native Race Condition caught)');
+    } else {
+      rethrow;
+    }
+  }
+  
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  
+  // FCM Service (Async)
+  // debugPrint('🚀 [STARTUP] Starting FCM init (async)...');
+  // FCMService().initialize();
+  
+  // DI
+  debugPrint('🚀 [STARTUP] Initializing DI...');
+  await di.init();
+  debugPrint('🚀 [STARTUP] DI initialized');
+  
+  // UI Setup
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: AppColors.bgGradientStart.withOpacity(0),
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: AppColors.bgGradientStart,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+  
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  
+  debugPrint('🚀 [STARTUP] Calling runApp...');
+  runApp(const IConnectApp());
+}
+*/
 
 class IConnectApp extends StatelessWidget {
   const IConnectApp({super.key});

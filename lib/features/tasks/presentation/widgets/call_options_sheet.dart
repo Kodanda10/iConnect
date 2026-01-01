@@ -408,21 +408,50 @@ class _LiquidGlassPopoverState extends State<_LiquidGlassPopover>
   Future<void> _launchWhatsAppCall(BuildContext context) async {
     _dismiss();
     
+    // Format: Country Code + Number (No +)
+    // wa.me requires clean digits only
     String cleanNumber = widget.phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    
+    // Auto-prefix 91 (India) if 10 digits
     if (cleanNumber.length == 10) {
       cleanNumber = '91$cleanNumber';
     }
     
-    final Uri whatsappUri = Uri.parse('whatsapp://call?phone=$cleanNumber');
-    
-    if (await canLaunchUrl(whatsappUri)) {
-      await launchUrl(whatsappUri);
-      widget.onCallComplete?.call('WHATSAPP_CALL'); // WhatsApp call action type
-    } else {
+    // Use universal link which opens chat reliably
+    // Users can then tap the call button in the chat
+    // This avoids "Invalid Link" errors with deep links
+    // Use native WhatsApp scheme to avoid Safari redirect
+    // 'whatsapp://send' opens the chat. From there, user can tap Call.
+    final Uri whatsappUri = Uri.parse('whatsapp://send?phone=$cleanNumber');
+
+    try {
+      // 1. Try Native Scheme (Most Reliable if installed)
+      // ignoring canLaunchUrl which can be flaky
+      bool launched = await launchUrl(
+        whatsappUri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      // 2. Fallback to Web Universal Link if native failed
+      if (!launched) {
+        final Uri webUri = Uri.parse('https://wa.me/$cleanNumber');
+        launched = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      }
+      
+      // 3. Only mark as complete if one of them succeeded
+      if (launched) {
+        if (mounted) {
+           // Overlay is already dismissed by _dismiss() at start
+           widget.onCallComplete?.call('WHATSAPP_CALL');
+        }
+      } else {
+        throw 'Could not launch WhatsApp';
+      }
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('WhatsApp is not installed'),
+            content: Text('Could not open WhatsApp'),
             backgroundColor: Colors.orange,
           ),
         );

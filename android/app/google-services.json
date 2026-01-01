@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "887016822564",
+    "project_id": "iconnect-crm",
+    "storage_bucket": "iconnect-crm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887016822564:android:iconnect_mobile_android",
+        "android_client_info": {
+          "package_name": "com.iconnect.iconnect_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

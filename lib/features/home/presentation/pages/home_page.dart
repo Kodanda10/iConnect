@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 24),
               
-              // Connected/Sent Button
+                // Connected/Sent Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -185,16 +185,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     actionType: actionType,
                   ));
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$actionType recorded!'),
-                      backgroundColor: Colors.teal,
-                    ),
-                  );
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
                 label: Text(
-                  actionType == 'CALL' ? 'Mark as Called' : 'Mark as Sent', 
+                  (actionType == 'CALL' || actionType == 'WHATSAPP_CALL') ? 'Mark as Called' : 'Mark as Sent', 
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
                 ),
               ),
@@ -216,7 +210,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         Navigator.pop(ctx);
                       },
                       // Conditional label: "No Answer" for CALL, "Not Sent" for SMS/WhatsApp
-                      child: Text(actionType == 'CALL' ? 'No Answer' : 'Not Sent'),
+                      child: Text((actionType == 'CALL' || actionType == 'WHATSAPP_CALL') ? 'No Answer' : 'Not Sent'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -232,7 +226,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         Navigator.pop(ctx);
                       },
                       // Conditional label: "Call Later" for CALL, "Send Later" for SMS/WhatsApp
-                      child: Text(actionType == 'CALL' ? 'Call Later' : 'Send Later'),
+                      child: Text((actionType == 'CALL' || actionType == 'WHATSAPP_CALL') ? 'Call Later' : 'Send Later'),
                     ),
                   ),
                 ],
@@ -546,7 +540,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         children: [
                           _buildMainTab('PENDING', 'Today', true),
                           _buildMainTab('COMPLETED', 'Report', false),
-                          _buildMainTab('MEETING', 'Meeting', false),
+                          // _buildMainTab('MEETING', 'Meeting', false),
                         ],
                       ),
                     ),
@@ -1841,7 +1835,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   /// Build the Call button with onTapDown for positioned popover
   Widget _buildCallButton(EnrichedTask task) {
-    final isCompleted = task.callSent;
+    // Grey out if ANY call (Cellular or WhatsApp) was made
+    final isCompleted = task.callSent || task.whatsappCallSent;
     final color = const Color(0xFF00A896);
     final effectiveColor = isCompleted ? Colors.grey[400]! : color;
     final effectiveTextColor = isCompleted ? Colors.grey[500]! : Colors.white.withOpacity(0.7);

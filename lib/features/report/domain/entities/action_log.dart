@@ -12,6 +12,7 @@ enum ActionType {
   call,
   sms,
   whatsapp,
+  whatsappCall,
 }
 
 /// Entity representing a single action log entry
@@ -60,6 +61,8 @@ class ActionLog extends Equatable {
         return ActionType.sms;
       case 'WHATSAPP':
         return ActionType.whatsapp;
+      case 'WHATSAPP_CALL':
+        return ActionType.whatsappCall;
       default:
         return ActionType.sms;
     }
@@ -74,6 +77,8 @@ class ActionLog extends Equatable {
         return 'SMS';
       case ActionType.whatsapp:
         return 'WHATSAPP';
+      case ActionType.whatsappCall:
+        return 'WHATSAPP_CALL';
     }
   }
   /// Create ActionLog from Firestore Map
