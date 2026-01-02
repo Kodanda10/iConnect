@@ -3,6 +3,7 @@
  * @description TDD RED PHASE - Failing tests for DataMetricsCard component
  * @changelog
  * - 2025-12-17: Initial TDD tests for Data Metrics Dashboard component
+ * - 2025-12-18: Added keyboard accessibility tests (focus interaction)
  */
 
 // Mock Firebase modules FIRST
@@ -97,6 +98,29 @@ describe('DataMetricsCard Component', () => {
         });
     });
 
+    it('shows GP breakdown on block focus (keyboard interaction)', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+            { name: 'GP2', count: 300 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus on Block A
+        fireEvent.focus(screen.getByTestId('block-Block A'));
+
+        // Assert - GP details should appear
+        await waitFor(() => {
+            expect(screen.getByText('GP1')).toBeInTheDocument();
+            expect(screen.getByText('GP2')).toBeInTheDocument();
+        });
+    });
+
     it('hides GP breakdown on mouse leave', async () => {
         // Arrange
         (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
@@ -114,6 +138,30 @@ describe('DataMetricsCard Component', () => {
         await waitFor(() => screen.getByText('GP1'));
 
         fireEvent.mouseLeave(screen.getByTestId('block-Block A'));
+
+        // Assert - GP details should hide
+        await waitFor(() => {
+            expect(screen.queryByText('GP1')).not.toBeInTheDocument();
+        });
+    });
+
+    it('hides GP breakdown on blur (keyboard interaction)', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus then blur
+        fireEvent.focus(screen.getByTestId('block-Block A'));
+        await waitFor(() => screen.getByText('GP1'));
+
+        fireEvent.blur(screen.getByTestId('block-Block A'));
 
         // Assert - GP details should hide
         await waitFor(() => {

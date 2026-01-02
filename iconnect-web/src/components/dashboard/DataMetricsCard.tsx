@@ -5,6 +5,7 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-12-18: Added keyboard accessibility (focus handlers, semantic list)
  */
 
 'use client';
@@ -98,7 +99,7 @@ export default function DataMetricsCard() {
             <div className="glass-card-light p-6 rounded-2xl transition-all duration-300 relative overflow-hidden">
                 {hoveredBlock ? (
                     // BLOCK DETAILS VIEW
-                    <div className="animate-fade-in space-y-4">
+                    <div id="gp-details-panel" className="animate-fade-in space-y-4" aria-live="polite">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
                                 <MapPin className="w-5 h-5 text-indigo-400" />
@@ -205,24 +206,24 @@ export default function DataMetricsCard() {
                             Block-wise Breakdown
                         </h3>
                         <p className="text-xs text-white/50">
-                            Hover list to see GP details
+                            Hover or focus list to see GP details
                         </p>
                     </div>
                 </div>
 
                 {/* Block List */}
-                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
+                <ul className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
                     {metrics.blocks.map((block) => (
                         <BlockItem
                             key={block.name}
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onInteract={() => handleBlockHover(block.name)}
+                            onLeave={() => setHoveredBlock(null)}
                         />
                     ))}
-                </div>
+                </ul>
             </div>
         </div>
     );
@@ -232,53 +233,60 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onInteract: () => void;
+    onLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+function BlockItem({ block, total, isHovered, onInteract, onLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
-        <div
-            data-testid={`block-${block.name}`}
-            className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
-                ${isHovered
-                    ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
-                    : 'bg-white/5 hover:bg-white/10'
-                }
-            `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-        >
-            {/* Progress bar background */}
-            <div
-                className="absolute inset-0 bg-emerald-500/5 transition-all duration-500"
-                style={{ width: `${percentage}%` }}
-            />
+        <li>
+            <button
+                type="button"
+                data-testid={`block-${block.name}`}
+                aria-expanded={isHovered}
+                aria-controls="gp-details-panel"
+                className={`
+                    w-full text-left p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
+                    ${isHovered
+                        ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
+                        : 'bg-white/5 hover:bg-white/10'
+                    }
+                `}
+                onMouseEnter={onInteract}
+                onMouseLeave={onLeave}
+                onFocus={onInteract}
+                onBlur={onLeave}
+            >
+                {/* Progress bar background */}
+                <div
+                    className="absolute inset-0 bg-emerald-500/5 transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                />
 
-            <div className="relative flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Users className={`w-4 h-4 transition-colors ${isHovered ? 'text-emerald-400' : 'text-white/40'}`} />
-                    <span className={`font-medium transition-colors ${isHovered ? 'text-emerald-300' : 'text-white'}`}>
-                        {block.name}
-                    </span>
+                <div className="relative flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Users className={`w-4 h-4 transition-colors ${isHovered ? 'text-emerald-400' : 'text-white/40'}`} />
+                        <span className={`font-medium transition-colors ${isHovered ? 'text-emerald-300' : 'text-white'}`}>
+                            {block.name}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold text-emerald-400">
+                            {block.count.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-white/40 w-10 text-right">
+                            {percentage}%
+                        </span>
+                        <ChevronRight
+                            className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90 text-emerald-400' : ''
+                                }`}
+                        />
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-emerald-400">
-                        {block.count.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-white/40 w-10 text-right">
-                        {percentage}%
-                    </span>
-                    <ChevronRight
-                        className={`w-4 h-4 text-white/40 transition-transform duration-300 ${isHovered ? 'rotate-90 text-emerald-400' : ''
-                            }`}
-                    />
-                </div>
-            </div>
-        </div>
+            </button>
+        </li>
     );
 }
 
@@ -339,5 +347,3 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
         </div>
     );
 }
-
-
