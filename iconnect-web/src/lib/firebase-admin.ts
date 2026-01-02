@@ -2,9 +2,10 @@
  * @file lib/firebase-admin.ts
  * @description Firebase Admin SDK initialization for server-side operations
  * @changelog
- * - 2024-12-11: Initial implementation for seed API
+ * - 2024-12-11: Initial implementation for server-side operations
  */
 
+import 'server-only';
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 

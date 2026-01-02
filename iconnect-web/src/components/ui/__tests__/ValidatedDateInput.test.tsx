@@ -172,6 +172,8 @@ describe('ValidatedDateInput Component', () => {
         // ============================================
         describe('Hotfix: Future Date Validation', () => {
             test('Test A: Data Entry - rejects future date for DOB (allowFuture=false)', () => {
+                jest.useFakeTimers();
+                jest.setSystemTime(new Date('2024-01-01'));
                 const { container } = render(
                     <ValidatedDateInput
                         label="Date of Birth"
@@ -182,6 +184,7 @@ describe('ValidatedDateInput Component', () => {
                 );
                 // Should show RED border for future date when allowFuture is false
                 expect(container.innerHTML).toContain('border-red-500');
+                jest.useRealTimers();
             });
 
             test('Test B: Data Entry - accepts today for Anniversary (allowFuture=false)', () => {
