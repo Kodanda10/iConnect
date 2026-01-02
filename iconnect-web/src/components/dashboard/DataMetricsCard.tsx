@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-01-26: Performance optimization - Memoized BlockItem and handlers to prevent unnecessary re-renders
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -54,10 +55,16 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    // Stable hover handler using useCallback
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    // Stable leave handler
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +225,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockHover}
+                            onMouseLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,12 +239,36 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
+    onMouseEnter: (name: string) => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+// Memoized BlockItem to prevent unnecessary re-renders of the entire list
+const BlockItem = memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
+
+    // Create stable handlers for this specific item
+    // Note: We use the passed-in handlers directly if possible, but they need arguments.
+    // Since we can't easily memoize the arrow function creation inside the map without creating a new component or hook,
+    // we accept the generic handler and call it.
+    // Ideally, we would pass just the ID and the parent handler would take the ID, but that's what we did.
+    // But `onMouseEnter={() => handleBlockHover(block.name)}` creates a new function every render.
+    // To fix this, we passed `handleBlockHover` directly to `onMouseEnter`.
+    // Now we need to wrap the call here.
+
+    // However, if we do `const handleEnter = () => onMouseEnter(block.name)`, this function is recreated every render of BlockItem.
+    // But since BlockItem is memoized, if props don't change, it won't re-render.
+    // The props `onMouseEnter` and `onMouseLeave` are now stable (useCallback from parent).
+    // `block` is stable (from metrics.blocks, assuming that array doesn't deep change unless data reloads).
+    // `isHovered` changes only for the affected blocks.
+
+    // So we need to ensure the event handlers passed to the div don't cause issues?
+    // Actually, passing `() => onMouseEnter(block.name)` to `div` is fine,
+    // as long as the `BlockItem` itself doesn't re-render.
+
+    const handleEnter = useCallback(() => {
+        onMouseEnter(block.name);
+    }, [block.name, onMouseEnter]);
 
     return (
         <div
@@ -249,8 +280,13 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
+            onMouseEnter={handleEnter}
             onMouseLeave={onMouseLeave}
+            // Add onFocus/onBlur for keyboard accessibility to match hover behavior
+            onFocus={handleEnter}
+            onBlur={onMouseLeave}
+            role="button"
+            tabIndex={0}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +316,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -301,7 +337,8 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+// Memoized GPProgressBar as well, though less critical
+const GPProgressBar = memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +375,4 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
-
-
+});
