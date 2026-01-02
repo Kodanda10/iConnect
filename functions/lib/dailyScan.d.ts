@@ -4,6 +4,7 @@
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
  */
+import * as admin from 'firebase-admin';
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type TaskStatus = 'PENDING' | 'COMPLETED';
 export interface Constituent {
@@ -18,14 +19,17 @@ export interface Constituent {
 }
 export interface Task {
     id: string;
-    constituentId: string;
+    constituent_id: string;
+    constituent_name: string;
+    constituent_mobile: string;
+    ward_number: string;
     type: TaskType;
-    dueDate: string;
+    due_date: any;
     status: TaskStatus;
     notes?: string;
-    actionTaken?: 'CALL' | 'SMS' | 'WHATSAPP';
-    completedBy?: 'LEADER' | 'STAFF';
-    createdAt: string;
+    action_taken?: 'CALL' | 'SMS' | 'WHATSAPP';
+    completed_by?: 'LEADER' | 'STAFF';
+    created_at: any;
 }
 export interface ScanResult {
     count: number;
@@ -35,4 +39,8 @@ export interface ScanResult {
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
  */
-export declare function scanForTasks(constituents: Constituent[], existingTasks: Task[]): ScanResult;
+export declare function scanForTasks(constituents: Constituent[], existingTasks: Task[], TimestampClass: any): ScanResult;
+/**
+ * Schedule daily push notifications (Action Reminder & Heads Up)
+ */
+export declare function scheduleDailyNotifications(db: admin.firestore.Firestore, constituents: Constituent[]): Promise<void>;

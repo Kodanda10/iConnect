@@ -42,7 +42,9 @@ class MockProvider {
         this.name = 'MockProvider';
     }
     async sendSMS(mobile, message) {
-        console.log(`[MOCK SMS] To: ${mobile} | Message: ${message}`);
+        // Redact PII in logs
+        const { redactMobile, redactMessage } = require('./utils/security');
+        console.log(`[MOCK SMS] To: ${redactMobile(mobile)} | Message: ${redactMessage(message)}`);
         return {
             success: true,
             messageId: `mock-${Date.now()}`,
@@ -50,7 +52,10 @@ class MockProvider {
         };
     }
     async sendWhatsApp(mobile, template, params) {
-        console.log(`[MOCK WhatsApp] To: ${mobile} | Template: ${template} | Params: ${JSON.stringify(params)}`);
+        // Redact PII in logs
+        const { redactMobile } = require('./utils/security');
+        // Do not log params as they might contain PII
+        console.log(`[MOCK WhatsApp] To: ${redactMobile(mobile)} | Template: ${template} | Params: [REDACTED]`);
         return {
             success: true,
             messageId: `mock-wa-${Date.now()}`,
