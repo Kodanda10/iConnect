@@ -3,11 +3,12 @@
  * @description Gyroscopic/cursor-aware 3D parallax card with depth effect
  * @changelog
  * - 2024-12-11: Initial implementation with mouse tracking and spring physics
+ * - 2024-05-22: Optimized performance by using direct DOM manipulation and requestAnimationFrame instead of React state for high-frequency updates.
  */
 
 'use client';
 
-import React, { useRef, useState, useEffect, ReactNode } from 'react';
+import React, { useRef, useState, useCallback, ReactNode, useEffect, useLayoutEffect } from 'react';
 
 interface ParallaxCardProps {
     children: ReactNode;
@@ -23,38 +24,82 @@ export function ParallaxCard({
     glowColor = 'rgba(0, 143, 122, 0.2)',
 }: ParallaxCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
-    const [transform, setTransform] = useState({ rotateX: 0, rotateY: 0, scale: 1 });
-    const [glowPosition, setGlowPosition] = useState({ x: 50, y: 50 });
+    const contentRef = useRef<HTMLDivElement>(null);
+    const glowRef = useRef<HTMLDivElement>(null);
+    const reflectionRef = useRef<HTMLDivElement>(null);
+    const rafId = useRef<number | null>(null);
+
     const [isHovering, setIsHovering] = useState(false);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!cardRef.current) return;
+    // Initialize styles to avoid hydration mismatches or missing initial states
+    useLayoutEffect(() => {
+        if (contentRef.current) {
+            contentRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+        }
+    }, []);
 
-        const rect = cardRef.current.getBoundingClientRect();
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        if (!cardRef.current || !contentRef.current) return;
+
+        const card = cardRef.current;
+        const rect = card.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        // Calculate rotation based on mouse position relative to center
+        // Calculate values
         const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * intensity;
         const rotateX = ((centerY - e.clientY) / (rect.height / 2)) * intensity;
-
-        // Calculate glow position (0-100%)
         const glowX = ((e.clientX - rect.left) / rect.width) * 100;
         const glowY = ((e.clientY - rect.top) / rect.height) * 100;
 
-        setTransform({ rotateX, rotateY, scale: 1.02 });
-        setGlowPosition({ x: glowX, y: glowY });
-    };
+        // Schedule update
+        if (rafId.current) cancelAnimationFrame(rafId.current);
 
-    const handleMouseLeave = () => {
+        rafId.current = requestAnimationFrame(() => {
+            if (contentRef.current) {
+                contentRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            }
+            if (glowRef.current) {
+                glowRef.current.style.background = `radial-gradient(600px circle at ${glowX}% ${glowY}%, ${glowColor}, transparent 40%)`;
+            }
+            if (reflectionRef.current) {
+                 reflectionRef.current.style.background = `linear-gradient(${105 + rotateY}deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%)`;
+            }
+        });
+    }, [intensity, glowColor]);
+
+    const handleMouseLeave = useCallback(() => {
         setIsHovering(false);
-        setTransform({ rotateX: 0, rotateY: 0, scale: 1 });
-        setGlowPosition({ x: 50, y: 50 });
-    };
+        if (rafId.current) {
+            cancelAnimationFrame(rafId.current);
+            rafId.current = null;
+        }
+
+        // Reset styles immediately
+        if (contentRef.current) {
+             contentRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+        }
+        if (glowRef.current) {
+            glowRef.current.style.background = `radial-gradient(600px circle at 50% 50%, ${glowColor}, transparent 40%)`;
+        }
+        if (reflectionRef.current) {
+             reflectionRef.current.style.background = `linear-gradient(105deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%)`;
+        }
+
+    }, [glowColor]);
 
     const handleMouseEnter = () => {
         setIsHovering(true);
     };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (rafId.current) {
+                cancelAnimationFrame(rafId.current);
+            }
+        };
+    }, []);
 
     return (
         <div
@@ -69,14 +114,10 @@ export function ParallaxCard({
             }}
         >
             <div
+                ref={contentRef}
                 className="relative w-full h-full"
                 style={{
-                    transform: `
-            perspective(1000px)
-            rotateX(${transform.rotateX}deg)
-            rotateY(${transform.rotateY}deg)
-            scale(${transform.scale})
-          `,
+                    // Initial state matching reset - kept out of JSX to prevent React overwrites
                     transition: isHovering
                         ? 'transform 0.1s ease-out'
                         : 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
@@ -85,10 +126,11 @@ export function ParallaxCard({
             >
                 {/* Glow effect that follows cursor */}
                 <div
+                    ref={glowRef}
                     className="absolute inset-0 rounded-inherit pointer-events-none"
                     style={{
                         background: `radial-gradient(
-              600px circle at ${glowPosition.x}% ${glowPosition.y}%,
+              600px circle at 50% 50%,
               ${glowColor},
               transparent 40%
             )`,
@@ -103,10 +145,11 @@ export function ParallaxCard({
 
                 {/* Reflection/depth layer */}
                 <div
+                    ref={reflectionRef}
                     className="absolute inset-0 pointer-events-none"
                     style={{
                         background: `linear-gradient(
-              ${105 + transform.rotateY}deg,
+              105deg,
               rgba(255, 255, 255, 0.1) 0%,
               transparent 50%
             )`,
