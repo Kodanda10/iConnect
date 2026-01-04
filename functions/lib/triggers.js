@@ -39,6 +39,7 @@ const firestore_1 = require("firebase-functions/v2/firestore");
 const admin = __importStar(require("firebase-admin"));
 const notifications_1 = require("./notifications");
 const messaging_1 = require("./messaging");
+const security_1 = require("./utils/security");
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
     admin.initializeApp();
@@ -138,7 +139,9 @@ function buildConstituentIndexUpdates(data) {
  */
 async function handleMeetingCreated(meetingData) {
     var _a;
-    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${meetingData.title} `);
+    // Redact sensitive info in logs
+    const safeTitle = meetingData.title ? `${meetingData.title.substring(0, 3)}...` : "[MISSING]";
+    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${safeTitle} `);
     // 1. Calculate Notification Schedule
     const scheduledTime = ((_a = meetingData.scheduled_time) === null || _a === void 0 ? void 0 : _a.toDate) ? meetingData.scheduled_time.toDate() : new Date(meetingData.scheduled_time);
     const notificationTimes = (0, notifications_1.determinePushTimes)(scheduledTime);
@@ -147,8 +150,7 @@ async function handleMeetingCreated(meetingData) {
     const fcmToken = meetingData.fcm_token;
     if (fcmToken) {
         await (0, messaging_1.sendPushNotification)(fcmToken, 'Meeting Scheduled', `You scheduled "${meetingData.title}" for ${scheduledTime.toLocaleString('en-IN')}`);
-        const { redactToken } = require('./utils/security');
-        console.log(`[TRIGGER] Sent confirmation push to ${redactToken(fcmToken)} `);
+        console.log(`[TRIGGER] Sent confirmation push to ${(0, security_1.redactToken)(fcmToken)} `);
     }
     else {
         console.log('[TRIGGER] No FCM token found for creator, skipping confirmation push');
@@ -191,7 +193,8 @@ async function handleMeetingCreated(meetingData) {
                 return;
             }
             catch (e) {
-                console.warn('[TRIGGER] Failed to enqueue Cloud Tasks, falling back to direct send:', e);
+                // Do not log full error object if it contains data
+                console.warn('[TRIGGER] Failed to enqueue Cloud Tasks, falling back to direct send.');
                 // Fall through to direct sending below.
             }
         }
@@ -212,7 +215,7 @@ async function handleMeetingCreated(meetingData) {
                     return true;
                 }
                 catch (e) {
-                    console.error('[TRIGGER] SMS send failed:', e);
+                    console.error(`[TRIGGER] SMS send failed for ${(0, security_1.redactMobile)(mobile)}`);
                     return false;
                 }
             }));
