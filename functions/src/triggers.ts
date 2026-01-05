@@ -104,7 +104,9 @@ function buildConstituentIndexUpdates(data: Record<string, any>): Record<string,
  * - Sends SMS/WhatsApp to all constituents
  */
 export async function handleMeetingCreated(meetingData: any) {
-    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${meetingData.title} `);
+    // Redact Title in logs
+    const titlePreview = meetingData.title ? `${meetingData.title.slice(0, 3)}...` : '[NO TITLE]';
+    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${titlePreview}`);
 
     // 1. Calculate Notification Schedule
     const scheduledTime = meetingData.scheduled_time?.toDate ? meetingData.scheduled_time.toDate() : new Date(meetingData.scheduled_time);

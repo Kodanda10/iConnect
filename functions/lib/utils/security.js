@@ -11,6 +11,8 @@ exports.redactToken = redactToken;
 /**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
+ * @param mobile - The mobile number to redact
+ * @return The redacted mobile number
  */
 function redactMobile(mobile) {
     if (!mobile)
@@ -21,6 +23,8 @@ function redactMobile(mobile) {
 }
 /**
  * Redacts message content, showing only length and first few chars
+ * @param message - The message content to redact
+ * @return The redacted message
  */
 function redactMessage(message) {
     if (!message)
@@ -32,6 +36,8 @@ function redactMessage(message) {
 }
 /**
  * Redacts email addresses
+ * @param email - The email address to redact
+ * @return The redacted email address
  */
 function redactEmail(email) {
     if (!email)
@@ -45,6 +51,8 @@ function redactEmail(email) {
 }
 /**
  * Redacts long tokens or IDs (like FCM tokens)
+ * @param token - The token to redact
+ * @return The redacted token
  */
 function redactToken(token) {
     if (!token)

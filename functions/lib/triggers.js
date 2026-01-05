@@ -138,7 +138,9 @@ function buildConstituentIndexUpdates(data) {
  */
 async function handleMeetingCreated(meetingData) {
     var _a;
-    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${meetingData.title} `);
+    // Redact Title in logs
+    const titlePreview = meetingData.title ? `${meetingData.title.slice(0, 3)}...` : '[NO TITLE]';
+    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${titlePreview}`);
     // 1. Calculate Notification Schedule
     const scheduledTime = ((_a = meetingData.scheduled_time) === null || _a === void 0 ? void 0 : _a.toDate) ? meetingData.scheduled_time.toDate() : new Date(meetingData.scheduled_time);
     const notificationTimes = (0, notifications_1.determinePushTimes)(scheduledTime);
