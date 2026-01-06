@@ -98,18 +98,41 @@ export default function ValidatedDateInput({
         }
     };
 
-    // Handle scroll/resize to close calendar to avoid detached popup
+    // Handle scroll/resize/keys to close calendar
     useEffect(() => {
         const handleScroll = () => {
             if (isCalendarOpen) setIsCalendarOpen(false);
         };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isCalendarOpen && e.key === 'Escape') {
+                e.preventDefault();
+                setIsCalendarOpen(false);
+                inputRef.current?.focus(); // Return focus to input
+            }
+        };
+
+        if (isCalendarOpen) {
+            window.addEventListener('keydown', handleKeyDown);
+        }
         window.addEventListener('scroll', handleScroll, true);
         window.addEventListener('resize', handleScroll);
+
         return () => {
+            if (isCalendarOpen) {
+                window.removeEventListener('keydown', handleKeyDown);
+            }
             window.removeEventListener('scroll', handleScroll, true);
             window.removeEventListener('resize', handleScroll);
         };
     }, [isCalendarOpen]);
+
+    const handleInputKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowDown' && !isCalendarOpen) {
+            e.preventDefault();
+            openCalendar();
+        }
+    };
 
     // Get border/icon styles based on validation state
     const getBorderClass = (): string => {
@@ -171,6 +194,7 @@ export default function ValidatedDateInput({
                     value={displayValue}
                     onChange={handleInputChange}
                     onFocus={openCalendar}
+                    onKeyDown={handleInputKeyDown}
                     placeholder={placeholder}
                     disabled={disabled}
                     maxLength={10}
