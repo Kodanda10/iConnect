@@ -4,13 +4,14 @@
  * @changelog
  * - 2024-12-11: Initial implementation with Emerald/Amethyst theme
  * - 2024-12-11: Optimized for ultra-fast login with preloaded Firebase
+ * - 2025-02-18: Added accessibility improvements (labels, password toggle)
  */
 
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Database, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 // Preload Firebase modules at the top level for faster auth
 import { getFirebaseAuth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
@@ -22,6 +23,7 @@ export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -112,12 +114,14 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
                                 Email Address
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                    id="email"
+                                    name="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -130,25 +134,39 @@ export default function LoginPage() {
 
                         {/* Password Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
                                 Password
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
-                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     autoComplete="current-password"
-                                    className="glass-input-dark"
+                                    className="glass-input-dark pr-12"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-full p-1"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-5 h-5" />
+                                    ) : (
+                                        <Eye className="w-5 h-5" />
+                                    )}
+                                </button>
                             </div>
                         </div>
 
                         {/* Error Message */}
                         {localError && (
-                            <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm break-all">
+                            <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm break-all" role="alert">
                                 <AlertCircle className="w-4 h-4 shrink-0" />
                                 <span>{localError}</span>
                             </div>
