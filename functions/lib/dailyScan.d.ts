@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-05-20: Optimized date matching performance
  */
 import * as admin from 'firebase-admin';
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
@@ -35,6 +36,15 @@ export interface ScanResult {
     count: number;
     newTasks: Task[];
 }
+/**
+ * Helper to get "-MM-DD" suffix from a Date object
+ */
+export declare function getMonthDaySuffix(date: Date): string;
+/**
+ * Check if a date string (YYYY-MM-DD) ends with a target suffix (-MM-DD)
+ * Optimized replacement for parsing logic
+ */
+export declare function isDateMatch(dateStr: string | undefined, suffix: string): boolean;
 /**
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
