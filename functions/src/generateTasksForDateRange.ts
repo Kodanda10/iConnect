@@ -11,6 +11,7 @@
  * 
  * @changelog
  * - 2025-12-26: Initial TDD implementation
+ * - 2024-05-20: Performance optimization - Pre-parse dates before loop (Bolt)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -74,11 +75,16 @@ export interface GenerateTasksResult {
     errors: string[];
 }
 
+interface DateParts {
+    month: number;
+    day: number;
+}
+
 /**
  * Parse date string (YYYY-MM-DD) and extract month/day
  * Returns null if invalid
  */
-function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
+function parseDateParts(dateStr: string | undefined): DateParts | null {
     if (!dateStr || typeof dateStr !== 'string') return null;
 
     const parts = dateStr.split('-');
@@ -92,16 +98,6 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
     }
 
     return { month, day };
-}
-
-/**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
 }
 
 /**
@@ -219,16 +215,23 @@ export function generateTasksForDateRange(
     // Build existing task lookup for O(1) deduplication
     const existingTaskKeys = buildExistingTaskKeys(existingTasks);
 
+    // OPTIMIZATION: Pre-parse dates to avoid repeated split/parseInt in the loop
+    const parsedConstituents = constituents.map(c => ({
+        original: c,
+        dob: parseDateParts(c.dob),
+        anniversary: parseDateParts(c.anniversary)
+    }));
+
     // Iterate through each date in range
     for (const date of dateRange(startDate, endDate)) {
         const targetMonth = date.getMonth() + 1; // 1-indexed
         const targetDay = date.getDate();
         const dueDateStr = formatDateStr(date);
 
-        // Scan all constituents for this date
-        for (const constituent of constituents) {
+        // Scan all pre-parsed constituents for this date
+        for (const { original: constituent, dob, anniversary } of parsedConstituents) {
             // Check Birthday
-            if (isDateMatchForTarget(constituent.dob, targetMonth, targetDay)) {
+            if (dob && dob.month === targetMonth && dob.day === targetDay) {
                 const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
                 if (existingTaskKeys.has(key)) {
                     skippedDuplicates++;
@@ -241,7 +244,7 @@ export function generateTasksForDateRange(
             }
 
             // Check Anniversary
-            if (isDateMatchForTarget(constituent.anniversary, targetMonth, targetDay)) {
+            if (anniversary && anniversary.month === targetMonth && anniversary.day === targetDay) {
                 const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
                 if (existingTaskKeys.has(key)) {
                     skippedDuplicates++;
