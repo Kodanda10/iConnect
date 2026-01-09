@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-05-20: Optimized date matching and task existence checks for performance
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -43,22 +44,21 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Format date as -MM-DD string for efficient suffix matching
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
+function getDateSuffix(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `-${month}-${day}`;
+}
+
+/**
+ * Check if a date string (YYYY-MM-DD) ends with the target suffix (-MM-DD)
+ * This is significantly faster than parsing dates in a loop.
+ */
+function isDateMatchSuffix(dateStr: string | undefined, targetSuffix: string): boolean {
     if (!dateStr) return false;
-
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
-
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
-
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    return dateStr.endsWith(targetSuffix);
 }
 
 /**
@@ -84,16 +84,12 @@ function createTask(
 }
 
 /**
- * Check if a task already exists for this constituent, type, and date
+ * Build a set of existing task keys for O(1) duplicate lookup
  */
-function taskExists(
-    existingTasks: Task[],
-    constituentId: string,
-    type: TaskType,
-    dueDate: string
-): boolean {
-    return existingTasks.some((task) => {
-        // Handle both Timestamp and String for backward compatibility during migration
+function buildExistingTaskKeys(existingTasks: Task[]): Set<string> {
+    const keys = new Set<string>();
+
+    for (const task of existingTasks) {
         let taskDateStr = '';
         if (task.due_date && typeof task.due_date.toDate === 'function') {
             taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
@@ -101,12 +97,12 @@ function taskExists(
             taskDateStr = task.due_date;
         }
 
-        return (
-            (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
-            task.type === type &&
-            taskDateStr === dueDate
-        );
-    });
+        const constituentId = task.constituent_id || (task as any).constituentId;
+        // Key format: constituentId_type_dueDate
+        keys.add(`${constituentId}_${task.type}_${taskDateStr}`);
+    }
+
+    return keys;
 }
 
 /**
@@ -122,38 +118,53 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // Pre-calculate suffixes for fast matching
+    const todaySuffix = getDateSuffix(today);
+    const tomorrowSuffix = getDateSuffix(tomorrow);
+
+    // Pre-calculate date strings for task keys
+    const todayDateStr = today.toISOString().split('T')[0];
+    const tomorrowDateStr = tomorrow.toISOString().split('T')[0];
+
+    // Build lookup set for existing tasks
+    const existingTaskKeys = buildExistingTaskKeys(existingTasks);
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+        if (isDateMatchSuffix(constituent.dob, todaySuffix)) {
+            const key = `${constituent.id}_BIRTHDAY_${todayDateStr}`;
+            if (!existingTaskKeys.has(key)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
+                existingTaskKeys.add(key); // Prevent duplicates if input has dupes
             }
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+        if (isDateMatchSuffix(constituent.dob, tomorrowSuffix)) {
+            const key = `${constituent.id}_BIRTHDAY_${tomorrowDateStr}`;
+            if (!existingTaskKeys.has(key)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
+                existingTaskKeys.add(key);
             }
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+        if (isDateMatchSuffix(constituent.anniversary, todaySuffix)) {
+            const key = `${constituent.id}_ANNIVERSARY_${todayDateStr}`;
+            if (!existingTaskKeys.has(key)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
+                existingTaskKeys.add(key);
             }
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+        if (isDateMatchSuffix(constituent.anniversary, tomorrowSuffix)) {
+            const key = `${constituent.id}_ANNIVERSARY_${tomorrowDateStr}`;
+            if (!existingTaskKeys.has(key)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
+                existingTaskKeys.add(key);
             }
         }
     }
@@ -185,18 +196,19 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todaySuffix = getDateSuffix(today);
+    const tomorrowSuffix = getDateSuffix(tomorrow);
+
     // 1. Calculate Counts
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
-    // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        if (isDateMatchSuffix(c.dob, todaySuffix)) todayCount.birthdays++;
+        if (isDateMatchSuffix(c.anniversary, todaySuffix)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        if (isDateMatchSuffix(c.dob, tomorrowSuffix)) tomorrowCount.birthdays++;
+        if (isDateMatchSuffix(c.anniversary, tomorrowSuffix)) tomorrowCount.anniversaries++;
     }
 
     // 2. Fetch Settings & Leader
@@ -243,7 +255,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isDateMatchSuffix(c.dob, tomorrowSuffix) || isDateMatchSuffix(c.anniversary, tomorrowSuffix)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -291,7 +303,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isDateMatchSuffix(c.dob, tomorrowSuffix) || isDateMatchSuffix(c.anniversary, tomorrowSuffix)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
