@@ -52,7 +52,7 @@ describe('Messaging Service', () => {
             expect(messageId).toBe('projects/id/messages/123');
             expect(admin.messaging().send).toHaveBeenCalledWith(expect.objectContaining({
                 token,
-                notification: { title, body }
+                notification: { title, body },
             }));
         });
     });

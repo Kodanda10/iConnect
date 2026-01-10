@@ -23,9 +23,9 @@ const createConstituent = (id, name, dobMonth, dobDay, anniversaryMonth, anniver
     name,
     mobile_number: '9876543210',
     dob: `1990-${String(dobMonth).padStart(2, '0')}-${String(dobDay).padStart(2, '0')}`,
-    anniversary: anniversaryMonth && anniversaryDay
-        ? `2015-${String(anniversaryMonth).padStart(2, '0')}-${String(anniversaryDay).padStart(2, '0')}`
-        : undefined,
+    anniversary: anniversaryMonth && anniversaryDay ?
+        `2015-${String(anniversaryMonth).padStart(2, '0')}-${String(anniversaryDay).padStart(2, '0')}` :
+        undefined,
     ward_number: '01',
     block: 'Dharmasala',
     gram_panchayat: 'Jaraka',
@@ -48,7 +48,7 @@ describe('generateTasksForDateRange', () => {
             };
             const result = (0, generateTasksForDateRange_1.generateTasksForDateRange)(constituents, [], options);
             expect(result.newTasks).toHaveLength(3);
-            expect(result.newTasks.map(t => t.constituent_name).sort()).toEqual([
+            expect(result.newTasks.map((t) => t.constituent_name).sort()).toEqual([
                 'Person Dec 20',
                 'Person Dec 22',
                 'Person Dec 25',
@@ -66,7 +66,7 @@ describe('generateTasksForDateRange', () => {
             };
             const result = (0, generateTasksForDateRange_1.generateTasksForDateRange)(constituents, [], options);
             expect(result.newTasks).toHaveLength(2);
-            expect(result.newTasks.map(t => t.type).sort()).toEqual(['ANNIVERSARY', 'BIRTHDAY']);
+            expect(result.newTasks.map((t) => t.type).sort()).toEqual(['ANNIVERSARY', 'BIRTHDAY']);
         });
         it('handles year boundary (Dec 30 - Jan 2)', () => {
             const constituents = [

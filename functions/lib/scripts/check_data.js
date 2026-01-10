@@ -48,7 +48,7 @@ async function checkData() {
     output += `Constituents Count: ${constituentsSnap.size}\n`;
     if (constituentsSnap.size > 0) {
         output += 'First 3 Constituents:\n';
-        constituentsSnap.docs.slice(0, 3).forEach(doc => {
+        constituentsSnap.docs.slice(0, 3).forEach((doc) => {
             output += `${doc.id} - ${doc.data().name}\n`;
         });
     }

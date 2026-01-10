@@ -6,12 +6,12 @@ describe('dailyScan Logic', () => {
         fromDate: (date) => ({
             toDate: () => date,
             toISOString: () => date.toISOString(),
-            _isTimestamp: true
+            _isTimestamp: true,
         }),
         now: () => ({
             toDate: () => new Date(),
-            _isTimestamp: true
-        })
+            _isTimestamp: true,
+        }),
     };
     const mockConstituents = [
         {
@@ -21,8 +21,8 @@ describe('dailyScan Logic', () => {
             dob: '1990-12-18', // matches today (if today is Dec 18)
             ward_number: '12',
             address: 'Street 1',
-            created_at: '2023-01-01'
-        }
+            created_at: '2023-01-01',
+        },
     ];
     test('should create task for birthday today', () => {
         // Set fixed date for test
@@ -41,7 +41,7 @@ describe('dailyScan Logic', () => {
         const existingTask = {
             constituent_id: 'c1',
             type: 'BIRTHDAY',
-            due_date: mockTimestampClass.fromDate(today)
+            due_date: mockTimestampClass.fromDate(today),
         };
         const result = (0, dailyScan_1.scanForTasks)(mockConstituents, [existingTask], mockTimestampClass);
         expect(result.count).toBe(0);

@@ -38,7 +38,7 @@ describe('Triggers', () => {
                 dial_in_number: '1800-123',
                 access_code: '9999',
                 created_by: 'user-abc', // Leader UID
-                fcm_token: 'fcm-token-abc' // Assuming we have this or fetch it
+                fcm_token: 'fcm-token-abc', // Assuming we have this or fetch it
             };
 
             await handleMeetingCreated(mockMeeting);

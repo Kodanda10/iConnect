@@ -38,11 +38,11 @@ const admin = __importStar(require("firebase-admin"));
 // Mock Firestore
 const mockBatch = {
     set: jest.fn(),
-    commit: jest.fn().mockResolvedValue(true)
+    commit: jest.fn().mockResolvedValue(true),
 };
 const mockDb = {
     collection: jest.fn(),
-    batch: jest.fn().mockReturnValue(mockBatch)
+    batch: jest.fn().mockReturnValue(mockBatch),
 };
 // Mock Settings Response
 const mockSettingsPayload = {
@@ -50,23 +50,23 @@ const mockSettingsPayload = {
     alertSettings: {
         headsUp: true,
         action: true,
-        headsUpMessage: "Tail message",
-        actionMessage: "Tail message"
-    }
+        headsUpMessage: 'Tail message',
+        actionMessage: 'Tail message',
+    },
 };
 // Mock User Response (Leader)
 const mockUserPayload = {
     id: 'leader123',
-    role: 'LEADER'
+    role: 'LEADER',
 };
 const mockCollection = (name) => {
     if (name === 'settings') {
         return {
             doc: (id) => ({
                 get: jest.fn().mockResolvedValue({
-                    data: () => mockSettingsPayload
-                })
-            })
+                    data: () => mockSettingsPayload,
+                }),
+            }),
         };
     }
     if (name === 'users') {
@@ -75,18 +75,18 @@ const mockCollection = (name) => {
                 limit: () => ({
                     get: jest.fn().mockResolvedValue({
                         empty: false,
-                        docs: [{ id: 'leader123', data: () => mockUserPayload }]
-                    })
-                })
+                        docs: [{ id: 'leader123', data: () => mockUserPayload }],
+                    }),
+                }),
             }),
-            doc: () => ({ get: jest.fn() }) // For other calls
+            doc: () => ({ get: jest.fn() }), // For other calls
         };
     }
     if (name === 'scheduled_notifications') {
         return {
             doc: (id) => ({
-                set: mockBatch.set // Allow direct set if used without batch
-            })
+                set: mockBatch.set, // Allow direct set if used without batch
+            }),
         };
     }
     return {};
@@ -99,8 +99,8 @@ const mockTimestamp = {
         // Mock Firestore Timestamp behavior
     }),
     now: () => ({
-        toDate: () => new Date()
-    })
+        toDate: () => new Date(),
+    }),
 };
 admin.firestore.Timestamp = mockTimestamp;
 describe('scheduleDailyNotifications', () => {
@@ -121,14 +121,14 @@ describe('scheduleDailyNotifications', () => {
             // Anniversary Today (Dec 18)
             { id: '2', name: 'B', dob: '1990-01-01', anniversary: '2010-12-18', mobile_number: '', ward_number: '', address: '', created_at: '' },
             // Birthday Tomorrow (Dec 19)
-            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' },
         ];
         await (0, dailyScan_1.scheduleDailyNotifications)(mockDb, constituents);
         // Expect 2 notifications
         expect(mockBatch.set).toHaveBeenCalledTimes(2);
         // Check Action Notification (Today)
         // Find Action Call
-        const actionCall = mockBatch.set.mock.calls.find(c => c[1].type === 'ACTION_REMINDER');
+        const actionCall = mockBatch.set.mock.calls.find((c) => c[1].type === 'ACTION_REMINDER');
         expect(actionCall).toBeDefined();
         const actionPayload = actionCall[1];
         // 1 Birthday + 1 Anniversary Today
@@ -139,7 +139,7 @@ describe('scheduleDailyNotifications', () => {
         expect(scheduledDate.getHours()).toBe(8);
         expect(scheduledDate.getDate()).toBe(18);
         // Find Heads Up Call
-        const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
+        const headsUpCall = mockBatch.set.mock.calls.find((c) => c[1].type === 'HEADS_UP');
         expect(headsUpCall).toBeDefined();
         const headsUpPayload = headsUpCall[1];
         // 1 Birthday Tomorrow
@@ -155,12 +155,12 @@ describe('scheduleDailyNotifications', () => {
         jest.setSystemTime(today);
         const constituents = [
             // Birthday Tomorrow (Dec 19)
-            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' },
         ];
         await (0, dailyScan_1.scheduleDailyNotifications)(mockDb, constituents);
-        const actionCall = mockBatch.set.mock.calls.find(c => c[1].type === 'ACTION_REMINDER');
+        const actionCall = mockBatch.set.mock.calls.find((c) => c[1].type === 'ACTION_REMINDER');
         expect(actionCall).toBeUndefined();
-        const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
+        const headsUpCall = mockBatch.set.mock.calls.find((c) => c[1].type === 'HEADS_UP');
         expect(headsUpCall).toBeDefined();
         expect(headsUpCall[1].body).toContain('1 birthdays tomorrow.');
     });
@@ -173,24 +173,24 @@ describe('scheduleDailyNotifications', () => {
             alertSettings: {
                 headsUp: true,
                 action: true,
-                headsUpMessage: "Tomorrow's Celebrations! 5 constituents have birthdays tomorrow. Tap to view...",
-                actionMessage: "Action Required! Send wishes to 5 people celebrating today. Don't miss..."
-            }
+                headsUpMessage: 'Tomorrow\'s Celebrations! 5 constituents have birthdays tomorrow. Tap to view...',
+                actionMessage: 'Action Required! Send wishes to 5 people celebrating today. Don\'t miss...',
+            },
         };
         // Override mock for this test
         mockDb.collection.mockImplementation((name) => {
             if (name === 'settings') {
                 return {
-                    doc: () => ({ get: jest.fn().mockResolvedValue({ data: () => dirtySettings }) })
+                    doc: () => ({ get: jest.fn().mockResolvedValue({ data: () => dirtySettings }) }),
                 };
             }
             return mockCollection(name); // Use default for others
         });
         const constituents = [
-            { id: '1', name: 'A', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+            { id: '1', name: 'A', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' },
         ];
         await (0, dailyScan_1.scheduleDailyNotifications)(mockDb, constituents);
-        const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
+        const headsUpCall = mockBatch.set.mock.calls.find((c) => c[1].type === 'HEADS_UP');
         expect(headsUpCall).toBeDefined();
         // Assert: Dynamic Count (1) represents reality. Hardcoded (5) is removed.
         // Expected: "1 birthdays tomorrow. Tomorrow's Celebrations! Tap to view..."
@@ -198,7 +198,7 @@ describe('scheduleDailyNotifications', () => {
         expect(body).toContain('1 birthdays tomorrow.');
         expect(body).not.toContain('5 constituents');
         expect(body).not.toContain('have birthdays tomorrow.'); // The hardcoded part
-        expect(body).toContain("Tomorrow's Celebrations!");
+        expect(body).toContain('Tomorrow\'s Celebrations!');
     });
 });
 //# sourceMappingURL=dailyScanNotifications.test.js.map

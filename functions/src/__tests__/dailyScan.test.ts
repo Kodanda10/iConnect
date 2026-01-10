@@ -2,15 +2,15 @@ import { scanForTasks, Constituent } from '../dailyScan';
 
 describe('dailyScan Logic', () => {
     const mockTimestampClass = {
-        fromDate: (date: Date) => ({ 
+        fromDate: (date: Date) => ({
             toDate: () => date,
             toISOString: () => date.toISOString(),
-            _isTimestamp: true 
+            _isTimestamp: true,
         }),
-        now: () => ({ 
+        now: () => ({
             toDate: () => new Date(),
-            _isTimestamp: true 
-        })
+            _isTimestamp: true,
+        }),
     };
 
     const mockConstituents: Constituent[] = [
@@ -21,8 +21,8 @@ describe('dailyScan Logic', () => {
             dob: '1990-12-18', // matches today (if today is Dec 18)
             ward_number: '12',
             address: 'Street 1',
-            created_at: '2023-01-01'
-        }
+            created_at: '2023-01-01',
+        },
     ];
 
     test('should create task for birthday today', () => {
@@ -36,7 +36,7 @@ describe('dailyScan Logic', () => {
         expect(result.newTasks[0].constituent_name).toBe('Rahul');
         expect(result.newTasks[0].type).toBe('BIRTHDAY');
         expect(result.newTasks[0].due_date._isTimestamp).toBe(true);
-        
+
         jest.useRealTimers();
     });
 
@@ -47,13 +47,13 @@ describe('dailyScan Logic', () => {
         const existingTask: any = {
             constituent_id: 'c1',
             type: 'BIRTHDAY',
-            due_date: mockTimestampClass.fromDate(today)
+            due_date: mockTimestampClass.fromDate(today),
         };
 
         const result = scanForTasks(mockConstituents, [existingTask], mockTimestampClass);
 
         expect(result.count).toBe(0);
-        
+
         jest.useRealTimers();
     });
 });

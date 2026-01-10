@@ -69,7 +69,7 @@ async function clearCollections() {
 
 function parseDate(dateStr: string): Date {
     const [day, month, year] = dateStr.split('/');
-    // Note: Creating date in UTC or local? 
+    // Note: Creating date in UTC or local?
     // Creating at 12:00 PM to avoid TZ shifts across midnight
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0);
 }
@@ -95,7 +95,7 @@ async function ingestData() {
     for (const line of lines) {
         if (!line.trim()) continue;
 
-        const [name, mobile, ward, block, gp, birthday, anniversary] = line.split(',').map(s => s.trim());
+        const [name, mobile, ward, block, gp, birthday, anniversary] = line.split(',').map((s) => s.trim());
 
         // 1. Create Constituent
         const constituentRef = db.collection('constituents').doc();
@@ -146,7 +146,7 @@ async function ingestData() {
             constituent_mobile: mobile,
             ward_number: parseInt(ward),
             block: block,
-            gram_panchayat: gp
+            gram_panchayat: gp,
         });
         taskCount++;
 
@@ -170,7 +170,7 @@ async function ingestData() {
                 constituent_mobile: mobile,
                 ward_number: parseInt(ward),
                 block: block,
-                gram_panchayat: gp
+                gram_panchayat: gp,
             });
             taskCount++;
         }

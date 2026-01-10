@@ -1,7 +1,7 @@
 /**
  * @file functions/src/__tests__/messagingProvider.test.ts
  * @description TDD tests for plug-and-play messaging provider abstraction
- * 
+ *
  * This tests our "bridge" - the abstraction layer that will seamlessly
  * integrate with real providers (Twilio, MSG91, Meta WhatsApp) when ready.
  */
@@ -59,7 +59,7 @@ describe('Messaging Provider Abstraction', () => {
             const results = await provider.sendBulkSMS(mobiles, 'Bulk test');
 
             expect(results.length).toBe(3);
-            expect(results.every(r => r.success)).toBe(true);
+            expect(results.every((r) => r.success)).toBe(true);
         });
     });
 

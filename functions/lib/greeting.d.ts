@@ -15,6 +15,11 @@ export interface GreetingRequest {
     leaderName?: string;
 }
 /**
+ * Sanitize input to prevent prompt injection
+ * Removes control characters and normalizes whitespace
+ */
+export declare function sanitizeInput(input: string): string;
+/**
  * Generate a greeting message for a constituent
  * Uses Gemini AI when available, falls back to templates
  */

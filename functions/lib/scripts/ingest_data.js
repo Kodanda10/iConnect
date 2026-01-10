@@ -118,7 +118,7 @@ async function ingestData() {
     for (const line of lines) {
         if (!line.trim())
             continue;
-        const [name, mobile, ward, block, gp, birthday, anniversary] = line.split(',').map(s => s.trim());
+        const [name, mobile, ward, block, gp, birthday, anniversary] = line.split(',').map((s) => s.trim());
         // 1. Create Constituent
         const constituentRef = db.collection('constituents').doc();
         const constituentId = constituentRef.id;
@@ -162,7 +162,7 @@ async function ingestData() {
             constituent_mobile: mobile,
             ward_number: parseInt(ward),
             block: block,
-            gram_panchayat: gp
+            gram_panchayat: gp,
         });
         taskCount++;
         // Anniversary Task
@@ -184,7 +184,7 @@ async function ingestData() {
                 constituent_mobile: mobile,
                 ward_number: parseInt(ward),
                 block: block,
-                gram_panchayat: gp
+                gram_panchayat: gp,
             });
             taskCount++;
         }

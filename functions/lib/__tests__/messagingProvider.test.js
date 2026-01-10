@@ -48,7 +48,7 @@ describe('Messaging Provider Abstraction', () => {
             const mobiles = ['+919876543210', '+919876543211', '+919876543212'];
             const results = await provider.sendBulkSMS(mobiles, 'Bulk test');
             expect(results.length).toBe(3);
-            expect(results.every(r => r.success)).toBe(true);
+            expect(results.every((r) => r.success)).toBe(true);
         });
     });
     describe('TwilioProvider', () => {
