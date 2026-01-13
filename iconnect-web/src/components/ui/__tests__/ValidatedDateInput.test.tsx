@@ -3,6 +3,7 @@
  * @description TDD tests for ValidatedDateInput component with real-time UI validation
  * @changelog
  * - 2024-12-17: Initial TDD implementation - UI behavior tests
+ * - 2025-01-20: Added tests for accessible error messaging
  */
 
 import React from 'react';
@@ -218,6 +219,60 @@ describe('ValidatedDateInput Component', () => {
                 // Should show GREEN border for future date when allowFuture is true
                 expect(container.innerHTML).toContain('border-emerald-500');
             });
+        });
+    });
+
+    // ============================================
+    // Accessibility Tests (New)
+    // ============================================
+    describe('Accessibility', () => {
+        test('shows descriptive error message for partial date', () => {
+            render(
+                <ValidatedDateInput
+                    value="12/"
+                    onChange={() => { }}
+                />
+            );
+
+            const errorMessage = screen.getByRole('alert');
+            expect(errorMessage).toHaveTextContent('Please enter a complete date (DD/MM/YYYY)');
+
+            const input = screen.getByRole('textbox');
+            expect(input).toHaveAttribute('aria-invalid', 'true');
+            expect(input).toHaveAttribute('aria-errormessage', errorMessage.id);
+        });
+
+        test('shows descriptive error message for future date when forbidden', () => {
+             jest.useFakeTimers();
+             jest.setSystemTime(new Date('2024-01-01'));
+
+            render(
+                <ValidatedDateInput
+                    value="01/01/2025" // Future relative to 2024-01-01
+                    onChange={() => { }}
+                    allowFuture={false}
+                />
+            );
+
+            const errorMessage = screen.getByRole('alert');
+            expect(errorMessage).toHaveTextContent('Date cannot be in the future');
+
+            jest.useRealTimers();
+        });
+
+        test('does not show error message for valid date', () => {
+            render(
+                <ValidatedDateInput
+                    value="2024-01-01"
+                    onChange={() => { }}
+                />
+            );
+
+            const errorMessage = screen.queryByRole('alert');
+            expect(errorMessage).not.toBeInTheDocument();
+
+            const input = screen.getByRole('textbox');
+            expect(input).toHaveAttribute('aria-invalid', 'false');
         });
     });
 
