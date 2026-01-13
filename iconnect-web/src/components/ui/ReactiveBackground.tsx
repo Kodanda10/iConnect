@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 
 interface ReactiveBackgroundProps {
     urgencyLevel?: 'calm' | 'normal' | 'active' | 'urgent';
@@ -50,22 +50,51 @@ export function ReactiveBackground({
     urgencyLevel = 'normal',
     particleCount = 20
 }: ReactiveBackgroundProps) {
-    const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
     const containerRef = useRef<HTMLDivElement>(null);
+    const gradientRef = useRef<HTMLDivElement>(null);
+    const requestRef = useRef<number>();
 
     const config = urgencyConfig[urgencyLevel];
 
-    // Track mouse for parallax effect
+    // Track mouse for parallax effect - Optimized to avoid re-renders
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            setMousePos({
-                x: e.clientX / window.innerWidth,
-                y: e.clientY / window.innerHeight,
+            if (requestRef.current) return;
+
+            requestRef.current = requestAnimationFrame(() => {
+                if (!gradientRef.current) return;
+
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+
+                const grad1X = 50 + (x - 0.5) * 20;
+                const grad1Y = 50 + (y - 0.5) * 20;
+
+                const grad2X = 70 - (x - 0.5) * 15;
+                const grad2Y = 80 - (y - 0.5) * 15;
+
+                gradientRef.current.style.background = `
+                    radial-gradient(
+                      ellipse 150% 100% at ${grad1X}% ${grad1Y}%,
+                      hsla(158, 60%, 30%, 0.3) 0%,
+                      transparent 60%
+                    ),
+                    radial-gradient(
+                      ellipse 100% 150% at ${grad2X}% ${grad2Y}%,
+                      hsla(255, 40%, 35%, 0.25) 0%,
+                      transparent 50%
+                    )
+                `;
+
+                requestRef.current = undefined;
             });
         };
 
         window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            if (requestRef.current) cancelAnimationFrame(requestRef.current);
+        };
     }, []);
 
     // Generate stable particles using useMemo instead of useEffect+setState
@@ -87,16 +116,17 @@ export function ReactiveBackground({
         >
             {/* Animated Mesh Gradient Layer */}
             <div
+                ref={gradientRef}
                 className="absolute inset-0"
                 style={{
                     background: `
             radial-gradient(
-              ellipse 150% 100% at ${50 + (mousePos.x - 0.5) * 20}% ${50 + (mousePos.y - 0.5) * 20}%,
+              ellipse 150% 100% at 50% 50%,
               hsla(158, 60%, 30%, 0.3) 0%,
               transparent 60%
             ),
             radial-gradient(
-              ellipse 100% 150% at ${70 - (mousePos.x - 0.5) * 15}% ${80 - (mousePos.y - 0.5) * 15}%,
+              ellipse 100% 150% at 70% 80%,
               hsla(255, 40%, 35%, 0.25) 0%,
               transparent 50%
             )
