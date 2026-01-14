@@ -1,0 +1,3 @@
+## 2024-05-24 - Custom UI Component Accessibility Gaps
+**Learning:** High-fidelity custom UI components (like GlassCalendar) in this repo prioritize visual design (Glassmorphism) but frequently miss semantic structure. Specifically, icon-only navigation buttons and custom dropdowns lack ARIA labels and state attributes (`aria-expanded`, `aria-haspopup`), rendering them invisible or confusing to screen readers.
+**Action:** When touching custom UI components, explicitly check for and add `aria-label` to icon buttons and semantic roles/attributes to non-native interactive elements. Verify with a dedicated a11y test file if one is missing.
