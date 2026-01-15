@@ -14,11 +14,19 @@ import { Constituent } from '@/types';
 function escapeCSVField(value: string | undefined): string {
     if (!value) return '';
 
-    // If field contains comma, quote, or newline, wrap in quotes and escape internal quotes
-    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-        return `"${value.replace(/"/g, '""')}"`;
+    let escaped = value;
+
+    // Prevent CSV Injection (Formula Injection)
+    // If field starts with =, +, -, or @, prepend a single quote to force it as text
+    if (/^[=+\-@]/.test(escaped)) {
+        escaped = `'${escaped}`;
     }
-    return value;
+
+    // If field contains comma, quote, or newline, wrap in quotes and escape internal quotes
+    if (escaped.includes(',') || escaped.includes('"') || escaped.includes('\n')) {
+        return `"${escaped.replace(/"/g, '""')}"`;
+    }
+    return escaped;
 }
 
 /**
