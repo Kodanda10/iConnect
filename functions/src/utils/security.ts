@@ -25,6 +25,15 @@ export function redactMessage(message: string | null | undefined): string {
 }
 
 /**
+ * Redacts arbitrary text, showing only the length.
+ * Useful for titles, descriptions, etc. where content is sensitive.
+ */
+export function redactText(text: string | null | undefined): string {
+    if (!text) return '[EMPTY]';
+    return `[REDACTED: ${text.length} chars]`;
+}
+
+/**
  * Redacts email addresses
  */
 export function redactEmail(email: string | null | undefined): string {
