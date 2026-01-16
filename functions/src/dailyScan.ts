@@ -43,22 +43,12 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Get the date suffix (-MM-DD) for optimized string matching
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
-
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
-
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
-
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+function getDateSuffix(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `-${month}-${day}`;
 }
 
 /**
@@ -122,11 +112,14 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todaySuffix = getDateSuffix(today);
+    const tomorrowSuffix = getDateSuffix(tomorrow);
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
+        if (constituent.dob?.endsWith(todaySuffix)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -134,7 +127,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
+        if (constituent.dob?.endsWith(tomorrowSuffix)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -142,7 +135,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
+        if (constituent.anniversary?.endsWith(todaySuffix)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -150,7 +143,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
+        if (constituent.anniversary?.endsWith(tomorrowSuffix)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -185,18 +178,20 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todaySuffix = getDateSuffix(today);
+    const tomorrowSuffix = getDateSuffix(tomorrow);
+
     // 1. Calculate Counts
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
-    // Since 'today' is created from IST string, its 'local' components are correct for IST
+    // NOTE: Suffix matching (-MM-DD) avoids expensive Date parsing
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        if (c.dob?.endsWith(todaySuffix)) todayCount.birthdays++;
+        if (c.anniversary?.endsWith(todaySuffix)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        if (c.dob?.endsWith(tomorrowSuffix)) tomorrowCount.birthdays++;
+        if (c.anniversary?.endsWith(tomorrowSuffix)) tomorrowCount.anniversaries++;
     }
 
     // 2. Fetch Settings & Leader
@@ -243,7 +238,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (c.dob?.endsWith(tomorrowSuffix) || c.anniversary?.endsWith(tomorrowSuffix)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -291,7 +286,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (c.dob?.endsWith(tomorrowSuffix) || c.anniversary?.endsWith(tomorrowSuffix)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
