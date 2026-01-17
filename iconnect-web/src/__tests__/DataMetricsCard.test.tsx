@@ -148,4 +148,25 @@ describe('DataMetricsCard Component', () => {
             expect(screen.getByText(/error/i)).toBeInTheDocument();
         });
     });
+
+    it('shows GP breakdown on block focus', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus on Block A
+        fireEvent.focus(screen.getByTestId('block-Block A'));
+
+        // Assert - GP details should appear
+        await waitFor(() => {
+            expect(screen.getByText('GP1')).toBeInTheDocument();
+        });
+    });
 });
