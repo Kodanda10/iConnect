@@ -44,3 +44,21 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Redacts arbitrary text in the middle
+ */
+export function redactText(text: string | null | undefined): string {
+    if (!text) return '[MISSING]';
+    if (text.length <= 6) return '***';
+    return `${text.slice(0, 3)}***${text.slice(-3)}`;
+}
+
+/**
+ * Sanitize input to prevent injection attacks (e.g. Prompt Injection)
+ * Escapes < and > characters
+ */
+export function sanitizeInput(input: string | undefined): string {
+    if (!input) return '';
+    return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
