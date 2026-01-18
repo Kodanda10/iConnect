@@ -1,8 +1,9 @@
 /**
  * @file components/ui/ValidatedDateInput.tsx
- * @description Reusable DD/MM/YYYY date input with real-time validation
+ * @description Reusable DD/MM/YYYY date input with real-time validation and accessible UX
  * @changelog
  * - 2024-12-17: Initial TDD implementation with red/green borders
+ * - 2025-02-20: 🎨 Palette UX improvements (delayed validation, a11y error message, keyboard support)
  */
 
 'use client';
@@ -41,9 +42,12 @@ export default function ValidatedDateInput({
 }: ValidatedDateInputProps) {
     const id = useId();
     const calendarId = `${id}-calendar`;
+    const errorId = `${id}-error`;
+
     const [displayValue, setDisplayValue] = useState(formatDateForDisplay(value));
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
+    const [isTouched, setIsTouched] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Sync external value changes
@@ -54,12 +58,22 @@ export default function ValidatedDateInput({
     // Get current validation state
     const validationState = getValidationState(displayValue, allowFuture);
 
+    // Improved UX: Only show error if touched OR if value is complete but invalid
+    // This prevents aggressive red borders while the user is still typing
+    const shouldShowError = validationState === 'error' && (isTouched || displayValue.length === 10);
+    const shouldShowSuccess = validationState === 'success';
+
     // Handle text input with auto-masking
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value;
         const formatted = formatDateInput(rawValue);
 
         setDisplayValue(formatted);
+
+        // Reset touched state if user clears input to start over
+        if (formatted === '') {
+            setIsTouched(false);
+        }
 
         // Try to parse and send valid date to parent
         const parsed = parseDateInput(formatted);
@@ -68,6 +82,20 @@ export default function ValidatedDateInput({
         } else {
             // Send formatted display value for partial input
             onChange(formatted);
+        }
+    };
+
+    const handleBlur = () => {
+        setIsTouched(true);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (disabled) return;
+
+        // Open calendar on Alt+ArrowDown (standard combobox behavior)
+        if (e.altKey && e.key === 'ArrowDown') {
+            e.preventDefault();
+            openCalendar();
         }
     };
 
@@ -81,6 +109,8 @@ export default function ValidatedDateInput({
         onChange(storageFormat);
         setDisplayValue(formatDateForDisplay(storageFormat));
         setIsCalendarOpen(false);
+        // Focus back on input after selection
+        inputRef.current?.focus();
     };
 
     // Calculate position on open
@@ -113,25 +143,31 @@ export default function ValidatedDateInput({
 
     // Get border/icon styles based on validation state
     const getBorderClass = (): string => {
-        switch (validationState) {
-            case 'success':
-                return 'border-emerald-500 ring-2 ring-emerald-500/20';
-            case 'error':
-                return 'border-red-500 ring-2 ring-red-500/20';
-            default:
-                return 'border-white/20 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-400/20';
+        if (shouldShowSuccess) {
+            return 'border-emerald-500 ring-2 ring-emerald-500/20';
         }
+        if (shouldShowError) {
+            return 'border-red-500 ring-2 ring-red-500/20';
+        }
+        return 'border-white/20 focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-400/20';
     };
 
     const getIcon = () => {
-        switch (validationState) {
-            case 'success':
-                return <Check className="w-5 h-5 text-emerald-500" />;
-            case 'error':
-                return <AlertCircle className="w-5 h-5 text-red-500" />;
-            default:
-                return <Calendar className="w-5 h-5 text-gray-400" />;
+        if (shouldShowSuccess) {
+            return <Check className="w-5 h-5 text-emerald-500" />;
         }
+        if (shouldShowError) {
+            return <AlertCircle className="w-5 h-5 text-red-500" />;
+        }
+        return <Calendar className="w-5 h-5 text-gray-400" />;
+    };
+
+    const getErrorMessage = () => {
+        if (!shouldShowError) return null;
+        if (!displayValue) return "Date is required"; // Should not happen with current logic as empty is neutral
+        if (displayValue.length < 10) return "Please enter a complete date (DD/MM/YYYY)";
+        if (!allowFuture && validationState === 'error') return "Future dates are not allowed";
+        return "Invalid date. Please check the format.";
     };
 
     return (
@@ -153,7 +189,7 @@ export default function ValidatedDateInput({
                     type="button"
                     onClick={openCalendar}
                     disabled={disabled || !showCalendar}
-                    className="focus:outline-none"
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-md"
                     aria-label="Toggle calendar"
                     aria-expanded={isCalendarOpen}
                     aria-haspopup="dialog"
@@ -170,15 +206,23 @@ export default function ValidatedDateInput({
                     inputMode="numeric"
                     value={displayValue}
                     onChange={handleInputChange}
-                    onFocus={openCalendar}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     disabled={disabled}
                     maxLength={10}
-                    aria-invalid={validationState === 'error'}
-                    title={validationState === 'error' ? "Date must be DD/MM/YYYY" : undefined}
+                    aria-invalid={shouldShowError}
+                    aria-errormessage={shouldShowError ? errorId : undefined}
                     className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
                 />
             </div>
+
+            {/* Accessible Error Message */}
+            {shouldShowError && (
+                <p id={errorId} role="alert" className="mt-1 text-xs text-red-400 font-medium ml-1 animate-in slide-in-from-top-1">
+                    {getErrorMessage()}
+                </p>
+            )}
 
             {/* Calendar Portal - Renders at root level to ensure Z-Index top */}
             {isCalendarOpen && showCalendar && typeof document !== 'undefined' && createPortal(

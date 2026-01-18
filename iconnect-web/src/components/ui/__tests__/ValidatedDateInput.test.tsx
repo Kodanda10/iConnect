@@ -3,10 +3,11 @@
  * @description TDD tests for ValidatedDateInput component with real-time UI validation
  * @changelog
  * - 2024-12-17: Initial TDD implementation - UI behavior tests
+ * - 2025-02-20: Updated for UX improvements (delayed validation, manual calendar toggle)
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ValidatedDateInput from '../ValidatedDateInput';
 
@@ -132,13 +133,16 @@ describe('ValidatedDateInput Component', () => {
             expect(container.innerHTML).not.toContain('border-emerald-500');
         });
 
-        test('shows error state (red border) for partial input', () => {
+        test('shows error state (red border) for partial input after blur', () => {
             const { container } = render(
                 <ValidatedDateInput
                     value="16/12/"
                     onChange={() => { }}
                 />
             );
+
+            // Trigger blur to activate validation for partial input
+            fireEvent.blur(screen.getByRole('textbox'));
 
             // Should have error class
             expect(container.innerHTML).toContain('border-red-500');
@@ -152,6 +156,8 @@ describe('ValidatedDateInput Component', () => {
                 />
             );
 
+            // Complete invalid date should show error immediately (or on blur)
+            // Logic: length === 10 shows error immediately
             expect(container.innerHTML).toContain('border-red-500');
         });
 
@@ -225,7 +231,7 @@ describe('ValidatedDateInput Component', () => {
     // Calendar Integration Tests
     // ============================================
     describe('Calendar Integration', () => {
-        test('calendar popup appears on input focus', async () => {
+        test('calendar popup appears on toggle click', async () => {
             render(
                 <ValidatedDateInput
                     value=""
@@ -234,8 +240,8 @@ describe('ValidatedDateInput Component', () => {
                 />
             );
 
-            const input = screen.getByRole('textbox');
-            await userEvent.click(input);
+            const button = screen.getByLabelText('Toggle calendar');
+            await userEvent.click(button);
 
             // GlassCalendar renders day names like 'Su', 'Mo', etc.
             expect(screen.getByText('Su')).toBeInTheDocument();
@@ -252,8 +258,8 @@ describe('ValidatedDateInput Component', () => {
                 />
             );
 
-            const input = screen.getByRole('textbox');
-            await userEvent.click(input);
+            const button = screen.getByLabelText('Toggle calendar');
+            await userEvent.click(button);
 
             // Click day 16
             const dayButton = screen.getByText('16');
@@ -295,6 +301,9 @@ describe('ValidatedDateInput Component', () => {
                         onChange={() => { }}
                     />
                 );
+
+                // Trigger blur to ensure partial inputs are validated
+                fireEvent.blur(screen.getByRole('textbox'));
 
                 if (expectedValid) {
                     expect(container.innerHTML).toContain('border-emerald-500');
