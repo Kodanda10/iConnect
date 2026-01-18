@@ -11,6 +11,7 @@
  * 
  * @changelog
  * - 2025-12-26: Initial TDD implementation
+ * - 2025-05-20: Optimized performance by inverting loop (Constituents * 1 parse) instead of (Dates * Constituents parses)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -92,16 +93,6 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
     }
 
     return { month, day };
-}
-
-/**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
 }
 
 /**
@@ -197,6 +188,7 @@ function buildExistingTaskKeys(existingTasks: Task[]): Set<string> {
  * - Idempotent: safely re-runnable
  * - Returns comprehensive metrics
  * - Denormalizes constituent data onto tasks for efficient queries
+ * - Performance optimized: O(C + D) instead of O(C * D) where C=Constituents, D=Days
  * 
  * @param constituents - Array of constituents to scan
  * @param existingTasks - Array of existing tasks (for deduplication)
@@ -219,37 +211,80 @@ export function generateTasksForDateRange(
     // Build existing task lookup for O(1) deduplication
     const existingTaskKeys = buildExistingTaskKeys(existingTasks);
 
-    // Iterate through each date in range
-    for (const date of dateRange(startDate, endDate)) {
-        const targetMonth = date.getMonth() + 1; // 1-indexed
-        const targetDay = date.getDate();
-        const dueDateStr = formatDateStr(date);
+    // OPTIMIZATION: Build a map of target dates (MM-DD) -> Date[]
+    // This allows us to iterate constituents once and look up if their dates match any target date
+    const targetDatesMap = new Map<string, Date[]>();
 
-        // Scan all constituents for this date
-        for (const constituent of constituents) {
-            // Check Birthday
-            if (isDateMatchForTarget(constituent.dob, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'BIRTHDAY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key); // Add to set to prevent duplicates in same run
-                    birthdayCount++;
+    // We also track the "due date strings" for these target dates to avoid re-formatting later
+    // Map<string, string[]> -> key MM-DD -> array of YYYY-MM-DD
+    const targetDateStringsMap = new Map<string, string[]>();
+
+    for (const date of dateRange(startDate, endDate)) {
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const key = `${month}-${day}`;
+
+        if (!targetDatesMap.has(key)) {
+            targetDatesMap.set(key, []);
+            targetDateStringsMap.set(key, []);
+        }
+        targetDatesMap.get(key)!.push(new Date(date));
+        targetDateStringsMap.get(key)!.push(formatDateStr(date));
+    }
+
+    // Iterate constituents ONCE
+    for (const constituent of constituents) {
+        // Check Birthday
+        if (constituent.dob) {
+            const parts = parseDateParts(constituent.dob);
+            if (parts) {
+                const key = `${parts.month}-${parts.day}`;
+                const matchingDates = targetDatesMap.get(key);
+
+                if (matchingDates) {
+                    const dateStrings = targetDateStringsMap.get(key)!;
+
+                    // Create task for each matching date (usually just one, unless range spans years)
+                    matchingDates.forEach((date, index) => {
+                        const dueDateStr = dateStrings[index];
+                        const taskKey = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
+
+                        if (existingTaskKeys.has(taskKey)) {
+                            skippedDuplicates++;
+                        } else {
+                            const task = createTask(constituent, 'BIRTHDAY', date, TimestampClass);
+                            newTasks.push(task);
+                            existingTaskKeys.add(taskKey);
+                            birthdayCount++;
+                        }
+                    });
                 }
             }
+        }
 
-            // Check Anniversary
-            if (isDateMatchForTarget(constituent.anniversary, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'ANNIVERSARY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key);
-                    anniversaryCount++;
+        // Check Anniversary
+        if (constituent.anniversary) {
+             const parts = parseDateParts(constituent.anniversary);
+            if (parts) {
+                const key = `${parts.month}-${parts.day}`;
+                const matchingDates = targetDatesMap.get(key);
+
+                if (matchingDates) {
+                    const dateStrings = targetDateStringsMap.get(key)!;
+
+                    matchingDates.forEach((date, index) => {
+                        const dueDateStr = dateStrings[index];
+                        const taskKey = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
+
+                        if (existingTaskKeys.has(taskKey)) {
+                            skippedDuplicates++;
+                        } else {
+                            const task = createTask(constituent, 'ANNIVERSARY', date, TimestampClass);
+                            newTasks.push(task);
+                            existingTaskKeys.add(taskKey);
+                            anniversaryCount++;
+                        }
+                    });
                 }
             }
         }
