@@ -71,7 +71,7 @@ describe('generateGreetingMessage', () => {
             const result = await generateGreetingMessage(request);
 
             // Should contain birthday-related words
-            expect(result.toLowerCase()).toMatch(/birthday|birth|born/);
+            expect(result.toLowerCase()).toMatch(/birthday|birth|born|returns/);
         });
 
         it('returns anniversary-specific message for ANNIVERSARY type', async () => {

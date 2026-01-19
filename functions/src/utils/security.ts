@@ -44,3 +44,12 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input for use in XML/HTML contexts (e.g., GenAI prompts)
+ * Escapes < and > to prevent injection.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    return input.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
