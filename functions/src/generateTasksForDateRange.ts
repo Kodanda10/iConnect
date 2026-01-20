@@ -95,16 +95,6 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
 }
 
 /**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
-}
-
-/**
  * Format date as YYYY-MM-DD string
  */
 function formatDateStr(date: Date): string {
@@ -219,37 +209,66 @@ export function generateTasksForDateRange(
     // Build existing task lookup for O(1) deduplication
     const existingTaskKeys = buildExistingTaskKeys(existingTasks);
 
-    // Iterate through each date in range
+    // 1. Pre-calculate target dates map (Month-Day -> Date[])
+    // This allows O(1) lookup per constituent instead of iterating date range.
+    // Complexity: O(Days + Constituents) instead of O(Days * Constituents).
+    const targetDatesMap = new Map<string, Date[]>();
+
     for (const date of dateRange(startDate, endDate)) {
         const targetMonth = date.getMonth() + 1; // 1-indexed
         const targetDay = date.getDate();
-        const dueDateStr = formatDateStr(date);
+        const key = `${targetMonth}-${targetDay}`;
 
-        // Scan all constituents for this date
-        for (const constituent of constituents) {
-            // Check Birthday
-            if (isDateMatchForTarget(constituent.dob, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'BIRTHDAY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key); // Add to set to prevent duplicates in same run
-                    birthdayCount++;
+        if (!targetDatesMap.has(key)) {
+            targetDatesMap.set(key, []);
+        }
+        targetDatesMap.get(key)!.push(date);
+    }
+
+    // 2. Iterate constituents once
+    for (const constituent of constituents) {
+        // Check Birthday
+        const dobParts = parseDateParts(constituent.dob);
+        if (dobParts) {
+            const dobKey = `${dobParts.month}-${dobParts.day}`;
+            const targetDates = targetDatesMap.get(dobKey);
+
+            if (targetDates) {
+                for (const date of targetDates) {
+                    const dueDateStr = formatDateStr(date);
+                    const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
+
+                    if (existingTaskKeys.has(key)) {
+                        skippedDuplicates++;
+                    } else {
+                        const task = createTask(constituent, 'BIRTHDAY', date, TimestampClass);
+                        newTasks.push(task);
+                        existingTaskKeys.add(key);
+                        birthdayCount++;
+                    }
                 }
             }
+        }
 
-            // Check Anniversary
-            if (isDateMatchForTarget(constituent.anniversary, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'ANNIVERSARY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key);
-                    anniversaryCount++;
+        // Check Anniversary
+        const anniversaryParts = parseDateParts(constituent.anniversary);
+        if (anniversaryParts) {
+            const anniversaryKey = `${anniversaryParts.month}-${anniversaryParts.day}`;
+            const targetDates = targetDatesMap.get(anniversaryKey);
+
+            if (targetDates) {
+                for (const date of targetDates) {
+                    const dueDateStr = formatDateStr(date);
+                    const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
+
+                    if (existingTaskKeys.has(key)) {
+                        skippedDuplicates++;
+                    } else {
+                        const task = createTask(constituent, 'ANNIVERSARY', date, TimestampClass);
+                        newTasks.push(task);
+                        existingTaskKeys.add(key);
+                        anniversaryCount++;
+                    }
                 }
             }
         }
