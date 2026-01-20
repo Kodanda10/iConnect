@@ -174,6 +174,13 @@ export default function UploadPage() {
         }
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+        }
+    };
+
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -517,12 +524,16 @@ export default function UploadPage() {
                     {/* Drop Zone */}
                     <div
                         onClick={() => fileInputRef.current?.click()}
+                        onKeyDown={handleKeyDown}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Upload CSV file. Drag and drop or press Enter to browse."
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         className={`
                             border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
-                            transition-all duration-300 glow-hover
+                            transition-all duration-300 glow-hover outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
                             ${isDragging
                                 ? 'border-emerald-400 bg-emerald-400/10 scale-[1.02]'
                                 : 'border-white/40 hover:border-emerald-400'
@@ -939,6 +950,7 @@ export default function UploadPage() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search by name, mobile, or ward..."
+                        aria-label="Search constituents"
                         className="glass-input-dark pl-11"
                     />
                 </div>
