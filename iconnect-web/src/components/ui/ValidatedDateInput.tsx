@@ -71,6 +71,17 @@ export default function ValidatedDateInput({
         }
     };
 
+    // Handle key press for accessibility
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowDown' && e.altKey) {
+            e.preventDefault();
+            openCalendar();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setIsCalendarOpen(false);
+        }
+    };
+
     // Handle calendar date selection
     const handleCalendarSelect = (date: Date) => {
         const year = date.getFullYear();
@@ -171,6 +182,7 @@ export default function ValidatedDateInput({
                     value={displayValue}
                     onChange={handleInputChange}
                     onFocus={openCalendar}
+                    onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     disabled={disabled}
                     maxLength={10}
