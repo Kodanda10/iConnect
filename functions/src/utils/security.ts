@@ -4,6 +4,35 @@
  */
 
 /**
+ * Sanitize user input to prevent injection attacks (e.g., Prompt Injection, XSS)
+ * - Removes control characters
+ * - Escapes HTML entities
+ * - Trims whitespace
+ */
+export function sanitizeInput(input: string | undefined | null): string {
+    if (!input) return '';
+
+    // 1. Trim whitespace
+    let sanitized = input.trim();
+
+    // 2. Remove control characters (newlines, tabs, etc.) which are common in prompt injection
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, ' ');
+
+    // 3. Escape HTML/XML characters to prevent tag injection if used in XML-structured prompts
+    sanitized = sanitized
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    // 4. Collapse multiple spaces
+    sanitized = sanitized.replace(/\s+/g, ' ');
+
+    return sanitized;
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */

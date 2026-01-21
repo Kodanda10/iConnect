@@ -4,9 +4,11 @@
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
  * - 2024-12-15: Added real Gemini AI integration with template fallback
+ * - 2025-01-28: Added security sanitization against prompt injection
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -70,19 +72,34 @@ let warnedMissingGeminiKey = false;
 
 /**
  * Build a prompt for Gemini AI
+ * Uses XML delimiters to separate instructions from user input
  */
-function buildPrompt(request: GreetingRequest): string {
+export function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
-The message should be:
+    // Sanitize user inputs to prevent prompt injection
+    const cleanName = sanitizeInput(request.name);
+    const cleanLeader = request.leaderName ? sanitizeInput(request.leaderName) : '';
+
+    const leaderContext = cleanLeader
+        ? `<sender_name>${cleanLeader}</sender_name>`
+        : '';
+
+    return `You are a helpful assistant generating greeting messages.
+Generate a warm and heartfelt ${occasion} greeting message for the recipient specified in <recipient_name> tags.
+${leaderContext ? `The message is sent on behalf of the person in <sender_name> tags.` : ''}
+The message must be in ${language}.
+
+<recipient_name>${cleanName}</recipient_name>
+${leaderContext}
+
+Guidelines:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+- ONLY return the greeting message content. Do not include XML tags or "Here is the message".`;
 }
 
 /**
@@ -92,7 +109,8 @@ function getTemplateMessage(request: GreetingRequest): string {
     const typeTemplates = TEMPLATES[request.type];
     const langTemplates = typeTemplates[request.language];
     const template = langTemplates[Math.floor(Math.random() * langTemplates.length)];
-    return template.replace('{name}', request.name);
+    // Basic replacement for fallback - still safe as it's just string replacement
+    return template.replace('{name}', request.name.trim());
 }
 
 /**
