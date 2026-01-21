@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -20,6 +20,18 @@ export default function DataMetricsCard() {
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
+
+    // Use refs to access latest state in useCallback without triggering re-creation
+    const gpDataRef = useRef(gpData);
+    const gpLoadingRef = useRef(gpLoading);
+
+    useEffect(() => {
+        gpDataRef.current = gpData;
+    }, [gpData]);
+
+    useEffect(() => {
+        gpLoadingRef.current = gpLoading;
+    }, [gpLoading]);
 
     useEffect(() => {
         loadMetrics();
@@ -39,9 +51,9 @@ export default function DataMetricsCard() {
         }
     };
 
-    // Lazy load GP data on hover
+    // Lazy load GP data on hover - Stable reference
     const loadGPData = useCallback(async (blockName: string) => {
-        if (gpData[blockName] || gpLoading[blockName]) return;
+        if (gpDataRef.current[blockName] || gpLoadingRef.current[blockName]) return;
 
         setGpLoading(prev => ({ ...prev, [blockName]: true }));
         try {
@@ -52,12 +64,17 @@ export default function DataMetricsCard() {
         } finally {
             setGpLoading(prev => ({ ...prev, [blockName]: false }));
         }
-    }, [gpData, gpLoading]);
+    }, []);
 
-    const handleBlockHover = (blockName: string) => {
+    // Stable handlers for BlockItem to enable React.memo
+    const handleBlockEnter = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +235,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockEnter}
+                            onMouseLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +249,11 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
+    onMouseEnter: (name: string) => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,7 +266,9 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
+            // Use semantic button or proper roles for better accessibility if this was a button,
+            // but for now keeping div to preserve exact behavior, just optimizing perf.
+            onMouseEnter={() => onMouseEnter(block.name)}
             onMouseLeave={onMouseLeave}
         >
             {/* Progress bar background */}
@@ -280,7 +299,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
