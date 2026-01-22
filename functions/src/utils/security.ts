@@ -44,3 +44,27 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input for GenAI prompts to prevent injection attacks.
+ * Removes control characters and escapes HTML/XML-like syntax.
+ */
+export function sanitizeInput(input: string | undefined): string {
+    if (!input) return '';
+    // Remove control characters (except newline/tab which might be needed, but for names/occasions generally safe to remove)
+    // Actually for names, let's just keep alphanumeric, spaces, and basic punctuation.
+    // But let's start with a basic escape.
+
+    // 1. Remove control characters
+    let sanitized = input.replace(/[\x00-\x1F\x7F]/g, '');
+
+    // 2. Escape XML/HTML special characters to prevent tag injection
+    sanitized = sanitized
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+
+    return sanitized;
+}
