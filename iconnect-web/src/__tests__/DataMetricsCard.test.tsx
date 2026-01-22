@@ -121,6 +121,51 @@ describe('DataMetricsCard Component', () => {
         });
     });
 
+    it('shows GP breakdown on keyboard focus', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus Block A
+        fireEvent.focus(screen.getByTestId('block-Block A'));
+
+        // Assert - GP details should appear
+        await waitFor(() => {
+            expect(screen.getByText('GP1')).toBeInTheDocument();
+        });
+    });
+
+    it('hides GP breakdown on keyboard blur', async () => {
+        // Arrange
+        (metricsService.fetchConstituentMetrics as jest.Mock).mockResolvedValue(mockMetrics);
+        (metricsService.fetchGPMetricsForBlock as jest.Mock).mockResolvedValue([
+            { name: 'GP1', count: 200 },
+        ]);
+
+        // Act
+        render(<DataMetricsCard />);
+
+        await waitFor(() => screen.getByTestId('block-Block A'));
+
+        // Focus then blur
+        fireEvent.focus(screen.getByTestId('block-Block A'));
+        await waitFor(() => screen.getByText('GP1'));
+
+        fireEvent.blur(screen.getByTestId('block-Block A'));
+
+        // Assert - GP details should hide
+        await waitFor(() => {
+            expect(screen.queryByText('GP1')).not.toBeInTheDocument();
+        });
+    });
+
     it('shows loading state initially', () => {
         // Arrange
         (metricsService.fetchConstituentMetrics as jest.Mock).mockImplementation(
