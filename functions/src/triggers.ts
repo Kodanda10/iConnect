@@ -2,6 +2,7 @@ import { onDocumentCreated, onDocumentWritten } from "firebase-functions/v2/fire
 import * as admin from 'firebase-admin';
 import { determinePushTimes, formatAudioMessage } from './notifications';
 import { sendPushNotification, sendSMS } from './messaging';
+import { redactText } from './utils/security';
 
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
@@ -104,7 +105,7 @@ function buildConstituentIndexUpdates(data: Record<string, any>): Record<string,
  * - Sends SMS/WhatsApp to all constituents
  */
 export async function handleMeetingCreated(meetingData: any) {
-    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${meetingData.title} `);
+    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${redactText(meetingData.title)} `);
 
     // 1. Calculate Notification Schedule
     const scheduledTime = meetingData.scheduled_time?.toDate ? meetingData.scheduled_time.toDate() : new Date(meetingData.scheduled_time);

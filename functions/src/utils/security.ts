@@ -44,3 +44,12 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Redacts generic text (e.g., titles, names), showing only first few chars + length
+ */
+export function redactText(text: string | null | undefined, visibleChars: number = 3): string {
+    if (!text) return '[EMPTY]';
+    if (text.length <= visibleChars) return text;
+    return `${text.slice(0, visibleChars)}... [${text.length} chars]`;
+}
