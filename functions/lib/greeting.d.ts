@@ -15,6 +15,10 @@ export interface GreetingRequest {
     leaderName?: string;
 }
 /**
+ * Build a prompt for Gemini AI
+ */
+export declare function buildPrompt(request: GreetingRequest): string;
+/**
  * Generate a greeting message for a constituent
  * Uses Gemini AI when available, falls back to templates
  */

@@ -44,3 +44,16 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input for use in GenAI prompts to prevent injection.
+ * Removes XML-like tags and limits length.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Remove any XML tags
+    let clean = input.replace(/<[^>]*>/g, '');
+    // Limit length to reasonable size (e.g. 100 chars for a name)
+    clean = clean.slice(0, 100);
+    return clean;
+}
