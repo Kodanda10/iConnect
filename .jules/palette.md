@@ -1,0 +1,3 @@
+## 2026-01-24 - GlassCalendar Accessibility Improvements
+**Learning:** Standard `<button>` elements do not support `aria-selected` unless they have specific roles like `gridcell` or `option`. For interactive date pickers using buttons in a grid, it's safer to use descriptive `aria-label` text (e.g., "Monday, December 16, 2024, Selected") and `aria-current="date"` for today, rather than misusing `aria-selected` which triggers lint warnings.
+**Action:** When building custom calendar widgets, rely on `aria-label` for detailed state communication and `aria-current` for the "current" day, unless implementing the full ARIA Grid pattern with keyboard navigation.
