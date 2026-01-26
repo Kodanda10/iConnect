@@ -6,7 +6,7 @@
  * They should FAIL until we implement generateGreeting in src/index.ts
  */
 
-import { generateGreetingMessage, GreetingRequest } from '../src/greeting';
+import { generateGreetingMessage, GreetingRequest, _buildPromptForTest } from '../greeting';
 
 describe('generateGreetingMessage', () => {
     describe('Input Validation', () => {
@@ -137,7 +137,45 @@ describe('generateGreetingMessage', () => {
 
             const result = await generateGreetingMessage(request);
 
+            // Note: In template fallback, it just replaces {name}, so it might contain O'Brien or O&apos;Brien depending on implementation details of fallback.
+            // But since getTemplateMessage just does .replace, it uses the original string from request if we didn't sanitize request.name before passing to getTemplateMessage.
+            // Wait, I updated generateGreetingMessage to use sanitizeInput ONLY in buildPrompt.
+            // So getTemplateMessage still uses request.name (raw).
+            // That is fine for templates as they are just string replacements in JS code, not AI prompts.
+            // Although XSS might be an issue if the result is rendered HTML without escaping.
+            // But this test expects "O'Brien".
             expect(result).toContain("O'Brien");
+        });
+    });
+
+    describe('Prompt Security', () => {
+        it('sanitizes input in the prompt', () => {
+            const request: GreetingRequest = {
+                name: '<script>evil</script>',
+                type: 'BIRTHDAY',
+                language: 'ENGLISH',
+                leaderName: 'Hack"er'
+            };
+
+            const prompt = _buildPromptForTest(request);
+
+            expect(prompt).toContain('&lt;script&gt;evil&lt;/script&gt;');
+            expect(prompt).toContain('Hack&quot;er');
+            expect(prompt).not.toContain('<script>');
+        });
+
+        it('uses XML delimiters', () => {
+            const request: GreetingRequest = {
+                name: 'John',
+                type: 'BIRTHDAY',
+                language: 'ENGLISH'
+            };
+
+            const prompt = _buildPromptForTest(request);
+
+            expect(prompt).toContain('<instructions>');
+            expect(prompt).toContain('</instructions>');
+            expect(prompt).toContain('<constituent_name>John</constituent_name>');
         });
     });
 });
