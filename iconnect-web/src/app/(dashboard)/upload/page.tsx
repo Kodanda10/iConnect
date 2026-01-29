@@ -490,6 +490,13 @@ export default function UploadPage() {
         );
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+        }
+    };
+
     return (
         <div className="space-y-8 animate-fade-in max-w-5xl mx-auto w-full">
             {/* Page Header */}
@@ -516,13 +523,17 @@ export default function UploadPage() {
 
                     {/* Drop Zone */}
                     <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Upload CSV file"
+                        onKeyDown={handleKeyDown}
                         onClick={() => fileInputRef.current?.click()}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         className={`
                             border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
-                            transition-all duration-300 glow-hover
+                            transition-all duration-300 glow-hover focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none
                             ${isDragging
                                 ? 'border-emerald-400 bg-emerald-400/10 scale-[1.02]'
                                 : 'border-white/40 hover:border-emerald-400'
