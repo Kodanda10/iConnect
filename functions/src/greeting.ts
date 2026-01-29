@@ -4,9 +4,11 @@
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
  * - 2024-12-15: Added real Gemini AI integration with template fallback
+ * - 2024-12-17: Implemented XML tagging and input sanitization to prevent prompt injection
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -74,15 +76,26 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
-The message should be:
+    // Construct prompt with XML delimiters for security
+    let prompt = `Generate a warm and heartfelt ${occasion} greeting message in ${language}.`;
+
+    prompt += `\n\nI will provide the constituent's name and the leader's name (if applicable) in XML tags.`;
+    prompt += `\n<constituent_name>${sanitizeInput(request.name)}</constituent_name>`;
+
+    if (request.leaderName) {
+        prompt += `\n<leader_name>${sanitizeInput(request.leaderName)}</leader_name>`;
+        prompt += `\nThe message should be on behalf of the leader named in <leader_name>.`;
+    }
+
+    prompt += `\n\nThe message should be:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
 Only return the greeting message, nothing else.`;
+
+    return prompt;
 }
 
 /**
@@ -140,3 +153,5 @@ export async function generateGreetingMessage(
     // Fallback to templates
     return getTemplateMessage(request);
 }
+
+export const _buildPromptForTest = buildPrompt;
