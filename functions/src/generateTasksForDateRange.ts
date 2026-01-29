@@ -11,6 +11,7 @@
  * 
  * @changelog
  * - 2025-12-26: Initial TDD implementation
+ * - 2025-05-20: Optimized algorithmic complexity from O(D*C) to O(D+C)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -92,16 +93,6 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
     }
 
     return { month, day };
-}
-
-/**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
 }
 
 /**
@@ -197,6 +188,7 @@ function buildExistingTaskKeys(existingTasks: Task[]): Set<string> {
  * - Idempotent: safely re-runnable
  * - Returns comprehensive metrics
  * - Denormalizes constituent data onto tasks for efficient queries
+ * - Optimized Complexity: O(D + C) instead of O(D * C)
  * 
  * @param constituents - Array of constituents to scan
  * @param existingTasks - Array of existing tasks (for deduplication)
@@ -219,40 +211,59 @@ export function generateTasksForDateRange(
     // Build existing task lookup for O(1) deduplication
     const existingTaskKeys = buildExistingTaskKeys(existingTasks);
 
-    // Iterate through each date in range
+    // 1. Build a map of "MM-DD" -> [Date] for the target range
+    // This allows O(1) lookup to see if a constituent's date falls in the range
+    const targetDatesMap = new Map<string, Date[]>();
+
     for (const date of dateRange(startDate, endDate)) {
-        const targetMonth = date.getMonth() + 1; // 1-indexed
-        const targetDay = date.getDate();
-        const dueDateStr = formatDateStr(date);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const key = `${month}-${day}`;
 
-        // Scan all constituents for this date
-        for (const constituent of constituents) {
-            // Check Birthday
-            if (isDateMatchForTarget(constituent.dob, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'BIRTHDAY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key); // Add to set to prevent duplicates in same run
-                    birthdayCount++;
-                }
-            }
-
-            // Check Anniversary
-            if (isDateMatchForTarget(constituent.anniversary, targetMonth, targetDay)) {
-                const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
-                if (existingTaskKeys.has(key)) {
-                    skippedDuplicates++;
-                } else {
-                    const task = createTask(constituent, 'ANNIVERSARY', date, TimestampClass);
-                    newTasks.push(task);
-                    existingTaskKeys.add(key);
-                    anniversaryCount++;
-                }
-            }
+        if (!targetDatesMap.has(key)) {
+            targetDatesMap.set(key, []);
         }
+        targetDatesMap.get(key)!.push(date);
+    }
+
+    // 2. Iterate constituents ONCE
+    for (const constituent of constituents) {
+        // Helper to process a date type (Birthday or Anniversary)
+        const processDate = (
+            dateStr: string | undefined,
+            type: TaskType,
+            incrementCount: () => void
+        ) => {
+            if (!dateStr) return;
+
+            const parts = parseDateParts(dateStr);
+            if (!parts) return;
+
+            const key = `${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+            const targetDates = targetDatesMap.get(key);
+
+            if (targetDates) {
+                for (const date of targetDates) {
+                    const dueDateStr = formatDateStr(date);
+                    const taskKey = getTaskKey(constituent.id, type, dueDateStr);
+
+                    if (existingTaskKeys.has(taskKey)) {
+                        skippedDuplicates++;
+                    } else {
+                        const task = createTask(constituent, type, date, TimestampClass);
+                        newTasks.push(task);
+                        existingTaskKeys.add(taskKey);
+                        incrementCount();
+                    }
+                }
+            }
+        };
+
+        // Check Birthday
+        processDate(constituent.dob, 'BIRTHDAY', () => birthdayCount++);
+
+        // Check Anniversary
+        processDate(constituent.anniversary, 'ANNIVERSARY', () => anniversaryCount++);
     }
 
     return {
