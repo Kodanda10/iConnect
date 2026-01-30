@@ -56,4 +56,26 @@ describe('dailyScan Logic', () => {
         
         jest.useRealTimers();
     });
+
+    test('should handle non-standard date format (slow path fallback)', () => {
+        const today = new Date('2025-01-05T10:00:00Z');
+        jest.useFakeTimers().setSystemTime(today);
+
+        const nonStandardConstituent: Constituent = {
+            id: 'c2',
+            name: 'Priya',
+            mobile_number: '9876543211',
+            dob: '1990-1-5', // non-standard format (single digits)
+            ward_number: '12',
+            address: 'Street 2',
+            created_at: '2023-01-01'
+        };
+
+        const result = scanForTasks([nonStandardConstituent], [], mockTimestampClass);
+
+        expect(result.count).toBe(1);
+        expect(result.newTasks[0].constituent_name).toBe('Priya');
+
+        jest.useRealTimers();
+    });
 });
