@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -71,18 +72,33 @@ let warnedMissingGeminiKey = false;
 /**
  * Build a prompt for Gemini AI
  */
-function buildPrompt(request: GreetingRequest): string {
+export function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
-The message should be:
-- Personal and sincere
-- 2-3 sentences maximum
-- Culturally appropriate for Indian context
-- Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+    const cleanName = sanitizeInput(request.name);
+    const cleanLeader = sanitizeInput(request.leaderName);
+
+    let prompt = `Generate a warm and heartfelt ${occasion} greeting message in ${language}.\n\n`;
+
+    prompt += `<constituent_name>\n${cleanName}\n</constituent_name>\n\n`;
+
+    if (cleanLeader) {
+        prompt += `<leader_name>\n${cleanLeader}\n</leader_name>\n\n`;
+    }
+
+    prompt += `Instructions:\n`;
+    prompt += `- Write a message for the constituent named in <constituent_name>\n`;
+    if (cleanLeader) {
+        prompt += `- The message is sent on behalf of the leader named in <leader_name>\n`;
+    }
+    prompt += `- Personal and sincere\n`;
+    prompt += `- 2-3 sentences maximum\n`;
+    prompt += `- Culturally appropriate for Indian context\n`;
+    prompt += `- Include blessings for health and happiness\n`;
+    prompt += `Only return the greeting message, nothing else.`;
+
+    return prompt;
 }
 
 /**
