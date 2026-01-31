@@ -44,3 +44,16 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Redacts meeting titles or sensitive subjects
+ */
+export function redactTitle(title: string | null | undefined): string {
+    if (!title) return '[MISSING]';
+    if (title.length <= 3) return title;
+
+    // Show length and first 5 chars to allow identifying the meeting type
+    // while hiding PII that often appears later in the title
+    const preview = title.slice(0, 5);
+    return `[${title.length} chars] ${preview}...`;
+}
