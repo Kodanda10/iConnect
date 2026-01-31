@@ -40,6 +40,32 @@ describe('dailyScan Logic', () => {
         jest.useRealTimers();
     });
 
+    test('should handle non-standard date format (slow path fallback)', () => {
+        // Test date: Dec 5th
+        const today = new Date('2025-12-05T10:00:00Z');
+        jest.useFakeTimers().setSystemTime(today);
+
+        const constituents: Constituent[] = [
+            {
+                id: 'c_slow',
+                name: 'Slow Path User',
+                mobile_number: '1234567890',
+                dob: '1990-12-5', // Non-standard format (no padding), fails endsWith("-12-05")
+                ward_number: '1',
+                address: 'Addr',
+                created_at: '2023-01-01'
+            }
+        ];
+
+        const result = scanForTasks(constituents, [], mockTimestampClass);
+
+        expect(result.count).toBe(1);
+        expect(result.newTasks[0].constituent_name).toBe('Slow Path User');
+        expect(result.newTasks[0].type).toBe('BIRTHDAY');
+
+        jest.useRealTimers();
+    });
+
     test('should NOT create duplicate tasks', () => {
         const today = new Date('2025-12-18T10:00:00Z');
         jest.useFakeTimers().setSystemTime(today);
