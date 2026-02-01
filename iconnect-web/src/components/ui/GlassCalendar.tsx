@@ -102,6 +102,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -118,6 +119,9 @@ export default function GlassCalendar({
                                 setShowYearDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-label={`Select month, currently ${monthNames[viewDate.getMonth()]}`}
+                            aria-haspopup="true"
+                            aria-expanded={showMonthDropdown}
                         >
                             {monthNamesShort[viewDate.getMonth()]}
                             <ChevronDown className="w-3 h-3 text-white/50" />
@@ -151,6 +155,9 @@ export default function GlassCalendar({
                                 setShowMonthDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-label={`Select year, currently ${viewDate.getFullYear()}`}
+                            aria-haspopup="true"
+                            aria-expanded={showYearDropdown}
                         >
                             {viewDate.getFullYear()}
                             <ChevronDown className="w-3 h-3 text-white/50" />
@@ -178,6 +185,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -215,6 +223,9 @@ export default function GlassCalendar({
                                 border-r border-b border-white/5
                                 ${isSelectedDay ? 'bg-emerald-500/20 text-emerald-400 z-10' : 'text-white/80 hover:bg-white/5 hover:text-white'}
                             `}
+                            aria-label={`Select ${monthNames[viewDate.getMonth()]} ${day}, ${viewDate.getFullYear()}`}
+                            aria-pressed={isSelectedDay}
+                            aria-current={isTodayDay ? 'date' : undefined}
                         >
                             {isTodayDay && <span className="absolute top-1 right-1 w-1 h-1 rounded-full bg-emerald-400"></span>}
                             {hasEvent && !isSelectedDay && !isTodayDay && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-white/30"></span>}
