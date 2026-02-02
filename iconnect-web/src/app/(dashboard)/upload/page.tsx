@@ -517,9 +517,18 @@ export default function UploadPage() {
                     {/* Drop Zone */}
                     <div
                         onClick={() => fileInputRef.current?.click()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                fileInputRef.current?.click();
+                            }
+                        }}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Upload CSV file"
                         className={`
                             border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
                             transition-all duration-300 glow-hover
@@ -1036,12 +1045,14 @@ export default function UploadPage() {
                     <div className="flex gap-2">
                         <button
                             disabled
+                            aria-label="Previous page"
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             disabled
+                            aria-label="Next page"
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
                         >
                             <ChevronRight className="w-4 h-4" />
