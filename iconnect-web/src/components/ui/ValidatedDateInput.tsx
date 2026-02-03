@@ -3,6 +3,7 @@
  * @description Reusable DD/MM/YYYY date input with real-time validation
  * @changelog
  * - 2024-12-17: Initial TDD implementation with red/green borders
+ * - 2025-01-20: Added accessibility improvements (aria-errormessage, explicit error text)
  */
 
 'use client';
@@ -41,6 +42,7 @@ export default function ValidatedDateInput({
 }: ValidatedDateInputProps) {
     const id = useId();
     const calendarId = `${id}-calendar`;
+    const errorMessageId = `${id}-error`;
     const [displayValue, setDisplayValue] = useState(formatDateForDisplay(value));
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
@@ -53,6 +55,25 @@ export default function ValidatedDateInput({
 
     // Get current validation state
     const validationState = getValidationState(displayValue, allowFuture);
+
+    // Determine error message text
+    const getErrorMessage = () => {
+        if (validationState !== 'error') return null;
+        if (displayValue.length > 0 && displayValue.length < 10) {
+            return "Please enter a complete date (DD/MM/YYYY)";
+        }
+        if (!allowFuture && /^\d{2}\/\d{2}\/\d{4}$/.test(displayValue)) {
+            // Check if it's invalid purely because of future date
+            // Note: This is a bit simplistic, relying on regex, but sufficient for UI feedback
+            // Ideally we'd have more granular error codes from the validator
+            const [d, m, y] = displayValue.split('/').map(Number);
+            const date = new Date(y, m - 1, d);
+            if (date > new Date()) return "Date cannot be in the future";
+        }
+        return "Invalid date. Format: DD/MM/YYYY";
+    };
+
+    const errorMessage = getErrorMessage();
 
     // Handle text input with auto-masking
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,10 +196,22 @@ export default function ValidatedDateInput({
                     disabled={disabled}
                     maxLength={10}
                     aria-invalid={validationState === 'error'}
-                    title={validationState === 'error' ? "Date must be DD/MM/YYYY" : undefined}
+                    aria-errormessage={validationState === 'error' ? errorMessageId : undefined}
                     className="flex-1 bg-transparent outline-none text-white placeholder-gray-500"
                 />
             </div>
+
+            {/* Error Message for Screen Readers and Visual Users */}
+            {validationState === 'error' && errorMessage && (
+                <div
+                    id={errorMessageId}
+                    role="alert"
+                    className="mt-1 text-xs text-red-400 font-medium flex items-center gap-1 animate-in slide-in-from-top-1"
+                >
+                    <AlertCircle className="w-3 h-3" />
+                    {errorMessage}
+                </div>
+            )}
 
             {/* Calendar Portal - Renders at root level to ensure Z-Index top */}
             {isCalendarOpen && showCalendar && typeof document !== 'undefined' && createPortal(
