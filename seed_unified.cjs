@@ -28,7 +28,7 @@ const Timestamp = admin.firestore.Timestamp;
 // --- CORRECT CONFIGURATION ---
 
 // 3 Test phone numbers (use randomly)
-const testPhones = ['6370502503', '9695528000', '7093322157'];
+const testPhones = ['6370502503', '9685528000', '7093322157'];
 
 // 75 Unique Odia names (from seed_constituents.cjs)
 const uniqueNames = [

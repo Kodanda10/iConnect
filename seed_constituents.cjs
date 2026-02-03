@@ -27,7 +27,7 @@ const uniqueNames = [
     'Jitendra Kumar Panda', 'Kulamani Mohanty', 'Laxmidhar Rath', 'Manoranjan Sahoo', 'Nilamani Patra'
 ];
 
-const testPhones = ['6370502503', '9695528000', '7093322157'];
+const testPhones = ['6370502503', '9685528000', '7093322157'];
 const gps = ['Jaraka', 'Jenapur', 'Kotapur', 'Aruha', 'Chahata', 'Deoka', 'Badagaon', 'Nuagaon'];
 const uid = '1hLlstCQOjOPdIOg7MT32Wbaiq22';
 
