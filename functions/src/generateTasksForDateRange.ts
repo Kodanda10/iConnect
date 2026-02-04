@@ -95,16 +95,6 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
 }
 
 /**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
-}
-
-/**
  * Format date as YYYY-MM-DD string
  */
 function formatDateStr(date: Date): string {
@@ -219,6 +209,14 @@ export function generateTasksForDateRange(
     // Build existing task lookup for O(1) deduplication
     const existingTaskKeys = buildExistingTaskKeys(existingTasks);
 
+    // Pre-process constituents to extract date parts once
+    // This optimization avoids parsing date strings O(D * C) times
+    const parsedConstituents = constituents.map(c => ({
+        c,
+        dob: parseDateParts(c.dob),
+        ann: parseDateParts(c.anniversary)
+    }));
+
     // Iterate through each date in range
     for (const date of dateRange(startDate, endDate)) {
         const targetMonth = date.getMonth() + 1; // 1-indexed
@@ -226,9 +224,9 @@ export function generateTasksForDateRange(
         const dueDateStr = formatDateStr(date);
 
         // Scan all constituents for this date
-        for (const constituent of constituents) {
+        for (const { c: constituent, dob, ann } of parsedConstituents) {
             // Check Birthday
-            if (isDateMatchForTarget(constituent.dob, targetMonth, targetDay)) {
+            if (dob && dob.month === targetMonth && dob.day === targetDay) {
                 const key = getTaskKey(constituent.id, 'BIRTHDAY', dueDateStr);
                 if (existingTaskKeys.has(key)) {
                     skippedDuplicates++;
@@ -241,7 +239,7 @@ export function generateTasksForDateRange(
             }
 
             // Check Anniversary
-            if (isDateMatchForTarget(constituent.anniversary, targetMonth, targetDay)) {
+            if (ann && ann.month === targetMonth && ann.day === targetDay) {
                 const key = getTaskKey(constituent.id, 'ANNIVERSARY', dueDateStr);
                 if (existingTaskKeys.has(key)) {
                     skippedDuplicates++;
