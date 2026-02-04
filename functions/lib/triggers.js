@@ -39,6 +39,7 @@ const firestore_1 = require("firebase-functions/v2/firestore");
 const admin = __importStar(require("firebase-admin"));
 const notifications_1 = require("./notifications");
 const messaging_1 = require("./messaging");
+const security_1 = require("./utils/security");
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
     admin.initializeApp();
@@ -138,7 +139,7 @@ function buildConstituentIndexUpdates(data) {
  */
 async function handleMeetingCreated(meetingData) {
     var _a;
-    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${meetingData.title} `);
+    console.log(`[TRIGGER] New Meeting: ${meetingData.id} | Title: ${(0, security_1.redactTitle)(meetingData.title)} `);
     // 1. Calculate Notification Schedule
     const scheduledTime = ((_a = meetingData.scheduled_time) === null || _a === void 0 ? void 0 : _a.toDate) ? meetingData.scheduled_time.toDate() : new Date(meetingData.scheduled_time);
     const notificationTimes = (0, notifications_1.determinePushTimes)(scheduledTime);

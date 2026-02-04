@@ -44,3 +44,12 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Redacts meeting titles or sensitive headers
+ */
+export function redactTitle(title: string | null | undefined): string {
+    if (!title) return '[MISSING]';
+    if (title.length <= 3) return title;
+    return title.slice(0, 3) + '...';
+}

@@ -8,6 +8,7 @@ exports.redactMobile = redactMobile;
 exports.redactMessage = redactMessage;
 exports.redactEmail = redactEmail;
 exports.redactToken = redactToken;
+exports.redactTitle = redactTitle;
 /**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
@@ -52,5 +53,15 @@ function redactToken(token) {
     if (token.length < 8)
         return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
+}
+/**
+ * Redacts meeting titles or sensitive headers
+ */
+function redactTitle(title) {
+    if (!title)
+        return '[MISSING]';
+    if (title.length <= 3)
+        return title;
+    return title.slice(0, 3) + '...';
 }
 //# sourceMappingURL=security.js.map
