@@ -44,3 +44,15 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input to prevent Prompt Injection in LLM prompts
+ * Escapes < and > to prevent breaking out of XML tags
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    return input
+        .trim()
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
