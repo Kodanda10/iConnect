@@ -19,3 +19,7 @@ export declare function redactEmail(email: string | null | undefined): string;
  * Redacts long tokens or IDs (like FCM tokens)
  */
 export declare function redactToken(token: string | null | undefined): string;
+/**
+ * Redacts meeting titles or sensitive headers
+ */
+export declare function redactTitle(title: string | null | undefined): string;
