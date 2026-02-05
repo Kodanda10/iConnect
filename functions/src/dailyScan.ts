@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2026-02-05: Performance optimization (single pass loop, date parsing)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -43,22 +44,25 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Check if a date string matches a target month and day
+ * Optimized to avoid Date object creation and use integer comparison
+ * @param dateStr YYYY-MM-DD string
+ * @param targetMonth 0-indexed month (0-11)
+ * @param targetDay 1-indexed day (1-31)
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
+function isDateMatchParts(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+    if (!dateStr || dateStr.length !== 10) return false;
 
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
+    // Fast check for YYYY-MM-DD format based on hyphens
+    if (dateStr[4] !== '-' || dateStr[7] !== '-') return false;
 
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    // Use substring + parseInt which is faster than split
+    // dateStr: YYYY-MM-DD
+    //          0123456789
+    const month = parseInt(dateStr.substring(5, 7), 10) - 1; // 1-indexed string to 0-indexed target
+    const day = parseInt(dateStr.substring(8, 10), 10);
 
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    return month === targetMonth && day === targetDay;
 }
 
 /**
@@ -122,11 +126,17 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // Pre-calculate date parts for optimized matching
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
+        if (isDateMatchParts(constituent.dob, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -134,7 +144,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
+        if (isDateMatchParts(constituent.dob, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -142,7 +152,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
+        if (isDateMatchParts(constituent.anniversary, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -150,7 +160,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
+        if (isDateMatchParts(constituent.anniversary, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -185,18 +195,38 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 1. Calculate Counts
+    // Pre-calculate date parts
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
+    // 1. Calculate Counts & Collect Names (Single Pass)
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+    const tomorrowNames: string[] = [];
 
     // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        // Today Counts
+        if (isDateMatchParts(c.dob, todayMonth, todayDay)) todayCount.birthdays++;
+        if (isDateMatchParts(c.anniversary, todayMonth, todayDay)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        // Tomorrow Counts & Names
+        let isTomorrowEvent = false;
+        if (isDateMatchParts(c.dob, tomorrowMonth, tomorrowDay)) {
+            tomorrowCount.birthdays++;
+            isTomorrowEvent = true;
+        }
+        if (isDateMatchParts(c.anniversary, tomorrowMonth, tomorrowDay)) {
+            tomorrowCount.anniversaries++;
+            isTomorrowEvent = true;
+        }
+
+        if (isTomorrowEvent) {
+            tomorrowNames.push(c.name.split(' ')[0]);
+        }
     }
 
     // 2. Fetch Settings & Leader
@@ -240,20 +270,14 @@ export async function scheduleDailyNotifications(
     // Note: Since scan runs at 7 PM, we schedule the Action Reminder for the NEXT morning (Tomorrow 8 AM).
     // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
     if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        // Collect names for tomorrow -> ALREADY COLLECTED in tomorrowNames
 
         // Smart Summary
         let nameSummary = "";
-        if (names.length > 0) {
+        if (tomorrowNames.length > 0) {
             const displayCount = 2; // Show first 2 names
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
+            const firstNames = tomorrowNames.slice(0, displayCount).join(', ');
+            const remaining = tomorrowNames.length - displayCount;
 
             if (remaining > 0) {
                 nameSummary = `(${firstNames} & ${remaining} others)`;
@@ -288,20 +312,14 @@ export async function scheduleDailyNotifications(
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
     // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        // Collect names for tomorrow -> ALREADY COLLECTED in tomorrowNames
 
         // Smart Summary
         let nameSummary = "";
-        if (names.length > 0) {
+        if (tomorrowNames.length > 0) {
             const displayCount = 2;
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
+            const firstNames = tomorrowNames.slice(0, displayCount).join(', ');
+            const remaining = tomorrowNames.length - displayCount;
 
             if (remaining > 0) {
                 nameSummary = `(${firstNames} & ${remaining} others)`;
