@@ -28,7 +28,7 @@ const uniqueNames = [
 ];
 
 // 3 test phone numbers for random assignment
-const testPhones = ['6370502503', '9695528000', '7093322157'];
+const testPhones = ['6370502503', '9685528000', '7093322157'];
 
 const gps = ['Jaraka', 'Jenapur', 'Kotapur', 'Aruha', 'Chahata', 'Deoka', 'Badagaon', 'Nuagaon'];
 const types = ['BIRTHDAY', 'ANNIVERSARY'];
