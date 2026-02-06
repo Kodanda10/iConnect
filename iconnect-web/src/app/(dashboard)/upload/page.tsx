@@ -307,14 +307,11 @@ export default function UploadPage() {
                 });
 
                 // 2. Create Tasks (Birthday/Anniversary) for THIS year
-                console.log('[Upload] Creating tasks for:', row.name, 'uid:', user?.uid);
                 if (user?.uid) {
                     // Birthday
                     const dob = parseDateToObj(row.dob);
-                    console.log('[Upload] DOB parsed:', row.dob, '->', dob);
                     if (dob) {
                         const bdayDueDate = new Date(currentYear, dob.getMonth(), dob.getDate(), 12, 0, 0);
-                        console.log('[Upload] Creating BIRTHDAY task, due:', bdayDueDate.toISOString());
                         await createTask({
                             constituent_id: constituentId,
                             uid: user.uid,
@@ -328,15 +325,12 @@ export default function UploadPage() {
                             constituent_mobile: row.mobile || '',
                             ward_number: row.ward,
                         });
-                        console.log('[Upload] BIRTHDAY task created successfully');
                     }
 
                     // Anniversary
                     const ann = parseDateToObj(row.anniversary);
-                    console.log('[Upload] Anniversary parsed:', row.anniversary, '->', ann);
                     if (ann) {
                         const annDueDate = new Date(currentYear, ann.getMonth(), ann.getDate(), 12, 0, 0);
-                        console.log('[Upload] Creating ANNIVERSARY task, due:', annDueDate.toISOString());
                         await createTask({
                             constituent_id: constituentId,
                             uid: user.uid,
@@ -350,7 +344,6 @@ export default function UploadPage() {
                             constituent_mobile: row.mobile || '',
                             ward_number: row.ward,
                         });
-                        console.log('[Upload] ANNIVERSARY task created successfully');
                     }
                 } else {
                     console.warn('[Upload] No user.uid - tasks NOT created!');
