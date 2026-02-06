@@ -44,3 +44,12 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Redacts sensitive titles (e.g. meeting titles)
+ * Returns a generic placeholder to prevent PII leakage
+ */
+export function redactTitle(title: string | null | undefined): string {
+    if (!title) return '[MISSING]';
+    return '[REDACTED]';
+}
