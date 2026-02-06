@@ -11,6 +11,7 @@
 
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
+import { redactToken } from "./utils/security";
 
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
@@ -34,7 +35,7 @@ export async function setUserRole(
     }
 
     await admin.auth().setCustomUserClaims(uid, { role });
-    console.log(`[AUTH] Set custom claims for ${uid}: role=${role}`);
+    console.log(`[AUTH] Set custom claims for ${redactToken(uid)}: role=${role}`);
 
     return { success: true };
 }
@@ -54,10 +55,10 @@ export const syncRoleToClaims = onDocumentWritten(
         if (!after) {
             try {
                 await admin.auth().setCustomUserClaims(userId, { role: null });
-                console.log(`[AUTH] Cleared claims for deleted user ${userId}`);
+                console.log(`[AUTH] Cleared claims for deleted user ${redactToken(userId)}`);
             } catch (e) {
                 // User might not exist in Auth
-                console.warn(`[AUTH] Could not clear claims for ${userId}`);
+                console.warn(`[AUTH] Could not clear claims for ${redactToken(userId)}`);
             }
             return;
         }
@@ -72,15 +73,15 @@ export const syncRoleToClaims = onDocumentWritten(
 
         // Validate role
         if (!newRole || !VALID_ROLES.includes(newRole)) {
-            console.warn(`[AUTH] Invalid role ${newRole} for ${userId}, skipping sync`);
+            console.warn(`[AUTH] Invalid role ${newRole} for ${redactToken(userId)}, skipping sync`);
             return;
         }
 
         try {
             await admin.auth().setCustomUserClaims(userId, { role: newRole });
-            console.log(`[AUTH] Synced role=${newRole} for ${userId} (was: ${oldRole || 'none'})`);
+            console.log(`[AUTH] Synced role=${newRole} for ${redactToken(userId)} (was: ${oldRole || 'none'})`);
         } catch (error: any) {
-            console.error(`[AUTH] Failed to sync claims for ${userId}:`, error.message);
+            console.error(`[AUTH] Failed to sync claims for ${redactToken(userId)}:`, error.message);
         }
     }
 );
@@ -93,7 +94,7 @@ export async function getUserClaims(uid: string): Promise<Record<string, any> | 
         const user = await admin.auth().getUser(uid);
         return user.customClaims;
     } catch (error) {
-        console.error(`[AUTH] Failed to get claims for ${uid}`);
+        console.error(`[AUTH] Failed to get claims for ${redactToken(uid)}`);
         return undefined;
     }
 }
