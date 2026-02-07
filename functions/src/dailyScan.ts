@@ -48,7 +48,29 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    const tMonth = targetDate.getMonth();
+    const tDay = targetDate.getDate();
+
+    // Optimize for standard YYYY-MM-DD format (avoids split/allocation)
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        // Parse Month (index 5, 6)
+        // '0' is 48
+        const m1 = dateStr.charCodeAt(5) - 48;
+        const m2 = dateStr.charCodeAt(6) - 48;
+        const month = (m1 * 10 + m2) - 1; // 0-indexed
+
+        // Fast fail on month mismatch
+        if (month !== tMonth) return false;
+
+        // Parse Day (index 8, 9)
+        const d1 = dateStr.charCodeAt(8) - 48;
+        const d2 = dateStr.charCodeAt(9) - 48;
+        const day = d1 * 10 + d2;
+
+        return day === tDay;
+    }
+
+    // Handle non-standard formats (fallback)
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
@@ -56,8 +78,8 @@ function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
     return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
+        day === tDay &&
+        month === tMonth
     );
 }
 
@@ -84,32 +106,6 @@ function createTask(
 }
 
 /**
- * Check if a task already exists for this constituent, type, and date
- */
-function taskExists(
-    existingTasks: Task[],
-    constituentId: string,
-    type: TaskType,
-    dueDate: string
-): boolean {
-    return existingTasks.some((task) => {
-        // Handle both Timestamp and String for backward compatibility during migration
-        let taskDateStr = '';
-        if (task.due_date && typeof task.due_date.toDate === 'function') {
-            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
-        } else if (typeof task.due_date === 'string') {
-            taskDateStr = task.due_date;
-        }
-
-        return (
-            (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
-            task.type === type &&
-            taskDateStr === dueDate
-        );
-    });
-}
-
-/**
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
  */
@@ -122,38 +118,61 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
     const newTasks: Task[] = [];
+
+    // Optimize task lookup: Pre-process existing tasks into a Set for O(1) checks
+    const existingTaskSet = new Set<string>();
+    for (const task of existingTasks) {
+        let taskDateStr = '';
+        if (task.due_date && typeof task.due_date.toDate === 'function') {
+            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
+        } else if (typeof task.due_date === 'string') {
+            taskDateStr = task.due_date;
+        }
+
+        const cid = task.constituent_id || (task as any).constituentId;
+        if (cid && task.type && taskDateStr) {
+            existingTaskSet.add(`${cid}|${task.type}|${taskDateStr}`);
+        }
+    }
 
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            const key = `${constituent.id}|BIRTHDAY|${todayStr}`;
+            if (!existingTaskSet.has(key)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
+                existingTaskSet.add(key); // Prevent duplicates in same run
             }
         }
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            const key = `${constituent.id}|BIRTHDAY|${tomorrowStr}`;
+            if (!existingTaskSet.has(key)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
+                existingTaskSet.add(key);
             }
         }
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            const key = `${constituent.id}|ANNIVERSARY|${todayStr}`;
+            if (!existingTaskSet.has(key)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
+                existingTaskSet.add(key);
             }
         }
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            const key = `${constituent.id}|ANNIVERSARY|${tomorrowStr}`;
+            if (!existingTaskSet.has(key)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
+                existingTaskSet.add(key);
             }
         }
     }
@@ -185,18 +204,33 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 1. Calculate Counts
+    // 1. Calculate Counts & Collect Names (Single Pass Optimization)
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+    const tomorrowNames: string[] = [];
 
     // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
+        // Check Today
         if (isDateMatch(c.dob, today)) todayCount.birthdays++;
         if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        // Check Tomorrow
+        let isTomorrowEvent = false;
+        if (isDateMatch(c.dob, tomorrow)) {
+            tomorrowCount.birthdays++;
+            isTomorrowEvent = true;
+        }
+        if (isDateMatch(c.anniversary, tomorrow)) {
+            tomorrowCount.anniversaries++;
+            isTomorrowEvent = true;
+        }
+
+        // Collect unique names for tomorrow's notifications
+        if (isTomorrowEvent) {
+            tomorrowNames.push(c.name.split(' ')[0]);
+        }
     }
 
     // 2. Fetch Settings & Leader
@@ -240,13 +274,8 @@ export async function scheduleDailyNotifications(
     // Note: Since scan runs at 7 PM, we schedule the Action Reminder for the NEXT morning (Tomorrow 8 AM).
     // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
     if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        // Use collected names (O(1) access instead of O(N) loop)
+        const names = tomorrowNames;
 
         // Smart Summary
         let nameSummary = "";
@@ -288,13 +317,8 @@ export async function scheduleDailyNotifications(
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
     // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        // Use collected names (O(1) access instead of O(N) loop)
+        const names = tomorrowNames;
 
         // Smart Summary
         let nameSummary = "";
