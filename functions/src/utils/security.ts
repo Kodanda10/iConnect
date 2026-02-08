@@ -44,3 +44,30 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitize input to prevent prompt injection and ensure data integrity.
+ * Escapes XML/HTML special characters and trims input.
+ * Enforces a maximum length to prevent DoS.
+ */
+export function sanitizeInput(input: string, maxLength: number = 100): string {
+    if (!input) return '';
+
+    // Trim and limit length
+    let sanitized = input.trim();
+    if (sanitized.length > maxLength) {
+        sanitized = sanitized.substring(0, maxLength);
+    }
+
+    // Escape XML special characters
+    return sanitized.replace(/[<>&"']/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '"': return '&quot;';
+            case "'": return '&apos;';
+            default: return c;
+        }
+    });
+}
