@@ -44,11 +44,28 @@ export interface ScanResult {
 
 /**
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Optimized to avoid split/parseInt allocations in hot loops for standard format
  */
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    // Optimized path for standard YYYY-MM-DD
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        // Parse Month (0-indexed in JS Date)
+        // charCodeAt(5) is tens digit, charCodeAt(6) is ones digit
+        // '0' is 48
+        const month = (dateStr.charCodeAt(5) - 48) * 10 + (dateStr.charCodeAt(6) - 48) - 1;
+
+        // Parse Day
+        const day = (dateStr.charCodeAt(8) - 48) * 10 + (dateStr.charCodeAt(9) - 48);
+
+        return (
+            day === targetDate.getDate() &&
+            month === targetDate.getMonth()
+        );
+    }
+
+    // Fallback for non-standard formats (e.g. YYYY-M-D) to preserve original behavior
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
