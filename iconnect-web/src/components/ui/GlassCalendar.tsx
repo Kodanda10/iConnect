@@ -4,6 +4,7 @@
  * @changelog
  * - 2024-12-11: Initial implementation
  * - 2024-12-12: Added year/month dropdowns for selecting historic dates (DOB use case)
+ * - 2024-05-23: Added ARIA labels and keyboard accessibility
  */
 'use client';
 
@@ -36,7 +37,6 @@ export default function GlassCalendar({
         if (selectedDate) setViewDate(selectedDate);
     }, [selectedDate]);
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -101,7 +101,8 @@ export default function GlassCalendar({
             <div className="flex items-center justify-between mb-4">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
-                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -117,7 +118,9 @@ export default function GlassCalendar({
                                 setShowMonthDropdown(!showMonthDropdown);
                                 setShowYearDropdown(false);
                             }}
-                            className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
+                            aria-label="Select month"
+                            aria-expanded={showMonthDropdown}
                         >
                             {monthNamesShort[viewDate.getMonth()]}
                             <ChevronDown className="w-3 h-3 text-white/50" />
@@ -129,7 +132,7 @@ export default function GlassCalendar({
                                     <button
                                         key={month}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectMonth(index); }}
-                                        className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${viewDate.getMonth() === index
+                                        className={`px-2 py-1.5 text-xs rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none ${viewDate.getMonth() === index
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
@@ -150,7 +153,9 @@ export default function GlassCalendar({
                                 setShowYearDropdown(!showYearDropdown);
                                 setShowMonthDropdown(false);
                             }}
-                            className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
+                            aria-label="Select year"
+                            aria-expanded={showYearDropdown}
                         >
                             {viewDate.getFullYear()}
                             <ChevronDown className="w-3 h-3 text-white/50" />
@@ -162,7 +167,7 @@ export default function GlassCalendar({
                                     <button
                                         key={year}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectYear(year); }}
-                                        className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center ${viewDate.getFullYear() === year
+                                        className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none ${viewDate.getFullYear() === year
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
@@ -177,14 +182,15 @@ export default function GlassCalendar({
 
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
-                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
             </div>
 
             {/* Day Names */}
-            <div className="grid grid-cols-7 border-b border-white/5 mb-1">
+            <div className="grid grid-cols-7 border-b border-white/5 mb-1" aria-hidden="true">
                 {dayNames.map(day => (
                     <div key={day} className="text-center text-[10px] font-semibold text-white/40 py-2 uppercase tracking-wider">
                         {day}
@@ -206,13 +212,27 @@ export default function GlassCalendar({
                     const dateKey = formatDateKey(day);
                     const hasEvent = eventDates.includes(dateKey);
 
+                    // Construct accessible label
+                    let label = date.toLocaleDateString('en-GB', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    if (isTodayDay) label += ', Today';
+                    if (isSelectedDay) label += ', Selected';
+                    if (hasEvent) label += ', Has event';
+
                     return (
                         <button
                             key={day}
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            aria-label={label}
+                            aria-pressed={isSelectedDay}
+                            aria-current={isTodayDay ? 'date' : undefined}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
-                                border-r border-b border-white/5
+                                border-r border-b border-white/5 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:outline-none
                                 ${isSelectedDay ? 'bg-emerald-500/20 text-emerald-400 z-10' : 'text-white/80 hover:bg-white/5 hover:text-white'}
                             `}
                         >
