@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as admin from 'firebase-admin';
+import { isDateMatch } from './utils/date';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type TaskStatus = 'PENDING' | 'COMPLETED';
@@ -40,25 +41,6 @@ export interface Task {
 export interface ScanResult {
     count: number;
     newTasks: Task[];
-}
-
-/**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
- */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
-
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
-
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
-
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
 }
 
 /**
