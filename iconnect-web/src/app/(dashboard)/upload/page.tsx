@@ -517,12 +517,21 @@ export default function UploadPage() {
                     {/* Drop Zone */}
                     <div
                         onClick={() => fileInputRef.current?.click()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                fileInputRef.current?.click();
+                            }
+                        }}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Upload CSV file"
                         className={`
                             border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer
-                            transition-all duration-300 glow-hover
+                            transition-all duration-300 glow-hover focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none
                             ${isDragging
                                 ? 'border-emerald-400 bg-emerald-400/10 scale-[1.02]'
                                 : 'border-white/40 hover:border-emerald-400'
