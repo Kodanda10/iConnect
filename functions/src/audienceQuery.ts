@@ -45,6 +45,9 @@ export async function queryConstituentsByAudience(
     // Only get constituents with valid mobile numbers
     query = query.where('mobile', '!=', '');
 
+    // Optimization: Select only required fields to save bandwidth and memory
+    query = query.select('name', 'mobile', 'block', 'gram_panchayat');
+
     try {
         const snapshot = await query.get();
         const constituents: ConstituentRecord[] = snapshot.docs.map(doc => ({
