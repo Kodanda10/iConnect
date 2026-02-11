@@ -113,23 +113,31 @@ describe('scheduleDailyNotifications', () => {
         expect(actionCall).toBeDefined();
         const actionPayload = actionCall[1];
 
-        // 1 Birthday + 1 Anniversary Today
-        expect(actionPayload.body).toContain('1 birthdays & 1 anniversaries today.');
+        // Action Reminder targets TOMORROW's events (Dec 19) but says "today" in the text
+        // because it is scheduled for tomorrow morning.
+        // We have 1 Birthday (C) on Dec 19. No Anniversaries.
+        expect(actionPayload.body).toContain('1 birthdays today');
+        expect(actionPayload.body).toContain('(C)');
         expect(actionPayload.body).toContain(mockSettingsPayload.alertSettings.actionMessage);
 
-        // Check Time: Today 8:00 AM
+        // Check Time: Tomorrow 8:00 AM (Dec 19)
+        // Wait, the code says:
+        // const scheduledFor = new Date(tomorrow);
+        // scheduledFor.setHours(8, 0, 0, 0);
+        // So it should be Dec 19.
         const scheduledDate = actionPayload.scheduledFor.toDate();
         expect(scheduledDate.getHours()).toBe(8);
-        expect(scheduledDate.getDate()).toBe(18);
+        expect(scheduledDate.getDate()).toBe(19);
 
         // Find Heads Up Call
         const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
         expect(headsUpCall).toBeDefined();
         const headsUpPayload = headsUpCall[1];
 
-        // 1 Birthday Tomorrow
-        expect(headsUpPayload.body).toContain('1 birthdays tomorrow.'); // No anniversaries
-        expect(headsUpPayload.body).not.toContain('&');
+        // Heads Up alerts about TOMORROW (Dec 19)
+        // 1 Birthday Tomorrow (C)
+        expect(headsUpPayload.body).toContain('1 birthdays tomorrow');
+        expect(headsUpPayload.body).toContain('(C)');
         expect(headsUpPayload.body).toContain(mockSettingsPayload.alertSettings.headsUpMessage);
 
         const headsUpDate = headsUpPayload.scheduledFor.toDate();
@@ -137,13 +145,13 @@ describe('scheduleDailyNotifications', () => {
         expect(headsUpDate.getDate()).toBe(18); // Scheduled FOR today at 8pm
     });
 
-    test('should NOT schedule Action if no events today', async () => {
+    test('should NOT schedule Action if no events tomorrow', async () => {
         const today = new Date('2025-12-18T10:00:00Z');
         jest.setSystemTime(today);
 
         const constituents: Constituent[] = [
-            // Birthday Tomorrow (Dec 19)
-            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+            // Birthday Today (Dec 18) - irrelevant for tomorrow's action
+            { id: '1', name: 'A', dob: '1990-12-18', mobile_number: '', ward_number: '', address: '', created_at: '' }
         ];
 
         await scheduleDailyNotifications(mockDb, constituents);
@@ -151,9 +159,9 @@ describe('scheduleDailyNotifications', () => {
         const actionCall = mockBatch.set.mock.calls.find(c => c[1].type === 'ACTION_REMINDER');
         expect(actionCall).toBeUndefined();
 
+        // Heads Up checks tomorrow, so it should also be undefined if nothing tomorrow
         const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
-        expect(headsUpCall).toBeDefined();
-        expect(headsUpCall[1].body).toContain('1 birthdays tomorrow.');
+        expect(headsUpCall).toBeUndefined();
     });
 
     test('should SANITIZE hardcoded clean-up text from templates', async () => {
@@ -191,9 +199,10 @@ describe('scheduleDailyNotifications', () => {
         expect(headsUpCall).toBeDefined();
 
         // Assert: Dynamic Count (1) represents reality. Hardcoded (5) is removed.
-        // Expected: "1 birthdays tomorrow. Tomorrow's Celebrations! Tap to view..."
+        // Expected: "1 birthdays tomorrow (A). Tomorrow's Celebrations! Tap to view..."
         const body = headsUpCall[1].body;
-        expect(body).toContain('1 birthdays tomorrow.');
+        expect(body).toContain('1 birthdays tomorrow');
+        expect(body).toContain('(A)');
         expect(body).not.toContain('5 constituents');
         expect(body).not.toContain('have birthdays tomorrow.'); // The hardcoded part
         expect(body).toContain("Tomorrow's Celebrations!");
