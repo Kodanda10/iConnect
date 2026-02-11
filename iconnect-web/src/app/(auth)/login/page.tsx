@@ -10,7 +10,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Database, Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 // Preload Firebase modules at the top level for faster auth
 import { getFirebaseAuth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
@@ -112,43 +112,54 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
                                 Email Address
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                    id="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@admin.com"
                                     autoComplete="email"
                                     className="glass-input-dark"
+                                    aria-invalid={!!localError}
+                                    aria-describedby={localError ? 'login-error' : undefined}
                                 />
                             </div>
                         </div>
 
                         {/* Password Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
                                 Password
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                    id="password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     autoComplete="current-password"
                                     className="glass-input-dark"
+                                    aria-invalid={!!localError}
+                                    aria-describedby={localError ? 'login-error' : undefined}
                                 />
                             </div>
                         </div>
 
                         {/* Error Message */}
                         {localError && (
-                            <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm break-all">
+                            <div
+                                id="login-error"
+                                role="alert"
+                                aria-live="polite"
+                                className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm break-all"
+                            >
                                 <AlertCircle className="w-4 h-4 shrink-0" />
                                 <span>{localError}</span>
                             </div>
