@@ -338,7 +338,7 @@ export default function SchedulerPage() {
                 <div className="glass-card-light p-6 rounded-2xl h-fit">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-white text-lg">Festivals</h3>
-                        <button onClick={() => setShowAddFestivalModal(true)} className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors">
+                        <button onClick={() => setShowAddFestivalModal(true)} aria-label="Add new festival" className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors">
                             <Plus className="w-4 h-4" />
                         </button>
                     </div>
@@ -361,7 +361,8 @@ export default function SchedulerPage() {
                                 </div>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setDeletingFestivalId(festival.id); }}
-                                    className="p-2 rounded-lg bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                                    className="p-2 rounded-lg bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                                    aria-label={`Remove ${festival.name}`}
                                     title="Remove Festival"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -405,6 +406,7 @@ export default function SchedulerPage() {
                                 <input
                                     type="text"
                                     placeholder="Festival Name"
+                                    aria-label="Festival Name"
                                     className="w-full glass-input-dark pl-11 pr-4 py-3 rounded-xl text-white outline-none focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
                                     value={newFestivalData.name}
                                     onChange={e => setNewFestivalData({ ...newFestivalData, name: e.target.value })}
