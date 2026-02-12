@@ -99,5 +99,31 @@ describe('audienceQuery', () => {
             // Should only send to 2 (filtering empty mobile)
             expect(messaging.sendSMS).toHaveBeenCalledTimes(2);
         });
+
+        it('redacts mobile numbers in error logs', async () => {
+            jest.resetModules();
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+            // Mock messaging to fail
+            jest.doMock('../messaging', () => ({
+                sendSMS: jest.fn().mockRejectedValue(new Error('Failed')),
+            }));
+
+            const { sendBulkSMS } = await import('../audienceQuery');
+
+            await sendBulkSMS([{ id: '1', name: 'User1', mobile: '9999988888' }], 'Test');
+
+            // Find the call that logs the failure
+            const errorCalls = consoleSpy.mock.calls.filter(args => args[0] && args[0].toString().includes('[BULK SMS] Failed for'));
+
+            expect(errorCalls.length).toBeGreaterThan(0);
+            const logMessage = errorCalls[0][0];
+
+            // Should be redacted: ***8888
+            expect(logMessage).toContain('***8888');
+            expect(logMessage).not.toContain('9999988888');
+
+            consoleSpy.mockRestore();
+        });
     });
 });
