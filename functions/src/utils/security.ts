@@ -4,6 +4,20 @@
  */
 
 /**
+ * Sanitizes input to prevent injection attacks (e.g. Prompt Injection, XSS)
+ * Escapes XML/HTML special characters: < > & " '
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
