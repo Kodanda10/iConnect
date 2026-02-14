@@ -44,3 +44,21 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input to prevent prompt injection and XSS.
+ * Escapes XML/HTML special characters and trims whitespace.
+ *
+ * @param input The raw input string
+ * @returns The sanitized string
+ */
+export function sanitizeInput(input: string | undefined | null): string {
+    if (!input) return '';
+    return input
+        .trim()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
