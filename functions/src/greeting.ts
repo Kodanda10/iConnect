@@ -4,9 +4,11 @@
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
  * - 2024-12-15: Added real Gemini AI integration with template fallback
+ * - 2025-05-21: Security fix for Prompt Injection (XML delimiters + Sanitization)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -70,19 +72,28 @@ let warnedMissingGeminiKey = false;
 
 /**
  * Build a prompt for Gemini AI
+ * Uses XML delimiters to separate instructions from data (Prompt Injection Defense)
  */
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
+    const sanitizedName = sanitizeInput(request.name);
+    const sanitizedLeader = request.leaderName ? sanitizeInput(request.leaderName) : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    return `<instruction>
+Generate a warm and heartfelt ${occasion} greeting message in ${language}.
+The recipient is provided in the <recipient> tag.
+${sanitizedLeader ? 'The sender is provided in the <sender> tag (send on their behalf).' : ''}
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+Only return the greeting message, nothing else.
+</instruction>
+
+<recipient>${sanitizedName}</recipient>
+${sanitizedLeader ? `<sender>${sanitizedLeader}</sender>` : ''}`;
 }
 
 /**
