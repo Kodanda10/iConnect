@@ -1,0 +1,3 @@
+## 2025-02-27 - Calendar Grid Accessibility on Buttons
+**Learning:** Using `aria-selected` on a native `<button>` element triggers lint warnings and is technically invalid ARIA, as `aria-selected` is reserved for roles like `gridcell`, `option`, etc. Buttons inside a calendar grid should either use `role="gridcell"` (losing button semantics without extra work) or use descriptive `aria-label` to indicate selection state (e.g., "15 January 2024, selected").
+**Action:** When implementing date pickers using buttons for days, prefer appending ", selected" to the `aria-label` over using `aria-selected` attribute, unless willing to implement full `grid` role pattern with custom keyboard handling.
