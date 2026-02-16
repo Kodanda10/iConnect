@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-02-16: Optimized notification scheduling to single-pass iteration
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -185,27 +186,20 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 1. Calculate Counts
-    let todayCount = { birthdays: 0, anniversaries: 0 };
-    let tomorrowCount = { birthdays: 0, anniversaries: 0 };
-
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
-    // Since 'today' is created from IST string, its 'local' components are correct for IST
-    for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
-
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
-    }
-
-    // 2. Fetch Settings & Leader
+    // --- Optimization: Fetch Settings FIRST ---
     const settingsDoc = await db.collection('settings').doc('app_config').get();
     const settings = settingsDoc.data();
 
     // Logic matches SettingsPage.tsx
     const headsUpEnabled = settings?.alertSettings?.headsUp ?? true;
     const actionEnabled = settings?.alertSettings?.action ?? true;
+
+    // If both disabled, exit early (Optimization)
+    if (!headsUpEnabled && !actionEnabled) {
+        console.log('[DAILY_SCAN] All notifications disabled, skipping.');
+        return;
+    }
+
     let headsUpTemplate = settings?.alertSettings?.headsUpMessage || "Tomorrow's Celebrations! Tap to view the list and prepare.";
     let actionTemplate = settings?.alertSettings?.actionMessage || "Action Required! Send wishes to people celebrating today. Don't miss out!";
 
@@ -218,6 +212,35 @@ export async function scheduleDailyNotifications(
             console.warn('[DAILY_SCAN] No LEADER found to notify.');
             return;
         }
+    }
+
+    // --- 2. Single Pass Scan (Optimization) ---
+    // We only care about TOMORROW's events for notifications
+    let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+    const tomorrowNames: string[] = [];
+
+    for (const c of constituents) {
+        // Check Birthday - Tomorrow
+        const isBirthday = isDateMatch(c.dob, tomorrow);
+        const isAnniversary = isDateMatch(c.anniversary, tomorrow);
+
+        if (isBirthday) tomorrowCount.birthdays++;
+        if (isAnniversary) tomorrowCount.anniversaries++;
+
+        if (isBirthday || isAnniversary) {
+             tomorrowNames.push(c.name.split(' ')[0]);
+        }
+    }
+
+    const totalEvents = tomorrowCount.birthdays + tomorrowCount.anniversaries;
+    // If no events tomorrow, skip (Optimization)
+    if (totalEvents === 0) {
+        // Log implies we checked but found nothing.
+        // We can just return without logging if we want to be silent, but logging is good for debugging.
+        // But the previous implementation would proceed to checks (which would be false).
+        // It would NOT log "Scheduled notifications".
+        // So we can return here.
+        return;
     }
 
     // --- Sanitization Logic ---
@@ -236,32 +259,25 @@ export async function scheduleDailyNotifications(
     const batch = db.batch();
     const Timestamp = admin.firestore.Timestamp;
 
+    // --- Prepare Summary Helper ---
+    // Reuse names collected in single pass
+    let nameSummary = "";
+    if (tomorrowNames.length > 0) {
+        const displayCount = 2; // Show first 2 names
+        const firstNames = tomorrowNames.slice(0, displayCount).join(', ');
+        const remaining = tomorrowNames.length - displayCount;
+
+        if (remaining > 0) {
+            nameSummary = `(${firstNames} & ${remaining} others)`;
+        } else {
+            nameSummary = `(${firstNames})`;
+        }
+    }
+
     // --- 3. Action Reminder (Tomorrow 8:00 AM) ---
     // Note: Since scan runs at 7 PM, we schedule the Action Reminder for the NEXT morning (Tomorrow 8 AM).
     // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
-    if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
-
-        // Smart Summary
-        let nameSummary = "";
-        if (names.length > 0) {
-            const displayCount = 2; // Show first 2 names
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
-
-            if (remaining > 0) {
-                nameSummary = `(${firstNames} & ${remaining} others)`;
-            } else {
-                nameSummary = `(${firstNames})`;
-            }
-        }
-
+    if (actionEnabled) {
         let prefix = "";
         const parts = [];
         if (tomorrowCount.birthdays > 0) parts.push(`${tomorrowCount.birthdays} birthdays`);
@@ -287,29 +303,7 @@ export async function scheduleDailyNotifications(
 
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
     // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
-    if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
-
-        // Smart Summary
-        let nameSummary = "";
-        if (names.length > 0) {
-            const displayCount = 2;
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
-
-            if (remaining > 0) {
-                nameSummary = `(${firstNames} & ${remaining} others)`;
-            } else {
-                nameSummary = `(${firstNames})`;
-            }
-        }
-
+    if (headsUpEnabled) {
         let prefix = "";
         const parts = [];
         if (tomorrowCount.birthdays > 0) parts.push(`${tomorrowCount.birthdays} birthdays`);
