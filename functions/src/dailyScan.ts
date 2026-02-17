@@ -43,22 +43,33 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Check if a date string matches a target month and day.
+ * Optimized for performance in hot loops (avoiding split/parseInt/Date calls).
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
+function isSameMonthAndDay(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    // Fast path for standard YYYY-MM-DD format (zero allocation)
+    if (dateStr.length === 10) {
+        // YYYY-MM-DD
+        // 0123456789
+        // Check for dashes at index 4 and 7
+        if (dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+             const m = (dateStr.charCodeAt(5) - 48) * 10 + (dateStr.charCodeAt(6) - 48);
+             const d = (dateStr.charCodeAt(8) - 48) * 10 + (dateStr.charCodeAt(9) - 48);
+             // targetMonth is 0-indexed, dateStr month is 1-indexed
+             return m === (targetMonth + 1) && d === targetDay;
+        }
+    }
+
+    // Fallback for other formats
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
     const day = parseInt(parts[2], 10);
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    return day === targetDay && month === targetMonth;
 }
 
 /**
@@ -122,11 +133,16 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
+        if (isSameMonthAndDay(constituent.dob, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -134,7 +150,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
+        if (isSameMonthAndDay(constituent.dob, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -142,7 +158,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
+        if (isSameMonthAndDay(constituent.anniversary, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -150,7 +166,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
+        if (isSameMonthAndDay(constituent.anniversary, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -185,18 +201,23 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
     // 1. Calculate Counts
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
+    // NOTE: isSameMonthAndDay compares with targetDay/targetMonth
     // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        if (isSameMonthAndDay(c.dob, todayMonth, todayDay)) todayCount.birthdays++;
+        if (isSameMonthAndDay(c.anniversary, todayMonth, todayDay)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay)) tomorrowCount.birthdays++;
+        if (isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) tomorrowCount.anniversaries++;
     }
 
     // 2. Fetch Settings & Leader
@@ -243,7 +264,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay) || isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -291,7 +312,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay) || isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
