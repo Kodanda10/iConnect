@@ -6,6 +6,7 @@
  */
 
 import * as admin from 'firebase-admin';
+import { redactMobile } from './utils/security';
 
 export interface ConstituentRecord {
     id: string;
@@ -96,7 +97,7 @@ export async function sendBulkSMS(
                 await sendSMS(mobile, message);
                 return true;
             } catch (e) {
-                console.error(`[BULK SMS] Failed for ${mobile}:`, e);
+                console.error(`[BULK SMS] Failed for ${redactMobile(mobile)}:`, e);
                 return false;
             }
         }));

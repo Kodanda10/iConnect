@@ -99,5 +99,38 @@ describe('audienceQuery', () => {
             // Should only send to 2 (filtering empty mobile)
             expect(messaging.sendSMS).toHaveBeenCalledTimes(2);
         });
+
+        it('redacts mobile numbers in error logs', async () => {
+            jest.resetModules();
+            // Mock sendSMS to always fail
+            jest.doMock('../messaging', () => ({
+                sendSMS: jest.fn().mockRejectedValue(new Error('Simulated failure')),
+            }));
+
+            // Spy on console.error
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            const { sendBulkSMS } = await import('../audienceQuery');
+
+            const constituents = [
+                { id: '1', name: 'User1', mobile: '9876543210' },
+            ];
+
+            await sendBulkSMS(constituents, 'Test message');
+
+            // Should have logged an error
+            expect(consoleSpy).toHaveBeenCalled();
+
+            // The log should contain the REDACTED number
+            const expectedRedacted = '******3210';
+            const calls = consoleSpy.mock.calls;
+            const errorLog = calls.find(args => args[0].includes('[BULK SMS] Failed for'));
+
+            expect(errorLog).toBeDefined();
+            expect(errorLog![0]).toContain(expectedRedacted);
+            expect(errorLog![0]).not.toContain('9876543210'); // Should NOT contain the full number
+
+            consoleSpy.mockRestore();
+        });
     });
 });
