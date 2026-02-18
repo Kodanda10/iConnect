@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -74,15 +75,29 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    // Sanitize user inputs to prevent prompt injection
+    const recipientName = sanitizeInput(request.name);
+    const leaderName = request.leaderName ? sanitizeInput(request.leaderName) : '';
+
+    const leaderContext = leaderName ? ` on behalf of <leader_name>${leaderName}</leader_name>` : '';
+
+    return `
+<instruction>
+Generate a warm and heartfelt ${occasion} greeting message${leaderContext} for the recipient.
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+- In the language: ${language}
+</instruction>
+
+<recipient_name>${recipientName}</recipient_name>
+
+<output_format>
+Only return the greeting message text. Do not include any explanations or XML tags.
+</output_format>`;
 }
 
 /**
