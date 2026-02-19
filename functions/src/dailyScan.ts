@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2024-05-23: Optimized date matching performance
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -43,22 +44,30 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Check if a date string (YYYY-MM-DD) matches a target month and day.
+ * Optimized using charCodeAt to avoid allocation and parsing.
+ * @param dateStr Date string in YYYY-MM-DD format
+ * @param targetMonth 0-indexed month (0-11)
+ * @param targetDay Day of month (1-31)
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
+function isSameMonthAndDay(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+    if (!dateStr || dateStr.length !== 10) return false;
 
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
+    // YYYY-MM-DD
+    // 0123456789
+    // month at 5,6 -> 5 * 10 + 6
+    // day at 8,9 -> 8 * 10 + 9
 
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    // Safety check for format (YYYY-MM-DD)
+    if (dateStr.charCodeAt(4) !== 45 || dateStr.charCodeAt(7) !== 45) return false;
 
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    // charCodeAt(i) - 48 gives the digit value
+    // Month is 1-indexed in string, convert to 0-indexed for comparison
+    const m = (dateStr.charCodeAt(5) - 48) * 10 + (dateStr.charCodeAt(6) - 48) - 1;
+    if (m !== targetMonth) return false;
+
+    const d = (dateStr.charCodeAt(8) - 48) * 10 + (dateStr.charCodeAt(9) - 48);
+    return d === targetDay;
 }
 
 /**
@@ -122,11 +131,16 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
+        if (isSameMonthAndDay(constituent.dob, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -134,7 +148,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
+        if (isSameMonthAndDay(constituent.dob, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -142,7 +156,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
+        if (isSameMonthAndDay(constituent.anniversary, todayMonth, todayDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -150,7 +164,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
+        if (isSameMonthAndDay(constituent.anniversary, tomorrowMonth, tomorrowDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -185,18 +199,22 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+
     // 1. Calculate Counts
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
-    // Since 'today' is created from IST string, its 'local' components are correct for IST
+    // NOTE: isSameMonthAndDay compares with target month/day (from IST Date object)
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        if (isSameMonthAndDay(c.dob, todayMonth, todayDay)) todayCount.birthdays++;
+        if (isSameMonthAndDay(c.anniversary, todayMonth, todayDay)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay)) tomorrowCount.birthdays++;
+        if (isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) tomorrowCount.anniversaries++;
     }
 
     // 2. Fetch Settings & Leader
@@ -243,7 +261,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay) || isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -291,7 +309,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isSameMonthAndDay(c.dob, tomorrowMonth, tomorrowDay) || isSameMonthAndDay(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
