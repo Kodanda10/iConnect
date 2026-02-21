@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-02-21: Performance optimization (single pass loop & zero-allocation date parsing)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -43,12 +44,34 @@ export interface ScanResult {
 }
 
 /**
- * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * Check if a date string (YYYY-MM-DD) matches a target month and day
+ * Optimized for performance:
+ * - Zero allocation for standard YYYY-MM-DD strings using charCodeAt
+ * - Fallback for other formats
  */
-function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
+function isSameMonthAndDay(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    // Fast path for standard YYYY-MM-DD format (length 10)
+    // Avoids allocation of substrings and array split
+    if (dateStr.length === 10) {
+        // Month at indices 5,6. Day at indices 8,9.
+        // '0' is 48.
+        // targetMonth is 0-indexed (0-11).
+        const m1 = dateStr.charCodeAt(5) - 48;
+        const m2 = dateStr.charCodeAt(6) - 48;
+        const month = m1 * 10 + m2 - 1;
+
+        if (month !== targetMonth) return false;
+
+        const d1 = dateStr.charCodeAt(8) - 48;
+        const d2 = dateStr.charCodeAt(9) - 48;
+        const day = d1 * 10 + d2;
+
+        return day === targetDay;
+    }
+
+    // Fallback logic
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
@@ -56,8 +79,8 @@ function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
     return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
+        day === targetDay &&
+        month === targetMonth
     );
 }
 
@@ -122,11 +145,16 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const tMonth = today.getMonth();
+    const tDay = today.getDate();
+    const tmMonth = tomorrow.getMonth();
+    const tmDay = tomorrow.getDate();
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
+        if (isSameMonthAndDay(constituent.dob, tMonth, tDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -134,7 +162,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
+        if (isSameMonthAndDay(constituent.dob, tmMonth, tmDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -142,7 +170,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
+        if (isSameMonthAndDay(constituent.anniversary, tMonth, tDay)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -150,7 +178,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
+        if (isSameMonthAndDay(constituent.anniversary, tmMonth, tmDay)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -185,18 +213,37 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 1. Calculate Counts
+    // 1. Calculate Counts & Collect Names (Single Pass)
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+    const tomorrowNames: string[] = [];
 
-    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
+    const tMonth = today.getMonth();
+    const tDay = today.getDate();
+    const tmMonth = tomorrow.getMonth();
+    const tmDay = tomorrow.getDate();
+
+    // NOTE: isSameMonthAndDay compares with target month/day (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
+        // Today
+        if (isSameMonthAndDay(c.dob, tMonth, tDay)) todayCount.birthdays++;
+        if (isSameMonthAndDay(c.anniversary, tMonth, tDay)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        // Tomorrow
+        let isTomorrowEvent = false;
+        if (isSameMonthAndDay(c.dob, tmMonth, tmDay)) {
+            tomorrowCount.birthdays++;
+            isTomorrowEvent = true;
+        }
+        if (isSameMonthAndDay(c.anniversary, tmMonth, tmDay)) {
+            tomorrowCount.anniversaries++;
+            isTomorrowEvent = true;
+        }
+
+        if (isTomorrowEvent) {
+             tomorrowNames.push(c.name.split(' ')[0]);
+        }
     }
 
     // 2. Fetch Settings & Leader
@@ -241,12 +288,7 @@ export async function scheduleDailyNotifications(
     // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
     if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        const names = tomorrowNames;
 
         // Smart Summary
         let nameSummary = "";
@@ -289,12 +331,7 @@ export async function scheduleDailyNotifications(
     // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
         // Collect names for tomorrow
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
+        const names = tomorrowNames;
 
         // Smart Summary
         let nameSummary = "";
