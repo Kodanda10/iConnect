@@ -3,6 +3,7 @@
  * @description System Brain - Daily scan for birthdays and anniversaries
  * @changelog
  * - 2024-12-11: Initial implementation with TDD
+ * - 2025-02-21: Performance optimization (single pass loop & zero-allocation date parsing)
  */
 import * as admin from 'firebase-admin';
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
