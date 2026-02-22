@@ -6,7 +6,7 @@
  * They should FAIL until we implement generateGreeting in src/index.ts
  */
 
-import { generateGreetingMessage, GreetingRequest } from '../src/greeting';
+import { generateGreetingMessage, GreetingRequest } from '../greeting';
 
 describe('generateGreetingMessage', () => {
     describe('Input Validation', () => {
