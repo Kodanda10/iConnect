@@ -5,11 +5,12 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - 2025-05-20: Performance optimization - Memoized BlockItem and GPProgressBar to prevent O(N) re-renders on hover
  */
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -25,6 +26,8 @@ export default function DataMetricsCard() {
         loadMetrics();
     }, []);
 
+    // Effect to trigger data loading when hoveredBlock changes
+    // This separates the state update (fast) from the side effect (async data loading)
     const loadMetrics = async () => {
         try {
             setLoading(true);
@@ -54,10 +57,23 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    // Effect to trigger data loading when hoveredBlock changes
+    // This separates the state update (fast) from the side effect (async data loading)
+    useEffect(() => {
+        if (hoveredBlock) {
+            loadGPData(hoveredBlock);
+        }
+    }, [hoveredBlock, loadGPData]);
+
+    // Stable callback for hover events to prevent re-renders of all BlockItems
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
-        loadGPData(blockName);
-    };
+    }, []);
+
+    // Stable callback for leave events
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -218,8 +234,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onHover={handleBlockHover}
+                            onLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,12 +248,16 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onHover: (name: string) => void;
+    onLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+// Memoized BlockItem to prevent re-rendering all blocks when one is hovered
+const BlockItem = memo(function BlockItem({ block, total, isHovered, onHover, onLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
+
+    // Create stable handlers calling the passed props
+    const handleMouseEnter = () => onHover(block.name);
 
     return (
         <div
@@ -249,8 +269,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={onLeave}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +300,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -301,7 +321,8 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+// Memoized to prevent re-renders when parent updates unrelated state
+const GPProgressBar = memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +359,4 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
-
-
+});
