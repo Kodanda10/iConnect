@@ -9,6 +9,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateGreetingMessage = generateGreetingMessage;
 const generative_ai_1 = require("@google/generative-ai");
+const security_1 = require("./utils/security");
 // Greeting templates for fallback (when Gemini API is unavailable)
 const TEMPLATES = {
     BIRTHDAY: {
@@ -60,14 +61,24 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request) {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
-The message should be:
+    // Sanitize and validate inputs
+    const name = (0, security_1.sanitizeInput)(request.name);
+    const leaderName = request.leaderName ? (0, security_1.sanitizeInput)(request.leaderName) : '';
+    const leaderInstruction = leaderName ? ` on behalf of ${leaderName}` : '';
+    return `<instruction>
+Generate a warm and heartfelt ${occasion} greeting message${leaderInstruction} for the person named in the data section below.
+Language: ${language}
+Constraints:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+- Do not include any other text or explanation. Only the greeting message.
+</instruction>
+
+<data>
+<name>${name}</name>
+</data>`;
 }
 /**
  * Get a template-based message (fallback)
@@ -86,6 +97,13 @@ async function generateGreetingMessage(request) {
     // Input validation
     if (!request.name || request.name.trim() === '') {
         throw new Error('Name is required');
+    }
+    // Security: Length limits
+    if (request.name.length > 100) {
+        throw new Error('Name is too long (max 100 chars)');
+    }
+    if (request.leaderName && request.leaderName.length > 100) {
+        throw new Error('Leader name is too long (max 100 chars)');
     }
     if (!VALID_TYPES.includes(request.type)) {
         throw new Error('Invalid type');
