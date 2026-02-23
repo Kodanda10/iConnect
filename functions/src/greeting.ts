@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -74,15 +75,26 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
-The message should be:
+    // Sanitize and validate inputs
+    const name = sanitizeInput(request.name);
+    const leaderName = request.leaderName ? sanitizeInput(request.leaderName) : '';
+    const leaderInstruction = leaderName ? ` on behalf of ${leaderName}` : '';
+
+    return `<instruction>
+Generate a warm and heartfelt ${occasion} greeting message${leaderInstruction} for the person named in the data section below.
+Language: ${language}
+Constraints:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+- Do not include any other text or explanation. Only the greeting message.
+</instruction>
+
+<data>
+<name>${name}</name>
+</data>`;
 }
 
 /**
@@ -105,6 +117,14 @@ export async function generateGreetingMessage(
     // Input validation
     if (!request.name || request.name.trim() === '') {
         throw new Error('Name is required');
+    }
+
+    // Security: Length limits
+    if (request.name.length > 100) {
+        throw new Error('Name is too long (max 100 chars)');
+    }
+    if (request.leaderName && request.leaderName.length > 100) {
+        throw new Error('Leader name is too long (max 100 chars)');
     }
 
     if (!VALID_TYPES.includes(request.type)) {
