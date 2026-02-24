@@ -1,0 +1,4 @@
+## 2025-02-18 - Prompt Injection in Greeting Generation
+**Vulnerability:** The `generateGreetingMessage` function constructed LLM prompts by directly concatenating user input (`name` and `leaderName`) into the prompt string. This allowed potential prompt injection if a malicious user provided a name containing instructions like "Ignore previous instructions".
+**Learning:** Even internal helper functions like `buildPrompt` must treat all user input as untrusted. LLM prompts are code, and user input is data; mixing them without sanitization is akin to SQL injection.
+**Prevention:** Always sanitize or encode user input before inserting it into an LLM prompt. Use a dedicated `sanitizeInput` utility that escapes special characters or strips control characters. In the future, consider using structured prompting (if supported by the API) or "chat" interfaces where system instructions are separate from user messages.
