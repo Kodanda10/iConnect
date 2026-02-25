@@ -69,20 +69,55 @@ const LANGUAGE_NAMES: Record<Language, string> = {
 let warnedMissingGeminiKey = false;
 
 /**
+ * Sanitize user input to prevent prompt injection and ensure reasonable length.
+ */
+export function sanitizeInput(input: string, maxLength: number = 100): string {
+    if (!input) return '';
+
+    // Trim whitespace
+    let sanitized = input.trim();
+
+    // Remove XML-like tags to prevent structure injection
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+
+    // Remove characters often used in prompt injection payloads
+    // We allow basic punctuation but remove excessive newlines or control chars
+    sanitized = sanitized.replace(/[\r\n]+/g, ' ');
+
+    // Truncate to maximum length
+    if (sanitized.length > maxLength) {
+        sanitized = sanitized.substring(0, maxLength);
+    }
+
+    return sanitized;
+}
+
+/**
  * Build a prompt for Gemini AI
  */
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    // Sanitize inputs
+    const safeName = sanitizeInput(request.name);
+    const safeLeaderName = request.leaderName ? sanitizeInput(request.leaderName) : '';
+
+    return `<instruction>
+Generate a warm and heartfelt ${occasion} greeting message for the person named in the <name> tag in ${language}.
+${safeLeaderName ? `The message is on behalf of the leader named in the <leader> tag.` : ''}
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
 - Culturally appropriate for Indian context
 - Include blessings for health and happiness
-Only return the greeting message, nothing else.`;
+Only return the greeting message, nothing else.
+</instruction>
+
+<data>
+<name>${safeName}</name>
+${safeLeaderName ? `<leader>${safeLeaderName}</leader>` : ''}
+</data>`;
 }
 
 /**
