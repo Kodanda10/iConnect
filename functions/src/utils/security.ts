@@ -44,3 +44,23 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes user input to prevent injection attacks
+ * - Trims whitespace
+ * - Removes control characters
+ * - Limits length
+ * - Escapes potential HTML/XML tags if necessary (though for LLM prompt, stripping might be better)
+ */
+export function sanitizeInput(input: string | undefined, maxLength: number = 100): string {
+    if (!input) return '';
+
+    // remove control characters and non-printable characters
+    let sanitized = input.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+
+    // strict alphanumeric and basic punctuation for names?
+    // Maybe just strip < and > to prevent XML injection since we'll use XML tags
+    sanitized = sanitized.replace(/[<>]/g, '');
+
+    return sanitized.trim().slice(0, maxLength);
+}
