@@ -44,3 +44,27 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input to prevent prompt injection and XSS
+ */
+export function sanitizeInput(input: string | undefined): string {
+    if (!input) return '';
+
+    // 1. Trim whitespace
+    let sanitized = input.trim();
+
+    // 2. Remove control characters and potential XML/HTML tags
+    // This is crucial for preventing prompt injection in XML-structured prompts
+    sanitized = sanitized.replace(/[<>]/g, '');
+
+    // 3. Remove newlines to prevent prompt injection via line breaks
+    sanitized = sanitized.replace(/[\r\n]+/g, ' ');
+
+    // 4. Enforce reasonable length limit (100 chars for names is plenty)
+    if (sanitized.length > 100) {
+        sanitized = sanitized.substring(0, 100);
+    }
+
+    return sanitized;
+}
