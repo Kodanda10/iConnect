@@ -1,0 +1,4 @@
+## 2025-02-28 - Removed Hardcoded Firebase API Keys
+**Vulnerability:** The scripts `seed-tasks.ts`, `seed-december.ts`, and `seed-constituents.ts` contained hardcoded Firebase API keys and full configuration objects. This exposes sensitive project configuration data in source control.
+**Learning:** Development and seeding scripts often bypass standard application initialization flows (like `firebase.ts`) and developers might hardcode credentials for convenience. These scripts need to be treated with the same security rigor as production code. Also, when patching scripts to use `.env` files, be sure to add the necessary dependencies (like `dotenv`) to the `package.json`.
+**Prevention:** Always use environment variables for sensitive configuration data, even in auxiliary scripts. Centralize configuration logic when possible so scripts can reuse the secure initialization methods.
