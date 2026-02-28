@@ -54,10 +54,14 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -213,13 +217,13 @@ export default function DataMetricsCard() {
                 {/* Block List */}
                 <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
                     {metrics.blocks.map((block) => (
-                        <BlockItem
+                        <MemoizedBlockItem
                             key={block.name}
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockHover}
+                            onMouseLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +236,15 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
+    onMouseEnter: (name: string) => void;
     onMouseLeave: () => void;
 }
 
 function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+    const handleMouseEnter = useCallback(() => {
+        onMouseEnter(block.name);
+    }, [block.name, onMouseEnter]);
+
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,7 +257,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
+            onMouseEnter={handleMouseEnter}
             onMouseLeave={onMouseLeave}
         >
             {/* Progress bar background */}
@@ -281,6 +289,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
         </div>
     );
 }
+
+const MemoizedBlockItem = React.memo(BlockItem);
 
 interface GPProgressBarProps {
     gp: GPMetric;
