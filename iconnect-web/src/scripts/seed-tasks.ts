@@ -7,8 +7,12 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 
-// Firebase config
-// Note: dotenv and path not needed when using hardcoded config
+// Firebase config from environment
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+// Load .env.local from the root of iconnect-web
+dotenv.config({ path: path.resolve(__dirname, '../../.env.local') });
 
 // Constituent type for type-safe access
 interface ConstituentDoc {
@@ -18,13 +22,17 @@ interface ConstituentDoc {
 }
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
-    authDomain: 'iconnect-crm.firebaseapp.com',
-    projectId: 'iconnect-crm',
-    storageBucket: 'iconnect-crm.firebasestorage.app',
-    messagingSenderId: '887016822564',
-    appId: '1:887016822564:web:dd5f49de3ef0138fe1c5b1',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
+
+if (!firebaseConfig.projectId) {
+    console.warn('⚠️ No Firebase project ID found in environment. Proceeding, but initialization may fail.');
+}
 
 async function seedTasks() {
     const app = initializeApp(firebaseConfig);
