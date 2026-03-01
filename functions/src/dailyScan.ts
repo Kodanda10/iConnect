@@ -48,12 +48,21 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
+    let day: number;
+    let month: number;
 
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    // Fast path: Zero-allocation parsing for standard YYYY-MM-DD strings
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        month = (dateStr.charCodeAt(5) - 48) * 10 + (dateStr.charCodeAt(6) - 48) - 1; // JS months are 0-indexed
+        day = (dateStr.charCodeAt(8) - 48) * 10 + (dateStr.charCodeAt(9) - 48);
+    } else {
+        // Fallback for non-standard formats
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return false;
+
+        day = parseInt(parts[2], 10);
+        month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    }
 
     return (
         day === targetDate.getDate() &&
@@ -185,9 +194,10 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // 1. Calculate Counts
+    // 1. Calculate Counts & Collect Tomorrow's Names in a single pass
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
+    const tomorrowNames: string[] = [];
 
     // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
@@ -195,8 +205,15 @@ export async function scheduleDailyNotifications(
         if (isDateMatch(c.dob, today)) todayCount.birthdays++;
         if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
+        const isTomorrowBday = isDateMatch(c.dob, tomorrow);
+        const isTomorrowAnniv = isDateMatch(c.anniversary, tomorrow);
+
+        if (isTomorrowBday) tomorrowCount.birthdays++;
+        if (isTomorrowAnniv) tomorrowCount.anniversaries++;
+
+        if (isTomorrowBday || isTomorrowAnniv) {
+            tomorrowNames.push(c.name.split(' ')[0]);
+        }
     }
 
     // 2. Fetch Settings & Leader
@@ -240,20 +257,12 @@ export async function scheduleDailyNotifications(
     // Note: Since scan runs at 7 PM, we schedule the Action Reminder for the NEXT morning (Tomorrow 8 AM).
     // It should target 'tomorrow's' events but say "Today" in the text (since it's read tomorrow).
     if (actionEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
-
         // Smart Summary
         let nameSummary = "";
-        if (names.length > 0) {
+        if (tomorrowNames.length > 0) {
             const displayCount = 2; // Show first 2 names
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
+            const firstNames = tomorrowNames.slice(0, displayCount).join(', ');
+            const remaining = tomorrowNames.length - displayCount;
 
             if (remaining > 0) {
                 nameSummary = `(${firstNames} & ${remaining} others)`;
@@ -288,20 +297,12 @@ export async function scheduleDailyNotifications(
     // --- 4. Heads Up Alert (Today 8:00 PM) ---
     // Scan at 7 PM -> Notify at 8 PM about Tomorrow's events
     if (headsUpEnabled && (tomorrowCount.birthdays + tomorrowCount.anniversaries > 0)) {
-        // Collect names for tomorrow
-        const names: string[] = [];
-        constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
-                names.push(c.name.split(' ')[0]);
-            }
-        });
-
         // Smart Summary
         let nameSummary = "";
-        if (names.length > 0) {
+        if (tomorrowNames.length > 0) {
             const displayCount = 2;
-            const firstNames = names.slice(0, displayCount).join(', ');
-            const remaining = names.length - displayCount;
+            const firstNames = tomorrowNames.slice(0, displayCount).join(', ');
+            const remaining = tomorrowNames.length - displayCount;
 
             if (remaining > 0) {
                 nameSummary = `(${firstNames} & ${remaining} others)`;
