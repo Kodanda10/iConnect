@@ -100,6 +100,7 @@ export default function GlassCalendar({
             {/* Navigation Header */}
             <div className="flex items-center justify-between mb-4">
                 <button
+                    aria-label="Previous month"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
@@ -111,6 +112,9 @@ export default function GlassCalendar({
                     {/* Month Dropdown */}
                     <div className="relative dropdown-container">
                         <button
+                            aria-label="Select month"
+                            aria-haspopup="listbox"
+                            aria-expanded={showMonthDropdown}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -144,6 +148,9 @@ export default function GlassCalendar({
                     {/* Year Dropdown */}
                     <div className="relative dropdown-container">
                         <button
+                            aria-label="Select year"
+                            aria-haspopup="listbox"
+                            aria-expanded={showYearDropdown}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -176,6 +183,7 @@ export default function GlassCalendar({
                 </div>
 
                 <button
+                    aria-label="Next month"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
@@ -209,6 +217,9 @@ export default function GlassCalendar({
                     return (
                         <button
                             key={day}
+                            aria-label={date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            aria-selected={isSelectedDay}
+                            aria-current={isTodayDay ? 'date' : undefined}
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
