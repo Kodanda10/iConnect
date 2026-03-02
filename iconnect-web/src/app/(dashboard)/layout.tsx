@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { Database, Loader2, LogOut, Calendar, Upload, Bell, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -64,9 +65,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="glass-navbar flex items-center justify-between h-14 px-4 sm:px-6">
                         {/* Logo */}
                         <div className="flex items-center gap-3">
-                            <img
+                            <Image
                                 src="/app-logo-final.png"
                                 alt="iConnect"
+                                width={36}
+                                height={36}
                                 className="w-9 h-9 rounded-full shadow-lg object-cover"
                             />
                             <div className="hidden sm:block">
@@ -106,7 +109,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {/* Right Section */}
                         <div className="flex items-center gap-2">
                             {/* Notification Bell */}
-                            <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
+                            <button
+                                className="relative p-2 rounded-full hover:bg-white/10 transition-colors"
+                                aria-label="Notifications"
+                            >
                                 <Bell className="w-5 h-5 text-white/70" />
                                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[rgba(30,45,40,0.8)]" />
                             </button>
@@ -125,6 +131,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                     onClick={() => signOut()}
                                     className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-red-400 transition-colors"
                                     title="Sign Out"
+                                    aria-label="Sign Out"
                                 >
                                     <LogOut className="w-4 h-4" />
                                 </button>
