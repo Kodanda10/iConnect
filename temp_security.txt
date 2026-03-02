@@ -4,27 +4,6 @@
  */
 
 /**
- * Sanitizes user input to prevent prompt injection and XSS.
- * Removes control characters and limits length.
- */
-export function sanitizeInput(input: string | null | undefined, maxLength: number = 100): string {
-    if (!input) return '';
-
-    // Remove control characters and non-printable characters
-    let sanitized = input.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-
-    // Replace multiple spaces with a single space
-    sanitized = sanitized.replace(/\s+/g, ' ').trim();
-
-    // Restrict length
-    if (sanitized.length > maxLength) {
-        sanitized = sanitized.slice(0, maxLength);
-    }
-
-    return sanitized;
-}
-
-/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
