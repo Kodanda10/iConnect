@@ -75,33 +75,36 @@ export interface GenerateTasksResult {
 }
 
 /**
- * Parse date string (YYYY-MM-DD) and extract month/day
- * Returns null if invalid
+ * Check if a date string matches a target date (month and day only, ignoring year)
  */
-function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
-    if (!dateStr || typeof dateStr !== 'string') return null;
+function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+    if (!dateStr || typeof dateStr !== 'string') return false;
 
+    // Fast path for standard YYYY-MM-DD format (zero allocations)
+    if (dateStr.length >= 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        const m1 = dateStr.charCodeAt(5) - 48;
+        const m2 = dateStr.charCodeAt(6) - 48;
+        const month = m1 * 10 + m2;
+
+        const d1 = dateStr.charCodeAt(8) - 48;
+        const d2 = dateStr.charCodeAt(9) - 48;
+        const day = d1 * 10 + d2;
+
+        return month === targetMonth && day === targetDay;
+    }
+
+    // Fallback for non-standard formats
     const parts = dateStr.split('-');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) return false;
 
     const month = parseInt(parts[1], 10);
     const day = parseInt(parts[2], 10);
 
     if (isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) {
-        return null;
+        return false;
     }
 
-    return { month, day };
-}
-
-/**
- * Check if a date string matches a target date (month and day only, ignoring year)
- */
-function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
-    const parts = parseDateParts(dateStr);
-    if (!parts) return false;
-
-    return parts.month === targetMonth && parts.day === targetDay;
+    return month === targetMonth && day === targetDay;
 }
 
 /**
