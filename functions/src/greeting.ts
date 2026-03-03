@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -102,8 +103,12 @@ function getTemplateMessage(request: GreetingRequest): string {
 export async function generateGreetingMessage(
     request: GreetingRequest
 ): Promise<string> {
-    // Input validation
-    if (!request.name || request.name.trim() === '') {
+    // Input validation and sanitization
+    request.name = sanitizeInput(request.name);
+    if (request.ward) request.ward = sanitizeInput(request.ward);
+    if (request.leaderName) request.leaderName = sanitizeInput(request.leaderName);
+
+    if (!request.name || request.name === '') {
         throw new Error('Name is required');
     }
 
