@@ -1,0 +1,3 @@
+## 2024-05-18 - Focus states for hover-only interactions in list views
+**Learning:** Interactive list elements relying solely on `onMouseEnter`/`onMouseLeave` for visual feedback (like the Block Breakdown) are invisible to keyboard users.
+**Action:** Always pair `onMouseEnter`/`onMouseLeave` with `onFocus`/`onBlur`, add `tabIndex={0}` and a semantic `role` (like `button`) for full keyboard accessibility, especially when hover dictates a separate layout change.

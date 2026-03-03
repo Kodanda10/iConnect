@@ -240,10 +240,14 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
-        <div
+        <button
+            role="button"
+            tabIndex={0}
+            aria-expanded={isHovered}
             data-testid={`block-${block.name}`}
             className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
+                w-full text-left p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50
                 ${isHovered
                     ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
                     : 'bg-white/5 hover:bg-white/10'
@@ -251,6 +255,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             `}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onFocus={onMouseEnter}
+            onBlur={onMouseLeave}
         >
             {/* Progress bar background */}
             <div
@@ -278,7 +284,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     />
                 </div>
             </div>
-        </div>
+        </button>
     );
 }
 
