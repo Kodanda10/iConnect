@@ -4,6 +4,16 @@
  */
 
 /**
+ * Sanitizes user input to prevent XSS and prompt injection
+ * Strips out characters like < > { } [ ] \ | ; $
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Replace potentially dangerous characters with empty string
+    return input.replace(/[<>\{\}\[\]\\|;$]/g, '').trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
