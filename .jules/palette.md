@@ -1,0 +1,3 @@
+## 2024-05-18 - Custom Calendar Accessibility Patterns
+**Learning:** Custom calendar components require an intricate web of ARIA attributes to be usable by screen readers. Specifically, custom dropdowns for month/year selection within a calendar widget must use `aria-haspopup="listbox"` and `aria-expanded` on the trigger, `role="listbox"` on the container, and `role="option"` with `aria-selected` on the items. Individual day buttons need full context (e.g. "15 January 2024") in their `aria-label`, `aria-selected` to reflect selection state, and `aria-current="date"` to indicate the current day.
+**Action:** When building or reviewing custom date pickers or calendar widgets, ensure this specific set of ARIA attributes is applied to recreate native semantic meaning.
