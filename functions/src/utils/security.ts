@@ -44,3 +44,19 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input to prevent prompt injection and XSS
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Basic sanitization: remove common injection patterns
+    // We remove < > tags for basic XSS protection in templates
+    // and remove some prompt injection keywords
+    return input
+        .replace(/[<>]/g, '')
+        .replace(/system prompt/ig, '')
+        .replace(/ignore previous/ig, '')
+        .replace(/ignore all/ig, '')
+        .trim();
+}

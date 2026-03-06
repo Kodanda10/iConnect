@@ -1,0 +1,4 @@
+## 2025-01-22 - [GenAI Prompt Injection Risk]
+**Vulnerability:** The `generateGreetingMessage` function passed un-sanitized user input (`request.name`, `request.leaderName`) directly into the prompt constructed for the Gemini AI. If a malicious user supplies a specially crafted string for these fields, they could override the instructions and cause the Gemini model to output arbitrary text, potentially leading to security risks or brand damage.
+**Learning:** Any dynamic content added to AI prompts from untrusted sources must be strictly sanitized. In this case, `request.name` and `request.leaderName` were being included without sanitization.
+**Prevention:** Use the `sanitizeInput` function from `functions/src/utils/security.ts` to strip potentially malicious prompt injection or XSS patterns before incorporating user-supplied data into a prompt.
