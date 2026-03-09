@@ -81,6 +81,31 @@ export interface GenerateTasksResult {
 function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
     if (!dateStr || typeof dateStr !== 'string') return null;
 
+    // Fast path: YYYY-MM-DD zero-allocation parsing
+    // ⚡ Bolt: Eliminates String.split() and array allocations in hot loops
+    if (dateStr.length >= 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        // '0' is 48, '9' is 57
+        const c1 = dateStr.charCodeAt(5);
+        const c2 = dateStr.charCodeAt(6);
+        const c3 = dateStr.charCodeAt(8);
+        const c4 = dateStr.charCodeAt(9);
+
+        // Ensure characters are valid digits
+        if (c1 >= 48 && c1 <= 57 && c2 >= 48 && c2 <= 57 && c3 >= 48 && c3 <= 57 && c4 >= 48 && c4 <= 57) {
+            const m1 = c1 - 48;
+            const m2 = c2 - 48;
+            const d1 = c3 - 48;
+            const d2 = c4 - 48;
+
+            const month = m1 * 10 + m2;
+            const day = d1 * 10 + d2;
+
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                return { month, day };
+            }
+        }
+    }
+
     const parts = dateStr.split('-');
     if (parts.length !== 3) return null;
 
