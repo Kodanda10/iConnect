@@ -1,0 +1,4 @@
+## 2025-01-09 - Prevent Prompt Injection in AI Greetings
+**Vulnerability:** Unsanitized user inputs (`name` and `leaderName`) were being directly interpolated into Gemini AI prompts in `functions/src/greeting.ts`, making the system vulnerable to prompt injection attacks where a malicious user could manipulate the AI's output.
+**Learning:** Even simple text generation tasks using LLMs require strict input validation and sanitization. User-provided data must never be directly interpolated into a prompt without removing control characters or HTML tags that might alter the AI's instruction set.
+**Prevention:** Always sanitize user inputs (e.g., using a `sanitizeInput` function that strips HTML tags and control characters) before passing them into any Generative AI prompt construction.
