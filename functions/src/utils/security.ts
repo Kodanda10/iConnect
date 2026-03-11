@@ -44,3 +44,21 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input to prevent prompt injection and XSS
+ * Removes HTML tags, control characters, and leading/trailing whitespace
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+
+    return input
+        // Remove HTML/XML tags
+        .replace(/<[^>]*>/g, '')
+        // Remove control characters except standard whitespace
+        .replace(/[\x00-\x08\x0B-\x1F\x7F-\x9F]/g, '')
+        // Clean up excessive whitespace
+        .replace(/\s+/g, ' ')
+        // Trim leading/trailing whitespace
+        .trim();
+}
