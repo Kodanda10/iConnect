@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -124,15 +124,21 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
-                                    <GPProgressBar
-                                        key={gp.name}
-                                        gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
-                                        delay={index * 50}
-                                        index={index}
-                                    />
-                                ))}
+                                {(() => {
+                                    // ⚡ Bolt: Extract O(N) computation outside the map to avoid O(N²) renders
+                                    const blockGps = gpData[hoveredBlock] || [];
+                                    const maxCount = Math.max(...blockGps.map(g => g.count), 1);
+
+                                    return blockGps.map((gp, index) => (
+                                        <GPProgressBar
+                                            key={gp.name}
+                                            gp={gp}
+                                            maxCount={maxCount}
+                                            delay={index * 50}
+                                            index={index}
+                                        />
+                                    ));
+                                })()}
                             </div>
                         )}
                     </div>
@@ -301,7 +307,8 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+// ⚡ Bolt: Memoize the progress bar to prevent unnecessary re-renders when parent state updates
+const GPProgressBar = memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +345,6 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
+});
 
 
