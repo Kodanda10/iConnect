@@ -1,0 +1,5 @@
+## 2025-01-22 - Sanitize Inputs Before LLM Interpolation
+
+**Vulnerability:** Unsanitized user inputs (`request.name`, `request.leaderName`) were being directly interpolated into Generative AI prompts in `functions/src/greeting.ts`, making the service susceptible to prompt injection attacks where a malicious user could craft a name to alter the model's instructions.
+**Learning:** Even simple strings like "names" can be used to inject malicious control characters or hidden instructions into LLM prompts. Prompt interpolation requires the same level of input sanitization as SQL queries. Furthermore, if a sanitization function strips out all content (e.g. an input was purely malicious HTML tags), falling back to a safe default (like 'the constituent') is necessary to maintain prompt structure.
+**Prevention:** Always use a utility function like `sanitizeInput` to strip HTML tags and control characters from user-controlled data *before* it is interpolated into an AI prompt. Provide safe fallback strings when sanitized output is empty.
