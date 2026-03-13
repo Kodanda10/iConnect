@@ -102,6 +102,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -118,25 +119,37 @@ export default function GlassCalendar({
                                 setShowYearDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-haspopup="listbox"
+                            aria-expanded={showMonthDropdown}
+                            aria-label="Select month"
                         >
                             {monthNamesShort[viewDate.getMonth()]}
                             <ChevronDown className="w-3 h-3 text-white/50" />
                         </button>
 
                         {showMonthDropdown && (
-                            <div className="absolute top-full left-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 grid grid-cols-3 gap-1 w-40">
-                                {monthNamesShort.map((month, index) => (
-                                    <button
-                                        key={month}
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectMonth(index); }}
-                                        className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${viewDate.getMonth() === index
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'text-white/70 hover:bg-white/10 hover:text-white'
-                                            }`}
-                                    >
-                                        {month}
-                                    </button>
-                                ))}
+                            <div
+                                className="absolute top-full left-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 grid grid-cols-3 gap-1 w-40"
+                                role="listbox"
+                                aria-label="Months"
+                            >
+                                {monthNamesShort.map((month, index) => {
+                                    const isSelectedMonth = viewDate.getMonth() === index;
+                                    return (
+                                        <button
+                                            key={month}
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectMonth(index); }}
+                                            className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${isSelectedMonth
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                            role="option"
+                                            aria-selected={isSelectedMonth}
+                                        >
+                                            {month}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -151,25 +164,37 @@ export default function GlassCalendar({
                                 setShowMonthDropdown(false);
                             }}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
+                            aria-haspopup="listbox"
+                            aria-expanded={showYearDropdown}
+                            aria-label="Select year"
                         >
                             {viewDate.getFullYear()}
                             <ChevronDown className="w-3 h-3 text-white/50" />
                         </button>
 
                         {showYearDropdown && (
-                            <div className="absolute top-full right-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto w-24 scrollbar-thin scrollbar-thumb-white/20">
-                                {years.map(year => (
-                                    <button
-                                        key={year}
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectYear(year); }}
-                                        className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center ${viewDate.getFullYear() === year
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'text-white/70 hover:bg-white/10 hover:text-white'
-                                            }`}
-                                    >
-                                        {year}
-                                    </button>
-                                ))}
+                            <div
+                                className="absolute top-full right-0 mt-1 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 p-2 max-h-48 overflow-y-auto w-24 scrollbar-thin scrollbar-thumb-white/20"
+                                role="listbox"
+                                aria-label="Years"
+                            >
+                                {years.map(year => {
+                                    const isSelectedYear = viewDate.getFullYear() === year;
+                                    return (
+                                        <button
+                                            key={year}
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectYear(year); }}
+                                            className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center ${isSelectedYear
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'text-white/70 hover:bg-white/10 hover:text-white'
+                                                }`}
+                                            role="option"
+                                            aria-selected={isSelectedYear}
+                                        >
+                                            {year}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -178,6 +203,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -206,6 +232,8 @@ export default function GlassCalendar({
                     const dateKey = formatDateKey(day);
                     const hasEvent = eventDates.includes(dateKey);
 
+                    const fullDateString = `${day} ${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
                     return (
                         <button
                             key={day}
@@ -215,6 +243,9 @@ export default function GlassCalendar({
                                 border-r border-b border-white/5
                                 ${isSelectedDay ? 'bg-emerald-500/20 text-emerald-400 z-10' : 'text-white/80 hover:bg-white/5 hover:text-white'}
                             `}
+                            aria-label={fullDateString}
+                            aria-pressed={isSelectedDay}
+                            {...(isTodayDay ? { 'aria-current': 'date' } : {})}
                         >
                             {isTodayDay && <span className="absolute top-1 right-1 w-1 h-1 rounded-full bg-emerald-400"></span>}
                             {hasEvent && !isSelectedDay && !isTodayDay && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-white/30"></span>}

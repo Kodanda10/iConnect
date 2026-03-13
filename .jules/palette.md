@@ -1,0 +1,3 @@
+## 2025-03-13 - Calendar Accessibility Patterns
+**Learning:** Standard custom calendar date buttons use `role="button"` implicitly. Standard buttons do not natively support the `aria-selected` attribute; `aria-pressed` should be used instead to indicate selection state for buttons that act as toggles. Additionally, rendering short display text (e.g. "1") requires an `aria-label` with the full date string (e.g. "1 January 2024") so screen readers announce useful context rather than just a number out of context.
+**Action:** Always use `aria-pressed` for selected state on elements with `role="button"` (unless using grid/gridcell semantics which support aria-selected). Ensure screen readers hear the full context (full date string) instead of only the visual label.
