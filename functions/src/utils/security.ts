@@ -25,6 +25,17 @@ export function redactMessage(message: string | null | undefined): string {
 }
 
 /**
+ * Sanitizes input by removing HTML tags and control characters to prevent XSS and injection attacks.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    return input
+        .replace(/<[^>]*>?/gm, '') // Remove HTML tags
+        .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+        .trim();
+}
+
+/**
  * Redacts email addresses
  */
 export function redactEmail(email: string | null | undefined): string {
