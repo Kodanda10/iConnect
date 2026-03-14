@@ -44,3 +44,13 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes user input by removing HTML tags and control characters
+ * to prevent XSS and prompt injection attacks.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Remove control characters and HTML tags
+    return input.replace(/[\x00-\x1F\x7F-\x9F]/g, '').replace(/<[^>]*>?/gm, '').trim();
+}
