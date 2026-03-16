@@ -77,10 +77,39 @@ export interface GenerateTasksResult {
 /**
  * Parse date string (YYYY-MM-DD) and extract month/day
  * Returns null if invalid
+ * Optimized with a zero-allocation fast-path using .charCodeAt() for standard YYYY-MM-DD strings.
  */
 function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
     if (!dateStr || typeof dateStr !== 'string') return null;
 
+    // Fast-path for standard YYYY-MM-DD format (length 10, hyphens at index 4 and 7)
+    if (
+        dateStr.length === 10 &&
+        dateStr.charCodeAt(4) === 45 && // '-'
+        dateStr.charCodeAt(7) === 45    // '-'
+    ) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Validate that extracted characters are actual digits (ASCII 48-57)
+        if (
+            m1 >= 48 && m1 <= 57 &&
+            m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 &&
+            d2 >= 48 && d2 <= 57
+        ) {
+            const month = (m1 - 48) * 10 + (m2 - 48);
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                return { month, day };
+            }
+        }
+    }
+
+    // Fallback for non-standard formats
     const parts = dateStr.split('-');
     if (parts.length !== 3) return null;
 
@@ -96,8 +125,37 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
 
 /**
  * Check if a date string matches a target date (month and day only, ignoring year)
+ * Optimized with a zero-allocation fast-path using .charCodeAt() for standard YYYY-MM-DD strings.
  */
 function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+    if (!dateStr || typeof dateStr !== 'string') return false;
+
+    // Fast-path for standard YYYY-MM-DD format (length 10, hyphens at index 4 and 7)
+    if (
+        dateStr.length === 10 &&
+        dateStr.charCodeAt(4) === 45 && // '-'
+        dateStr.charCodeAt(7) === 45    // '-'
+    ) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Validate that extracted characters are actual digits (ASCII 48-57)
+        if (
+            m1 >= 48 && m1 <= 57 &&
+            m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 &&
+            d2 >= 48 && d2 <= 57
+        ) {
+            const month = (m1 - 48) * 10 + (m2 - 48);
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return month === targetMonth && day === targetDay;
+        }
+    }
+
+    // Fallback for non-standard formats
     const parts = parseDateParts(dateStr);
     if (!parts) return false;
 
