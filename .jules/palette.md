@@ -1,0 +1,3 @@
+## 2024-12-18 - Accessibility attributes for custom calendar components
+**Learning:** Custom calendar components (like GlassCalendar) require specific ARIA attributes since they rely heavily on interaction but lack native HTML semantics. Dropping them severely impacts screen reader usability.
+**Action:** When building custom date pickers, always include `aria-label` on navigation buttons, `aria-haspopup="listbox"` and `aria-expanded` on dropdown toggles, `role="listbox"` and `role="option"` for dropdown menus, `aria-current="date"` for today, `aria-pressed` for the selected date, and full date strings for day button `aria-label`s.
