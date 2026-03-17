@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -74,9 +75,14 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    // Sanitize user inputs to prevent prompt injection
+    const sanitizedName = sanitizeInput(request.name) || 'the constituent';
+    const sanitizedLeaderName = sanitizeInput(request.leaderName);
+
+    const leaderMention = sanitizedLeaderName ? ` on behalf of ${sanitizedLeaderName}` : '';
+
+    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${sanitizedName} in ${language}.
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
@@ -92,7 +98,10 @@ function getTemplateMessage(request: GreetingRequest): string {
     const typeTemplates = TEMPLATES[request.type];
     const langTemplates = typeTemplates[request.language];
     const template = langTemplates[Math.floor(Math.random() * langTemplates.length)];
-    return template.replace('{name}', request.name);
+
+    // Sanitize the name before injecting into template to prevent XSS
+    const sanitizedName = sanitizeInput(request.name) || 'the constituent';
+    return template.replace('{name}', sanitizedName);
 }
 
 /**
