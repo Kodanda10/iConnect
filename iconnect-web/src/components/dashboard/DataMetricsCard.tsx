@@ -40,6 +40,10 @@ export default function DataMetricsCard() {
     };
 
     // Lazy load GP data on hover
+    // ⚡ Bolt: Pre-calculate the max GP count for the currently hovered block to avoid O(N²) calculation inside map loop
+    const currentGPData = hoveredBlock ? (gpData[hoveredBlock] || []) : [];
+    const maxGPCount = currentGPData.length > 0 ? Math.max(...currentGPData.map(g => g.count), 1) : 1;
+
     const loadGPData = useCallback(async (blockName: string) => {
         if (gpData[blockName] || gpLoading[blockName]) return;
 
@@ -54,10 +58,11 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    // ⚡ Bolt: Memoize block hover handler to prevent recreating function on every render
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
 
     // Loading state
     if (loading) {
@@ -124,11 +129,12 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {/* ⚡ Bolt: Use pre-calculated maxCount (O(N) instead of O(N²)) */}
+                                {currentGPData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGPCount}
                                         delay={index * 50}
                                         index={index}
                                     />
@@ -218,8 +224,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockHover}
+                            onMouseLeave={setHoveredBlock}
                         />
                     ))}
                 </div>
@@ -232,12 +238,22 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onMouseEnter: (name: string) => void;
+    onMouseLeave: (name: string | null) => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+// ⚡ Bolt: Use React.memo to prevent re-rendering list items unless props change
+const BlockItem = React.memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
+
+    // ⚡ Bolt: Use useCallback for event handlers that call passed functions with IDs
+    const handleMouseEnter = useCallback(() => {
+        onMouseEnter(block.name);
+    }, [block.name, onMouseEnter]);
+
+    const handleMouseLeave = useCallback(() => {
+        onMouseLeave(null);
+    }, [onMouseLeave]);
 
     return (
         <div
@@ -249,8 +265,8 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {/* Progress bar background */}
             <div
@@ -280,7 +296,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -301,7 +317,8 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+// ⚡ Bolt: Use React.memo for list item to prevent unnecessary re-renders
+const GPProgressBar = React.memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +355,6 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
+});
 
 
