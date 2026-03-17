@@ -1,0 +1,4 @@
+
+## 2025-01-16 - Custom Calendar Accessibility Patterns
+**Learning:** Custom calendar implementations (like `GlassCalendar`) often lack built-in accessibility semantics that native date inputs provide. Standard `role="button"` elements used for days do not support `aria-selected` according to ARIA specs, meaning `aria-pressed` must be used instead to indicate selection. Also, dropdowns for months/years require full `listbox`/`option` role hierarchies and expanded/haspopup attributes on their toggles to be properly interpreted by screen readers.
+**Action:** When building custom interactive components that mimic native controls (like date pickers or select dropdowns), strictly consult ARIA patterns to ensure correct roles (e.g., `listbox` vs `menu`) and state attributes (e.g., `aria-pressed` instead of `aria-selected` on buttons) are applied. Add full context to concise visual labels (e.g. converting day "1" to "1 January 2024" via `aria-label`).
