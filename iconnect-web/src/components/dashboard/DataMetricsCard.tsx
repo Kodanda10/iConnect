@@ -5,6 +5,7 @@
  * - 2025-12-17: Initial implementation (TDD GREEN phase)
  * - 2025-12-17: Fixed layout - 50% Total + 50% Block breakdown, dark theme
  * - 2025-12-17: Added animated GP hover modal with lazy loading and progress bars
+ * - [Current Date]: BOLT OPTIMIZATION - Extracted Math.max calculation from O(N²) loop to O(N). Added React.memo and stable callbacks to prevent unnecessary BlockItem re-renders.
  */
 
 'use client';
@@ -54,10 +55,14 @@ export default function DataMetricsCard() {
         }
     }, [gpData, gpLoading]);
 
-    const handleBlockHover = (blockName: string) => {
+    const handleBlockHover = useCallback((blockName: string) => {
         setHoveredBlock(blockName);
         loadGPData(blockName);
-    };
+    }, [loadGPData]);
+
+    const handleBlockLeave = useCallback(() => {
+        setHoveredBlock(null);
+    }, []);
 
     // Loading state
     if (loading) {
@@ -122,19 +127,29 @@ export default function DataMetricsCard() {
                             <div className="py-12 text-center text-white/40 text-sm">
                                 No GP data available for {hoveredBlock}
                             </div>
-                        ) : (
-                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
-                                    <GPProgressBar
-                                        key={gp.name}
-                                        gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
-                                        delay={index * 50}
-                                        index={index}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        ) : (() => {
+                            // ⚡ BOLT OPTIMIZATION: Extract Math.max computation out of the render loop
+                            // Previously O(N²) because Math.max was calculated inside the .map loop for each GP item
+                            // Now O(N) by calculating maxCount once outside the loop
+                            const currentGpData = gpData[hoveredBlock] || [];
+                            const maxGpCount = currentGpData.length > 0
+                                ? Math.max(...currentGpData.map(g => g.count))
+                                : 1;
+
+                            return (
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {currentGpData.map((gp, index) => (
+                                        <GPProgressBar
+                                            key={gp.name}
+                                            gp={gp}
+                                            maxCount={maxGpCount}
+                                            delay={index * 50}
+                                            index={index}
+                                        />
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </div>
                 ) : (
                     // DEFAULT TOTAL VIEW
@@ -218,8 +233,8 @@ export default function DataMetricsCard() {
                             block={block}
                             total={metrics.total}
                             isHovered={hoveredBlock === block.name}
-                            onMouseEnter={() => handleBlockHover(block.name)}
-                            onMouseLeave={() => setHoveredBlock(null)}
+                            onMouseEnter={handleBlockHover}
+                            onMouseLeave={handleBlockLeave}
                         />
                     ))}
                 </div>
@@ -232,11 +247,11 @@ interface BlockItemProps {
     block: BlockMetric;
     total: number;
     isHovered: boolean;
-    onMouseEnter: () => void;
+    onMouseEnter: (blockName: string) => void;
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = React.memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -249,7 +264,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
                     : 'bg-white/5 hover:bg-white/10'
                 }
             `}
-            onMouseEnter={onMouseEnter}
+            onMouseEnter={() => onMouseEnter(block.name)}
             onMouseLeave={onMouseLeave}
         >
             {/* Progress bar background */}
@@ -280,7 +295,7 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;
@@ -301,7 +316,7 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+const GPProgressBar = React.memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +353,6 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
+});
 
 
