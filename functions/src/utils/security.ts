@@ -4,6 +4,16 @@
  */
 
 /**
+ * Sanitizes user input by stripping HTML tags and control characters.
+ * Useful for preventing XSS and prompt injection.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Remove HTML tags and common control characters
+    return input.replace(/<\/?[^>]+(>|$)/g, "").replace(/[\x00-\x1F\x7F-\x9F]/g, "").trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */

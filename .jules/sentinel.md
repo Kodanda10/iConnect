@@ -1,0 +1,5 @@
+## 2024-05-24 - Prompt Injection Vulnerability in Generative AI Prompts
+
+**Vulnerability:** User inputs (`request.name`, `request.leaderName`) were being interpolated directly into Gemini AI prompts in `functions/src/greeting.ts` without any sanitization. This allowed for prompt injection where a user could provide a crafted name to alter the model's instructions, or XSS payloads which could be propagated further.
+**Learning:** All user inputs must be aggressively sanitized before being embedded into Generative AI prompts to prevent Prompt Injection or XSS issues.
+**Prevention:** Introduce and utilize a `sanitizeInput` helper that strips out HTML tags and control characters. When sanitization completely strips the input, ensure a safe fallback like `'the constituent'` is used to maintain grammatical correctness without reintroducing untrusted input.
