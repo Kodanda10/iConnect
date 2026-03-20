@@ -1,0 +1,4 @@
+## 2024-05-18 - Prevent Prompt Injection in LLM Generation
+**Vulnerability:** The `greeting.ts` service used unsanitized user inputs (`name` and `leaderName`) directly within the Gemini AI prompt template. This allowed potential prompt injection or Cross-Site Scripting (XSS) if the user supplied malicious HTML or control characters.
+**Learning:** If sanitization strips all content from a user input intended for an LLM prompt (e.g., it was purely malicious HTML), we must provide a fallback to maintain the prompt's grammatical structure without reintroducing vulnerabilities. Falling back to the unsanitized string (e.g. `sanitizeInput(name) || name`) directly subverts the sanitization.
+**Prevention:** Implemented a `sanitizeInput` function to strip HTML tags and control characters. When sanitizing inputs for LLM prompts, apply the sanitization and use a safe generic fallback (e.g., `'the constituent'`) if the result is empty.
