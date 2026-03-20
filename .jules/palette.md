@@ -1,0 +1,3 @@
+## 2024-03-20 - Custom Calendar Accessibility Attributes
+**Learning:** Custom calendar components (like `GlassCalendar`) require a specific set of ARIA attributes to be fully accessible. Navigation buttons need `aria-label`, dropdown toggles need `aria-haspopup='listbox'` and `aria-expanded`, dropdown menus need `role='listbox'` and `role='option'`, and day buttons need a full date string `aria-label` (e.g., '1 January 2024'), `aria-current='date'` for today, and `aria-pressed` for the selected date (since `role='button'` does not support `aria-selected`).
+**Action:** When creating or modifying custom calendar or date picker components, ensure this complete set of ARIA roles and states are applied for proper screen reader support and keyboard navigation context.
