@@ -1,0 +1,4 @@
+## 2024-05-18 - Prompt Injection in Gemini Greetings
+**Vulnerability:** User-controlled input (`name`, `leaderName`) in `greeting.ts` was interpolated directly into generative AI prompts without sanitization, allowing potential prompt injection attacks or unexpected generation behaviors if users inputted malicious HTML or control instructions.
+**Learning:** Even internal tool generative AI prompts can be manipulated if user input contains structural HTML or hidden characters. Additionally, if sanitization removes all content (e.g. pure `<script>` payloads), the fallback input needs to maintain sentence structure.
+**Prevention:** Implement `sanitizeInput` to strip HTML tags and control characters before interpolating any user string into an LLM prompt. If the sanitized input results in an empty string, fallback to a safe generic descriptor (like `'the constituent'`).
