@@ -44,21 +44,40 @@ export interface ScanResult {
 
 /**
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * OPTIMIZED: Zero-allocation fast-path using charCodeAt for standard YYYY-MM-DD
  */
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    const targetDay = targetDate.getDate();
+    const targetMonth = targetDate.getMonth();
+
+    // Fast path: standard YYYY-MM-DD (10 chars, hyphens at index 4 and 7)
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Validate all extracted characters are digits (ASCII 48-57)
+        if (m1 >= 48 && m1 <= 57 && m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 && d2 >= 48 && d2 <= 57) {
+
+            const month = (m1 - 48) * 10 + (m2 - 48) - 1; // JS months are 0-indexed
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return day === targetDay && month === targetMonth;
+        }
+    }
+
+    // Fallback: Handle non-standard formats safely
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
     const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    const month = parseInt(parts[1], 10) - 1;
 
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    return day === targetDay && month === targetMonth;
 }
 
 /**
