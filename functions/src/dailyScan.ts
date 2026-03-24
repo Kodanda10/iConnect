@@ -48,7 +48,28 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    const targetDay = targetDate.getDate();
+    const targetMonth = targetDate.getMonth();
+
+    // Fast-path for standard YYYY-MM-DD strings using zero-allocation character codes
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Ensure characters are valid ASCII digits (48 = '0', 57 = '9')
+        if (m1 >= 48 && m1 <= 57 && m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 && d2 >= 48 && d2 <= 57) {
+
+            const month = (m1 - 48) * 10 + (m2 - 48) - 1; // 0-indexed
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return month === targetMonth && day === targetDay;
+        }
+    }
+
+    // Fallback for non-standard formats
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
@@ -56,8 +77,8 @@ function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
     return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
+        day === targetDay &&
+        month === targetMonth
     );
 }
 
