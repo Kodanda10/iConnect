@@ -4,6 +4,17 @@
  */
 
 /**
+ * Sanitizes input by removing HTML tags and control characters to prevent XSS and injection attacks.
+ * Preserves inner text (e.g., <script>alert('hacked')</script> becomes alert('hacked')).
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    let sanitized = input.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+    return sanitized.trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
