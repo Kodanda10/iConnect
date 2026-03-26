@@ -1,3 +1,7 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+
+## 2026-03-26 - React List Rendering and O(N²) Calculations
+**Learning:** Performing a computation like `Math.max` over the entire array *inside* a `.map` loop during rendering causes an O(N²) performance bottleneck. Additionally, defining inline anonymous functions in JSX as event handlers for list items forces unnecessary re-renders of all child components, defeating `React.memo()`.
+**Action:** Extract expensive computations out of the `.map` loop and pass the result as a stable prop. Wrap list item components in `React.memo()` and use `useCallback` to create stable event handlers in the parent. Child list items should call these stable parent handlers with their specific arguments (e.g. their `id` or `name`), rather than relying on inline closures created in the parent's loop.
