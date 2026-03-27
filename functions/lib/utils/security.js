@@ -8,6 +8,7 @@ exports.redactMobile = redactMobile;
 exports.redactMessage = redactMessage;
 exports.redactEmail = redactEmail;
 exports.redactToken = redactToken;
+exports.sanitizeInput = sanitizeInput;
 /**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
@@ -52,5 +53,18 @@ function redactToken(token) {
     if (token.length < 8)
         return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
+}
+/**
+ * Sanitizes input by stripping HTML tags (preserving inner text) and control characters.
+ * Useful to prevent prompt injection and XSS.
+ */
+function sanitizeInput(input) {
+    if (!input)
+        return '';
+    // Remove HTML tags but preserve inner text
+    let sanitized = input.replace(/<[^>]*>/g, '');
+    // Remove control characters (ASCII 0-31, 127)
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+    return sanitized.trim();
 }
 //# sourceMappingURL=security.js.map
