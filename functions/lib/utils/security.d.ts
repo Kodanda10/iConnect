@@ -19,3 +19,8 @@ export declare function redactEmail(email: string | null | undefined): string;
  * Redacts long tokens or IDs (like FCM tokens)
  */
 export declare function redactToken(token: string | null | undefined): string;
+/**
+ * Sanitizes input by stripping HTML tags (preserving inner text) and control characters.
+ * Useful to prevent prompt injection and XSS.
+ */
+export declare function sanitizeInput(input: string | null | undefined): string;
