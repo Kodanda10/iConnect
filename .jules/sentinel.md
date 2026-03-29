@@ -1,0 +1,4 @@
+## 2025-12-17 - Fix Prompt Injection Vulnerability in Gemini AI Generation
+**Vulnerability:** Prompt Injection via Unsanitized LLM Inputs
+**Learning:** User inputs (e.g. `request.name`, `request.leaderName`) passed directly into generative AI prompts can lead to prompt injection and XSS (when the generated payload is rendered). Simply using `||` fallbacks on sanitized input might inadvertently result in an empty string if the input was completely stripped, leading to structurally invalid prompts.
+**Prevention:** Implement an input sanitization function (`sanitizeInput`) that strips control characters and HTML tags while preserving inner text content. When interpolating user-controlled data into LLM prompts, apply sanitization and provide an explicit fallback (e.g., `'the constituent'`) if the output is completely stripped to maintain correct prompt structure.
