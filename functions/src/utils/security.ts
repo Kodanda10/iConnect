@@ -44,3 +44,20 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input by aggressively removing HTML brackets and control characters.
+ * Restricts length to prevent complex prompt injections.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Strip all angle brackets completely to defeat unclosed tag XSS and HTML injection
+    let sanitized = input.replace(/[<>]/g, '');
+    // Remove control characters (ASCII 0-31 and 127) except space, tab, newline, carriage return
+    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+
+    // Strict length limit to mitigate prompt injection surface area
+    sanitized = sanitized.slice(0, 100);
+
+    return sanitized.trim();
+}
