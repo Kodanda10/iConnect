@@ -1,0 +1,3 @@
+## 2024-12-14 - Custom Calendar Accessibility Patterns
+**Learning:** Custom calendar components like `GlassCalendar` require specific accessibility attributes: `aria-label` on navigation buttons, `aria-haspopup='listbox'`/`aria-expanded` on dropdown toggles, `role='listbox'`/`role='option'` for dropdown menus, `aria-current='date'` for today, `aria-pressed` for the selected date (since `role='button'` does not support `aria-selected`), and full date strings (e.g., '1 January 2024') for day button `aria-label`s.
+**Action:** Always verify custom calendar/date-picker components against this pattern instead of relying on default HTML date inputs, which are often replaced for styling reasons but lose built-in a11y.
