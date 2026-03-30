@@ -44,3 +44,16 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input for display or AI generation by limiting length
+ * and stripping out potentially malicious characters (e.g. HTML tags).
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    return input
+        .slice(0, 100)
+        .replace(/[<>]/g, '')
+        .replace(/[\x00-\x1F\x7F]/g, '')
+        .trim();
+}
