@@ -1,0 +1,3 @@
+## 2024-12-18 - Accessible Custom Calendar Components
+**Learning:** Custom calendar components require careful application of ARIA attributes. Navigation buttons require `aria-label`s. Dropdowns need `aria-haspopup` and `aria-expanded` on their toggles, with `role="listbox"` on the menu and `role="option"` with `aria-selected` on the items. Day buttons inside the calendar grid should use `aria-label` with the full date string, `aria-current="date"` for today, and importantly, `aria-pressed` for the selected state instead of `aria-selected` because `role="button"` does not support `aria-selected`.
+**Action:** When building custom date pickers or complex dropdowns, always ensure to apply these standard ARIA roles and state attributes to support screen readers correctly.
