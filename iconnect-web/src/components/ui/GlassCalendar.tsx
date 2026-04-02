@@ -102,6 +102,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -133,6 +134,7 @@ export default function GlassCalendar({
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
+                                        aria-label={monthNames[index]}
                                     >
                                         {month}
                                     </button>
@@ -166,6 +168,7 @@ export default function GlassCalendar({
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
                                             }`}
+                                        aria-label={year.toString()}
                                     >
                                         {year}
                                     </button>
@@ -178,6 +181,7 @@ export default function GlassCalendar({
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -215,6 +219,7 @@ export default function GlassCalendar({
                                 border-r border-b border-white/5
                                 ${isSelectedDay ? 'bg-emerald-500/20 text-emerald-400 z-10' : 'text-white/80 hover:bg-white/5 hover:text-white'}
                             `}
+                            aria-label={`${day} ${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`}
                         >
                             {isTodayDay && <span className="absolute top-1 right-1 w-1 h-1 rounded-full bg-emerald-400"></span>}
                             {hasEvent && !isSelectedDay && !isTodayDay && <span className="absolute bottom-1 w-1 h-1 rounded-full bg-white/30"></span>}
