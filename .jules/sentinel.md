@@ -1,0 +1,4 @@
+## 2025-12-18 - Prevent Prompt Injection in AI Greeting Generator
+**Vulnerability:** User-provided names and leader names were passed directly into the Gemini AI prompt template without sanitization. This allowed attackers to potentially inject instructions into the prompt via malicious input (e.g., HTML tags or control characters).
+**Learning:** Any user input passed into GenAI prompts must be aggressively sanitized to prevent attackers from altering the model's instructions or bypassing safety filters.
+**Prevention:** Always use `sanitizeInput` to strip control characters, restrict input length, and remove angle brackets (`<`, `>`). If the input becomes completely empty after sanitization (e.g., input was entirely malicious tags), fall back to a safe default string (e.g., 'the constituent') so the prompt maintains its grammatical structure without reintroducing untrusted data.
