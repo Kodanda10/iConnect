@@ -1,0 +1,3 @@
+## 2025-01-28 - ARIA Selection States on Buttons
+**Learning:** `role="button"` does not support `aria-selected` according to ARIA specs, which is a common mistake when building custom dropdowns or calendar grids without explicitly using `role="option"`.
+**Action:** Use `aria-pressed` to indicate selection state on toggle-style buttons, or ensure the container and items explicitly use `role="listbox"` and `role="option"` if you intend to use `aria-selected`.
