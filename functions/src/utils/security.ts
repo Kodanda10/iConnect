@@ -4,6 +4,19 @@
  */
 
 /**
+ * Sanitizes user input by removing angle brackets and control characters,
+ * and limiting length to 100 characters to prevent injection attacks.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // Use aggressive replacement to remove all characters within angle brackets,
+    // and also remove standalone angle brackets.
+    let sanitized = input.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/[<>]/g, '').replace(/[\x00-\x1F\x7F]/g, '');
+    return sanitized.slice(0, 100).trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
