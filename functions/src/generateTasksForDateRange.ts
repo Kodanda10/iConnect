@@ -98,6 +98,32 @@ function parseDateParts(dateStr: string | undefined): { month: number; day: numb
  * Check if a date string matches a target date (month and day only, ignoring year)
  */
 function isDateMatchForTarget(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+    // Fast path for standard YYYY-MM-DD to avoid array/string allocations in hot loops
+    if (
+        dateStr &&
+        dateStr.length === 10 &&
+        dateStr.charCodeAt(4) === 45 && // '-'
+        dateStr.charCodeAt(7) === 45    // '-'
+    ) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Check if extracted characters are valid digits (ASCII 48-57)
+        if (
+            m1 >= 48 && m1 <= 57 &&
+            m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 &&
+            d2 >= 48 && d2 <= 57
+        ) {
+            const month = (m1 - 48) * 10 + (m2 - 48); // 1-indexed here
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return month === targetMonth && day === targetDay;
+        }
+    }
+
     const parts = parseDateParts(dateStr);
     if (!parts) return false;
 

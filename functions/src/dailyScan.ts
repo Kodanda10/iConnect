@@ -48,6 +48,31 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
+    // Fast path for standard YYYY-MM-DD to avoid array/string allocations in hot loops
+    if (
+        dateStr.length === 10 &&
+        dateStr.charCodeAt(4) === 45 && // '-'
+        dateStr.charCodeAt(7) === 45    // '-'
+    ) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Check if extracted characters are valid digits (ASCII 48-57)
+        if (
+            m1 >= 48 && m1 <= 57 &&
+            m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 &&
+            d2 >= 48 && d2 <= 57
+        ) {
+            const month = (m1 - 48) * 10 + (m2 - 48) - 1; // JS months are 0-indexed
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return day === targetDate.getDate() && month === targetDate.getMonth();
+        }
+    }
+
     // Handle YYYY-MM-DD format
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
