@@ -1,0 +1,3 @@
+## 2025-04-04 - Accessible GlassCalendar Day Selection Pattern
+**Learning:** When using `role="button"` (implicit via `<button>`) for day selection in custom calendars, standard `aria-selected` is invalid according to WAI-ARIA. The pattern requires `aria-pressed` to indicate a selected date toggle, paired with full date strings in `aria-label` (e.g., "1 January 2024") because screen readers will just read out raw digit numbers out of context without it. Today's date can effectively be represented with `aria-current="date"`.
+**Action:** Consistently use `aria-pressed` for selected state on day buttons, ensure full date expansion for day `aria-label`s, and apply `aria-current="date"` for "today" indicators on custom calendar controls.
