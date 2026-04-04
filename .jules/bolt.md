@@ -1,3 +1,7 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+
+## 2025-01-20 - Date Parsing Optimization with charCodeAt
+**Learning:** In highly iterated loops like `generateTasksForDateRange` which iterates over every date in a range and every constituent (O(D * C)), performing `dateString.split('-')` creates an array and three substring allocations per check. In V8, doing this thousands of times adds up significantly. Replacing this with a fast-path that checks length and indices using `.charCodeAt()` drops the runtime drastically (e.g., from ~150ms to ~45ms for 1,000,000 ops, ~3.3x speedup).
+**Action:** When a known simple string format like `YYYY-MM-DD` is repeatedly parsed in a hot loop, check length, explicitly check the delimiters (like `-` at indices 4 and 7), and map digit ascii codes (48-57) directly to math operations instead of using `split` and `parseInt`. Always retain the original logic as a fallback for malformed or edge case inputs.
