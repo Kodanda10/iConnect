@@ -81,6 +81,26 @@ export interface GenerateTasksResult {
 function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
     if (!dateStr || typeof dateStr !== 'string') return null;
 
+    // Fast-path for standard YYYY-MM-DD to avoid array/string allocations in hot loops
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Ensure characters are digits (ASCII 48-57)
+        if (m1 >= 48 && m1 <= 57 && m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 && d2 >= 48 && d2 <= 57) {
+            const month = (m1 - 48) * 10 + (m2 - 48);
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                return { month, day };
+            }
+        }
+    }
+
+    // Fallback for non-standard formats (e.g., YYYY-M-D)
     const parts = dateStr.split('-');
     if (parts.length !== 3) return null;
 
