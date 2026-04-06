@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2025-01-20 - Fast Path Zero-Allocation String Parsing
+**Learning:** In tight nested hot loops, string parsing operations like `String.prototype.split('-')` and `parseInt()` create significant overhead due to memory allocation (arrays and strings). A `charCodeAt()` fast path avoids this and can be ~10x faster.
+**Action:** When working on critical bottlenecks that parse fixed-format strings (like `YYYY-MM-DD` dates) in hot loops, consider implementing zero-allocation parsing using `charCodeAt()` instead of `split` and `parseInt`, while keeping the original logic as a fallback for malformed inputs. Ensure ASCII validation constraints (e.g. checking characters are between 48 and 57) are strictly applied.
