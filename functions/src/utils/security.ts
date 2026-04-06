@@ -44,3 +44,27 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input string to prevent prompt injection and XSS.
+ * Removes HTML tags, standalone angle brackets, and control characters.
+ * Restricts the length to 100 characters.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    let sanitized = input;
+
+    // Remove HTML tags completely e.g., <script>...</script> becomes ...
+    // Note: A simple `<[^>]*>` might leave trailing characters if unclosed,
+    // so let's also remove standalone angle brackets.
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/[<>]/g, '');
+
+    // Remove control characters
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+
+    // Restrict length to 100 characters
+    sanitized = sanitized.slice(0, 100);
+
+    return sanitized.trim();
+}
