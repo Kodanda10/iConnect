@@ -124,15 +124,22 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
-                                    <GPProgressBar
-                                        key={gp.name}
-                                        gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
-                                        delay={index * 50}
-                                        index={index}
-                                    />
-                                ))}
+                                {(() => {
+                                    const gps = gpData[hoveredBlock] || [];
+                                    // ⚡ Bolt Optimization: Extracted Math.max calculation outside the .map()
+                                    // loop below. Previously, calculating this inline caused an O(N^2) render
+                                    // performance hit as the array grew.
+                                    const maxCount = Math.max(...gps.map(g => g.count), 1);
+                                    return gps.map((gp, index) => (
+                                        <GPProgressBar
+                                            key={gp.name}
+                                            gp={gp}
+                                            maxCount={maxCount}
+                                            delay={index * 50}
+                                            index={index}
+                                        />
+                                    ));
+                                })()}
                             </div>
                         )}
                     </div>
@@ -301,7 +308,7 @@ const GP_BAR_COLORS = [
     { from: '#06B6D4', to: '#22D3EE', shadow: 'rgba(6, 182, 212, 0.5)' },    // Cyan
 ];
 
-function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
+const GPProgressBar = React.memo(function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
     const [animatedWidth, setAnimatedWidth] = useState(0);
     const percentage = maxCount > 0 ? (gp.count / maxCount) * 100 : 0;
     const colorScheme = GP_BAR_COLORS[index % GP_BAR_COLORS.length];
@@ -338,6 +345,6 @@ function GPProgressBar({ gp, maxCount, delay, index }: GPProgressBarProps) {
             </div>
         </div>
     );
-}
+});
 
 
