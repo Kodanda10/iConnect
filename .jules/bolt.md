@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2024-05-15 - Extracted O(N²) calculation from render loop
+**Learning:** Avoid executing heavy aggregate calculations like `Math.max` over an entire array map inside an inline render function, especially when iterating over items. These duplicate the work on every iteration unnecessarily and scale poorly with collection size (O(N²)). Additionally, wrapping children components with `React.memo` effectively limits their unneeded re-renders when parent states unrelated to them update.
+**Action:** Always pre-calculate derived constants from arrays (like maximums, totals, or sorted versions) before passing them into a `.map()` callback to preserve O(N) linear time complexity.
