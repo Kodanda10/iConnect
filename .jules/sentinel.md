@@ -1,0 +1,4 @@
+## 2024-12-19 - Prompt Injection via Unsanitized User Input in GenAI Template
+**Vulnerability:** User input (`name` and `leaderName`) was directly interpolated into the Gemini AI prompt in `functions/src/greeting.ts` without sanitization, allowing prompt injection attacks (e.g. `<script>` tags or malicious instructions overriding the prompt).
+**Learning:** Even when using string interpolation in backend services for LLMs, all user-provided fields must be aggressively sanitized (stripping HTML tags and angle brackets) to prevent injection. Also, if a malicious input is completely stripped by sanitization, falling back to the original string re-introduces the vulnerability. We must fallback to a generic safe string instead.
+**Prevention:** Use `sanitizeInput` to strip `<[^>]*>` and restrict length before interpolating into prompts. Use a safe fallback string like `'the constituent'` if the sanitized result is empty.
