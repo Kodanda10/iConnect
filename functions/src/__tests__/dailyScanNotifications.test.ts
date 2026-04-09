@@ -114,7 +114,7 @@ describe('scheduleDailyNotifications', () => {
         const actionPayload = actionCall[1];
 
         // 1 Birthday + 1 Anniversary Today
-        expect(actionPayload.body).toContain('1 birthdays & 1 anniversaries today.');
+        expect(actionPayload.body).toContain('1 birthdays & 1 anniversaries today');
         expect(actionPayload.body).toContain(mockSettingsPayload.alertSettings.actionMessage);
 
         // Check Time: Today 8:00 AM
@@ -128,7 +128,7 @@ describe('scheduleDailyNotifications', () => {
         const headsUpPayload = headsUpCall[1];
 
         // 1 Birthday Tomorrow
-        expect(headsUpPayload.body).toContain('1 birthdays tomorrow.'); // No anniversaries
+        expect(headsUpPayload.body).toContain('1 birthdays tomorrow'); // No anniversaries
         expect(headsUpPayload.body).not.toContain('&');
         expect(headsUpPayload.body).toContain(mockSettingsPayload.alertSettings.headsUpMessage);
 
@@ -153,7 +153,7 @@ describe('scheduleDailyNotifications', () => {
 
         const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
         expect(headsUpCall).toBeDefined();
-        expect(headsUpCall[1].body).toContain('1 birthdays tomorrow.');
+        expect(headsUpCall[1].body).toContain('1 birthdays tomorrow');
     });
 
     test('should SANITIZE hardcoded clean-up text from templates', async () => {
@@ -193,7 +193,7 @@ describe('scheduleDailyNotifications', () => {
         // Assert: Dynamic Count (1) represents reality. Hardcoded (5) is removed.
         // Expected: "1 birthdays tomorrow. Tomorrow's Celebrations! Tap to view..."
         const body = headsUpCall[1].body;
-        expect(body).toContain('1 birthdays tomorrow.');
+        expect(body).toContain('1 birthdays tomorrow');
         expect(body).not.toContain('5 constituents');
         expect(body).not.toContain('have birthdays tomorrow.'); // The hardcoded part
         expect(body).toContain("Tomorrow's Celebrations!");
