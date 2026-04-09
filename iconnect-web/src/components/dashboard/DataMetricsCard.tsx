@@ -91,6 +91,10 @@ export default function DataMetricsCard() {
         return null;
     }
 
+    // ⚡ Bolt: Extract maxCount calculation from render loop to avoid O(N²) render overhead
+    const currentGPData = hoveredBlock ? (gpData[hoveredBlock] || []) : [];
+    const maxGPCount = currentGPData.length > 0 ? Math.max(...currentGPData.map(g => g.count), 1) : 1;
+
     return (
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
             {/* LEFT: Dynamic Info Card (50%) */}
@@ -118,17 +122,17 @@ export default function DataMetricsCard() {
                                 <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
                                 <span className="text-sm">Fetching GP data...</span>
                             </div>
-                        ) : gpData[hoveredBlock]?.length === 0 ? (
+                        ) : currentGPData.length === 0 ? (
                             <div className="py-12 text-center text-white/40 text-sm">
                                 No GP data available for {hoveredBlock}
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGPData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGPCount}
                                         delay={index * 50}
                                         index={index}
                                     />
