@@ -173,7 +173,7 @@ describe('ValidatedDateInput Component', () => {
         describe('Hotfix: Future Date Validation', () => {
             test('Test A: Data Entry - rejects future date for DOB (allowFuture=false)', () => {
                 jest.useFakeTimers();
-                jest.setSystemTime(new Date('2024-01-01'));
+                jest.setSystemTime(new Date('2024-01-01').getTime());
                 const { container } = render(
                     <ValidatedDateInput
                         label="Date of Birth"

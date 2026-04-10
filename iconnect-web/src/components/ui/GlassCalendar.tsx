@@ -70,20 +70,21 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
-    const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
-    };
+    // Pre-calculate invariants for the render loop to avoid allocating new Date objects inside
+    const today = new Date();
+    const isCurrentMonth = viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+    const currentDay = today.getDate();
 
-    const isSelected = (day: number) => {
-        if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
-    };
+    const isSelectedMonth = selectedDate ? viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear() : false;
+    const selectedDay = selectedDate ? selectedDate.getDate() : null;
 
-    const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
-    };
+    const viewYearStr = viewDate.getFullYear().toString();
+    const viewMonthStr = (viewDate.getMonth() + 1).toString().padStart(2, '0');
+    const datePrefix = `${viewYearStr}-${viewMonthStr}-`;
+
+    const isToday = (day: number) => isCurrentMonth && day === currentDay;
+    const isSelected = (day: number) => isSelectedMonth && day === selectedDay;
+    const formatDateKey = (day: number) => datePrefix + day.toString().padStart(2, '0');
 
     // Close dropdowns when clicking outside
     const handleCalendarClick = (e: React.MouseEvent) => {
