@@ -46,9 +46,27 @@ export interface ScanResult {
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
  */
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
+    if (!dateStr || typeof dateStr !== 'string') return false;
 
-    // Handle YYYY-MM-DD format
+    // Fast path for exact YYYY-MM-DD format to avoid object allocation in hot loops
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        const m1 = dateStr.charCodeAt(5);
+        const m2 = dateStr.charCodeAt(6);
+        const d1 = dateStr.charCodeAt(8);
+        const d2 = dateStr.charCodeAt(9);
+
+        // Validate ASCII 48-57 (digits '0'-'9')
+        if (m1 >= 48 && m1 <= 57 && m2 >= 48 && m2 <= 57 &&
+            d1 >= 48 && d1 <= 57 && d2 >= 48 && d2 <= 57) {
+
+            const month = (m1 - 48) * 10 + (m2 - 48) - 1; // JS months are 0-indexed
+            const day = (d1 - 48) * 10 + (d2 - 48);
+
+            return day === targetDate.getDate() && month === targetDate.getMonth();
+        }
+    }
+
+    // Fallback for non-standard YYYY-MM-DD formats
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
