@@ -8,6 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as admin from 'firebase-admin';
 
+/**
+ * Format date as YYYY-MM-DD string without allocating intermediate arrays.
+ */
+function formatDateStr(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type TaskStatus = 'PENDING' | 'COMPLETED';
 
@@ -48,12 +58,34 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
+    if (dateStr.length < 10) {
+        // Fallback for unpadded dates (e.g., 2023-1-2)
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return false;
 
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+        const day = parseInt(parts[2], 10);
+        const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+
+        return (
+            day === targetDate.getDate() &&
+            month === targetDate.getMonth()
+        );
+    }
+
+    // Fast-path for zero-padded YYYY-MM-DD using charCodeAt to avoid string allocation
+    const m1 = dateStr.charCodeAt(5);
+    const m2 = dateStr.charCodeAt(6);
+    const d1 = dateStr.charCodeAt(8);
+    const d2 = dateStr.charCodeAt(9);
+
+    // Validate characters are digits (ASCII 48-57)
+    if (m1 < 48 || m1 > 57 || m2 < 48 || m2 > 57 ||
+        d1 < 48 || d1 > 57 || d2 < 48 || d2 > 57) {
+        return false;
+    }
+
+    const day = (d1 - 48) * 10 + (d2 - 48);
+    const month = (m1 - 48) * 10 + (m2 - 48) - 1; // JS months are 0-indexed
 
     return (
         day === targetDate.getDate() &&
@@ -96,7 +128,7 @@ function taskExists(
         // Handle both Timestamp and String for backward compatibility during migration
         let taskDateStr = '';
         if (task.due_date && typeof task.due_date.toDate === 'function') {
-            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
+            taskDateStr = formatDateStr(task.due_date.toDate());
         } else if (typeof task.due_date === 'string') {
             taskDateStr = task.due_date;
         }
@@ -122,12 +154,15 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayStr = formatDateStr(today);
+    const tomorrowStr = formatDateStr(tomorrow);
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
+            const dueDateStr = todayStr;
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
@@ -135,7 +170,7 @@ export function scanForTasks(
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
+            const dueDateStr = tomorrowStr;
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
@@ -143,7 +178,7 @@ export function scanForTasks(
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
+            const dueDateStr = todayStr;
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
             }
@@ -151,7 +186,7 @@ export function scanForTasks(
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
+            const dueDateStr = tomorrowStr;
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
@@ -270,7 +305,7 @@ export async function scheduleDailyNotifications(
         if (parts.length > 0) prefix = `${parts.join(' & ')} today ${nameSummary}. `;
 
         // ID keyed by Tomorrow's date since it's an action for that day
-        const docId = `action_${tomorrow.toISOString().split('T')[0]}_${targetUid}`;
+        const docId = `action_${formatDateStr(tomorrow)}_${targetUid}`;
         const scheduledFor = new Date(tomorrow);
         scheduledFor.setHours(8, 0, 0, 0);
 
@@ -318,7 +353,7 @@ export async function scheduleDailyNotifications(
         if (parts.length > 0) prefix = `${parts.join(' & ')} tomorrow ${nameSummary}. `;
 
         // ID keyed by Today because it's the Heads Up sent today
-        const docId = `heads_up_${today.toISOString().split('T')[0]}_${targetUid}`;
+        const docId = `heads_up_${formatDateStr(today)}_${targetUid}`;
         const scheduledFor = new Date(today);
         scheduledFor.setHours(20, 0, 0, 0);
 

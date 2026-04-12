@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2025-12-26 - Optimized Date Formats
+**Learning:** Avoid `new Date(string)` inside hot loops. String parsing for `YYYY-MM-DD` dates in hot loops is optimized using a zero-allocation fast-path with `.charCodeAt()` instead of `String.prototype.split('-')`. When applying this pattern, validate that the extracted characters are actual digits to prevent malformed inputs from computing valid values. Furthermore, `.toISOString().split('T')[0]` allocates an unnecessary string array and slows down rendering performance drastically.
+**Action:** Replaced `.toISOString().split('T')[0]` with custom string padding concat and used character validation.
