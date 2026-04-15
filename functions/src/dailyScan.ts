@@ -48,17 +48,35 @@ export interface ScanResult {
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Handle YYYY-MM-DD format
+    // Fast path: String optimization for strict YYYY-MM-DD
+    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) {
+        // Validate all other characters are digits
+        let allDigits = true;
+        for (let i = 0; i < 10; i++) {
+            if (i === 4 || i === 7) continue;
+            const code = dateStr.charCodeAt(i);
+            if (code < 48 || code > 57) {
+                allDigits = false;
+                break;
+            }
+        }
+
+        if (allDigits) {
+            // JS months are 0-indexed
+            const month = (dateStr.charCodeAt(5) - 48) * 10 + (dateStr.charCodeAt(6) - 48) - 1;
+            const day = (dateStr.charCodeAt(8) - 48) * 10 + (dateStr.charCodeAt(9) - 48);
+            return day === targetDate.getDate() && month === targetDate.getMonth();
+        }
+    }
+
+    // Fallback for non-standard lengths (e.g. 2023-1-2)
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
     const day = parseInt(parts[2], 10);
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
-    return (
-        day === targetDate.getDate() &&
-        month === targetDate.getMonth()
-    );
+    return day === targetDate.getDate() && month === targetDate.getMonth();
 }
 
 /**
@@ -122,37 +140,37 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // ⚡ Bolt: Extract expensive string formatting outside the loop
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', todayStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
         }
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
         }
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', todayStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
             }
         }
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
         }
