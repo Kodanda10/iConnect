@@ -9,12 +9,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateGreetingMessage = generateGreetingMessage;
 const generative_ai_1 = require("@google/generative-ai");
+const security_1 = require("./utils/security");
 // Greeting templates for fallback (when Gemini API is unavailable)
 const TEMPLATES = {
     BIRTHDAY: {
         ENGLISH: [
             'Happy Birthday {name}! Wishing you a fantastic year ahead filled with health and happiness.',
-            'Many happy returns of the day, {name}! May God bless you with good health.',
+            'Happy Birthday and many happy returns of the day, {name}! May God bless you with good health.',
             'Happy Birthday {name}! Wishing you a year full of success and joy.',
         ],
         HINDI: [
@@ -60,8 +61,10 @@ let warnedMissingGeminiKey = false;
 function buildPrompt(request) {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    const safeLeaderName = (0, security_1.sanitizeInput)(request.leaderName) || 'the constituent';
+    const safeName = (0, security_1.sanitizeInput)(request.name) || 'the constituent';
+    const leaderMention = request.leaderName ? ` on behalf of ${safeLeaderName}` : '';
+    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${safeName} in ${language}.
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
