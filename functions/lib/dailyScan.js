@@ -45,8 +45,10 @@ const uuid_1 = require("uuid");
 const admin = __importStar(require("firebase-admin"));
 /**
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
+ * @param targetMonth 0-indexed month
+ * @param targetDay day of the month
  */
-function isDateMatch(dateStr, targetDate) {
+function isDateMatch(dateStr, targetMonth, targetDay) {
     if (!dateStr)
         return false;
     // Handle YYYY-MM-DD format
@@ -55,8 +57,8 @@ function isDateMatch(dateStr, targetDate) {
         return false;
     const day = parseInt(parts[2], 10);
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
-    return (day === targetDate.getDate() &&
-        month === targetDate.getMonth());
+    return (day === targetDay &&
+        month === targetMonth);
 }
 /**
  * Create a new task object with denormalized data
@@ -101,32 +103,35 @@ function scanForTasks(constituents, existingTasks, TimestampClass) {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     const newTasks = [];
+    // Pre-calculate extracted values to avoid re-calculating inside the hot loop
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+        if (isDateMatch(constituent.dob, todayMonth, todayDay)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', todayStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
         }
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+        if (isDateMatch(constituent.dob, tomorrowMonth, tomorrowDay)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
         }
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+        if (isDateMatch(constituent.anniversary, todayMonth, todayDay)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', todayStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
             }
         }
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+        if (isDateMatch(constituent.anniversary, tomorrowMonth, tomorrowDay)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
         }
@@ -158,14 +163,18 @@ async function scheduleDailyNotifications(db, constituents) {
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
     // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+    const tomorrowDay = tomorrow.getDate();
     for (const c of constituents) {
-        if (isDateMatch(c.dob, today))
+        if (isDateMatch(c.dob, todayMonth, todayDay))
             todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, today))
+        if (isDateMatch(c.anniversary, todayMonth, todayDay))
             todayCount.anniversaries++;
-        if (isDateMatch(c.dob, tomorrow))
+        if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay))
             tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrow))
+        if (isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay))
             tomorrowCount.anniversaries++;
     }
     // 2. Fetch Settings & Leader
@@ -208,7 +217,7 @@ async function scheduleDailyNotifications(db, constituents) {
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay) || isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -253,7 +262,7 @@ async function scheduleDailyNotifications(db, constituents) {
         // Collect names for tomorrow
         const names = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
+            if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay) || isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
