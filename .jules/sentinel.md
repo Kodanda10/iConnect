@@ -1,0 +1,4 @@
+## 2024-05-18 - Prevent Prompt Injection in Greeting Generation
+**Vulnerability:** Unsanitized user inputs (`request.name`, `request.leaderName`) were being directly interpolated into Gemini AI prompts, exposing the system to prompt injection attacks. If fallback templates were used, this could also lead to XSS depending on how the template output was handled.
+**Learning:** Even internal or semi-trusted data (like constituent names) must be sanitized before being fed into GenAI prompts, as malicious inputs can instruct the LLM to output harmful or unrelated content.
+**Prevention:** Always use aggressive sanitization (e.g., stripping angle brackets, HTML tags, control characters) and length limits on user-controlled inputs before prompt interpolation. Fallback to a safe generic string (like 'the constituent') if the malicious input is completely stripped, rather than failing or falling back to the unsanitized original string.
