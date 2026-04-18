@@ -1,0 +1,4 @@
+## 2025-01-20 - Prompt Injection in AI Greetings
+**Vulnerability:** User-provided names and leader names were passed directly into Gemini AI prompts and greeting templates without sanitization, leading to prompt injection or XSS risks.
+**Learning:** Even when inputs seem purely functional (like generating greetings), passing them unsanitized into AI prompt strings is dangerous. Furthermore, if an input consists ENTIRELY of malicious content (like `<malicious>`), our `sanitizeInput` strips it all. We must provide a safe, non-empty fallback (like 'the constituent') so the resulting prompt doesn't become ungrammatical and fail to instruct the model properly.
+**Prevention:** Always use `sanitizeInput` on all user input before interpolation, and ensure optional inputs have safe fallback values rather than defaulting to empty strings that break context.
