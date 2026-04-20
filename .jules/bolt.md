@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2025-01-20 - O(N²) array searches with O(1) Set lookups
+**Learning:** In `functions/src/dailyScan.ts`, replacing an `Array.prototype.some` scan inside a loop over constituents with a single `Set` built beforehand from `existingTasks` reduced an O(N²) complexity down to O(N) lookup. Using string concatenation for keys (`${id}_${type}_${date}`) makes hash lookups efficient. Extracting `toISOString().split('T')[0]` outside of hot loops is also important.
+**Action:** When working with nested loops or repetitive array searches (like `.some()`, `.find()`, or `.filter()`) inside another loop mapping constituents or tasks, pre-compute lookup maps or sets outside the loop to optimize for speed.
