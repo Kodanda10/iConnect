@@ -1,0 +1,3 @@
+## 2025-04-21 - Custom Calendar ARIA Support
+**Learning:** Custom calendar implementations using raw `div` and `button` elements lack inherent semantic date semantics. Specifically, using `role="button"` for days does not support `aria-selected` (which requires a grid/gridcell or listbox/option role).
+**Action:** When creating custom interactive date pickers, always apply full date strings to `aria-label`s on day buttons (e.g., "1 January 2024") instead of just the day number, use `aria-current="date"` for the present day, and use `aria-pressed` for the user's selection state when using standard button roles.
