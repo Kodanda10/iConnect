@@ -44,3 +44,31 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input for LLM prompts to prevent prompt injection and XSS
+ * - Limits length to 100 characters
+ * - Strips HTML tags and angle brackets
+ * - Removes control characters
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+
+    let sanitized = input;
+
+    // 1. Enforce length limit (mitigate DoS/buffer overflow attacks on LLM context)
+    if (sanitized.length > 100) {
+        sanitized = sanitized.slice(0, 100);
+    }
+
+    // 2. Aggressively remove HTML tags and standalone angle brackets
+    // Prevents HTML injection, unclosed tag XSS, and attempts to use XML/HTML-like syntax to prompt inject
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    sanitized = sanitized.replace(/[<>]/g, '');
+
+    // 3. Remove control characters
+    // eslint-disable-next-line no-control-regex
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+
+    return sanitized.trim();
+}
