@@ -84,32 +84,6 @@ function createTask(
 }
 
 /**
- * Check if a task already exists for this constituent, type, and date
- */
-function taskExists(
-    existingTasks: Task[],
-    constituentId: string,
-    type: TaskType,
-    dueDate: string
-): boolean {
-    return existingTasks.some((task) => {
-        // Handle both Timestamp and String for backward compatibility during migration
-        let taskDateStr = '';
-        if (task.due_date && typeof task.due_date.toDate === 'function') {
-            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
-        } else if (typeof task.due_date === 'string') {
-            taskDateStr = task.due_date;
-        }
-
-        return (
-            (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
-            task.type === type &&
-            taskDateStr === dueDate
-        );
-    });
-}
-
-/**
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
  */
@@ -122,38 +96,55 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // Bolt ⚡: Extract redundant toISOString calculations outside the hot loop
+    const todayDateStr = today.toISOString().split('T')[0];
+    const tomorrowDateStr = tomorrow.toISOString().split('T')[0];
+
+    // Bolt ⚡: Pre-compute a Set for O(1) task existence lookup instead of O(N) array searching inside the constituent loop
+    const existingTaskSet = new Set<string>();
+    for (const task of existingTasks) {
+        let taskDateStr = '';
+        if (task.due_date && typeof task.due_date.toDate === 'function') {
+            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
+        } else if (typeof task.due_date === 'string') {
+            taskDateStr = task.due_date;
+        }
+        const constituentId = task.constituent_id || (task as any).constituentId;
+        existingTaskSet.add(`${constituentId}_${task.type}_${taskDateStr}`);
+    }
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!existingTaskSet.has(`${constituent.id}_BIRTHDAY_${todayDateStr}`)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
+                existingTaskSet.add(`${constituent.id}_BIRTHDAY_${todayDateStr}`);
             }
         }
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!existingTaskSet.has(`${constituent.id}_BIRTHDAY_${tomorrowDateStr}`)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
+                existingTaskSet.add(`${constituent.id}_BIRTHDAY_${tomorrowDateStr}`);
             }
         }
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!existingTaskSet.has(`${constituent.id}_ANNIVERSARY_${todayDateStr}`)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
+                existingTaskSet.add(`${constituent.id}_ANNIVERSARY_${todayDateStr}`);
             }
         }
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!existingTaskSet.has(`${constituent.id}_ANNIVERSARY_${tomorrowDateStr}`)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
+                existingTaskSet.add(`${constituent.id}_ANNIVERSARY_${tomorrowDateStr}`);
             }
         }
     }
