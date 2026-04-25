@@ -6,6 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redactMobile = redactMobile;
 exports.redactMessage = redactMessage;
+exports.sanitizeInput = sanitizeInput;
 exports.redactEmail = redactEmail;
 exports.redactToken = redactToken;
 /**
@@ -29,6 +30,19 @@ function redactMessage(message) {
     // Ideally, message content shouldn't be logged at all, but for debugging flow:
     const preview = message.slice(0, 10);
     return `[${message.length} chars] ${preview}...`;
+}
+/**
+ * Sanitizes input to prevent prompt injection, XSS, and HTML injection
+ * Limits length to 100 characters and strips HTML tags, standalone brackets, and control characters.
+ */
+function sanitizeInput(input) {
+    if (!input)
+        return '';
+    // eslint-disable-next-line no-control-regex
+    let sanitized = input.replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+    sanitized = sanitized.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    sanitized = sanitized.replace(/[<>]/g, ''); // Remove standalone angle brackets
+    return sanitized.slice(0, 100).trim();
 }
 /**
  * Redacts email addresses
