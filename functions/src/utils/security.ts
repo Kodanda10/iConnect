@@ -25,6 +25,19 @@ export function redactMessage(message: string | null | undefined): string {
 }
 
 /**
+ * Sanitizes input to prevent prompt injection, XSS, and HTML injection
+ * Limits length to 100 characters and strips HTML tags, standalone brackets, and control characters.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // eslint-disable-next-line no-control-regex
+    let sanitized = input.replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+    sanitized = sanitized.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    sanitized = sanitized.replace(/[<>]/g, ''); // Remove standalone angle brackets
+    return sanitized.slice(0, 100).trim();
+}
+
+/**
  * Redacts email addresses
  */
 export function redactEmail(email: string | null | undefined): string {

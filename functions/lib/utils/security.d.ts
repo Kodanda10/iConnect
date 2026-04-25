@@ -12,6 +12,11 @@ export declare function redactMobile(mobile: string | null | undefined): string;
  */
 export declare function redactMessage(message: string | null | undefined): string;
 /**
+ * Sanitizes input to prevent prompt injection, XSS, and HTML injection
+ * Limits length to 100 characters and strips HTML tags, standalone brackets, and control characters.
+ */
+export declare function sanitizeInput(input: string | null | undefined): string;
+/**
  * Redacts email addresses
  */
 export declare function redactEmail(email: string | null | undefined): string;
