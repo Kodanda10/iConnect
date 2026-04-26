@@ -1,0 +1,4 @@
+## 2025-04-26 - Prevent Prompt Injection via Gemini
+**Vulnerability:** User-controlled input fields (`name` and `leaderName`) were being directly interpolated into the string prompt for the Gemini AI model without any sanitization or validation, allowing for prompt injection attacks.
+**Learning:** The prompt strings were built implicitly assuming standard alphabetic names, without acknowledging that arbitrary input strings (including XML/HTML tags and instructions) could alter the instruction context interpreted by the LLM.
+**Prevention:** Implement an aggressive `sanitizeInput` function that limits string length, strips angle brackets/tags, and removes control characters. Apply this sanitization to any dynamic input destined for LLM prompts, providing a safe fallback (e.g., 'the constituent') if the malicious input is fully stripped.
