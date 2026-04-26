@@ -9,6 +9,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateGreetingMessage = generateGreetingMessage;
 const generative_ai_1 = require("@google/generative-ai");
+const security_1 = require("./utils/security");
 // Greeting templates for fallback (when Gemini API is unavailable)
 const TEMPLATES = {
     BIRTHDAY: {
@@ -93,6 +94,15 @@ async function generateGreetingMessage(request) {
     if (!VALID_LANGUAGES.includes(request.language)) {
         throw new Error('Invalid language');
     }
+    // Sanitize inputs for prompt injection before passing to AI or templates
+    // Do this after validation to ensure required fields aren't bypassed
+    const sanitizedName = (0, security_1.sanitizeInput)(request.name) || 'the constituent';
+    const sanitizedLeader = request.leaderName ? ((0, security_1.sanitizeInput)(request.leaderName) || 'the leader') : undefined;
+    const sanitizedRequest = {
+        ...request,
+        name: sanitizedName,
+        leaderName: sanitizedLeader,
+    };
     // Try Gemini API if key is configured
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey && !warnedMissingGeminiKey) {
@@ -103,7 +113,7 @@ async function generateGreetingMessage(request) {
         try {
             const genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            const prompt = buildPrompt(request);
+            const prompt = buildPrompt(sanitizedRequest);
             const result = await model.generateContent(prompt);
             const text = result.response.text();
             if (text && text.trim().length > 0) {
@@ -115,6 +125,6 @@ async function generateGreetingMessage(request) {
         }
     }
     // Fallback to templates
-    return getTemplateMessage(request);
+    return getTemplateMessage(sanitizedRequest);
 }
 //# sourceMappingURL=greeting.js.map
