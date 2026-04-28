@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -115,6 +116,16 @@ export async function generateGreetingMessage(
         throw new Error('Invalid language');
     }
 
+    // Sanitize inputs
+    const sanitizedName = sanitizeInput(request.name) || 'User';
+    const sanitizedLeaderName = request.leaderName ? sanitizeInput(request.leaderName) : undefined;
+
+    const sanitizedRequest: GreetingRequest = {
+        ...request,
+        name: sanitizedName,
+        leaderName: sanitizedLeaderName,
+    };
+
     // Try Gemini API if key is configured
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey && !warnedMissingGeminiKey) {
@@ -126,7 +137,7 @@ export async function generateGreetingMessage(
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            const prompt = buildPrompt(request);
+            const prompt = buildPrompt(sanitizedRequest);
             const result = await model.generateContent(prompt);
             const text = result.response.text();
             if (text && text.trim().length > 0) {
@@ -138,5 +149,5 @@ export async function generateGreetingMessage(
     }
 
     // Fallback to templates
-    return getTemplateMessage(request);
+    return getTemplateMessage(sanitizedRequest);
 }

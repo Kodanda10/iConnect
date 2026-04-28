@@ -44,3 +44,29 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes user input to prevent prompt injection and XSS
+ * - Truncates to 100 characters
+ * - Strips HTML tags, angle brackets, and control characters
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    let sanitized = input.trim();
+    // Truncate to 100 characters
+    if (sanitized.length > 100) {
+        sanitized = sanitized.slice(0, 100);
+    }
+    // Remove HTML tags and angle brackets
+    // When matching <[^>]*> it can consume text between unmatched angle brackets,
+    // which is the intended behavior for aggressive tag stripping
+    sanitized = sanitized.replace(/<[^>]*>/g, '').replace(/[<>]/g, '');
+
+    // Remove extra spaces that might be left by the replacements
+    sanitized = sanitized.replace(/\s+/g, ' ');
+
+    // Remove control characters
+    // eslint-disable-next-line no-control-regex
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+    return sanitized.trim();
+}
