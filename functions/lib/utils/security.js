@@ -4,10 +4,27 @@
  * @description Security utilities for data redaction and protection
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sanitizeInput = sanitizeInput;
 exports.redactMobile = redactMobile;
 exports.redactMessage = redactMessage;
 exports.redactEmail = redactEmail;
 exports.redactToken = redactToken;
+/**
+ * Sanitizes input to prevent XSS and prompt injection.
+ * Restricts length to 100 characters and aggressively removes HTML tags,
+ * standalone angle brackets, and control characters.
+ */
+function sanitizeInput(input) {
+    if (!input)
+        return '';
+    // eslint-disable-next-line no-control-regex
+    return input
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/[<>]/g, '') // Remove standalone angle brackets
+        .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+        .slice(0, 100) // Restrict length to 100 chars
+        .trim();
+}
 /**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
