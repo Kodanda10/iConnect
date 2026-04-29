@@ -3,6 +3,12 @@
  * @description Security utilities for data redaction and protection
  */
 /**
+ * Sanitizes input to prevent XSS and prompt injection.
+ * Restricts length to 100 characters and aggressively removes HTML tags,
+ * standalone angle brackets, and control characters.
+ */
+export declare function sanitizeInput(input: string | null | undefined): string;
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
