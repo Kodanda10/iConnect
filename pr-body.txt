@@ -1,0 +1,13 @@
+### 💡 What
+Added `aria-label`s to the icon-only navigation buttons ("Previous month" and "Next month") and `aria-pressed` to the day selection buttons in the `GlassCalendar` component.
+
+### 🎯 Why
+Screen reader users had no context for the icon-only navigation buttons, making calendar traversal difficult. Additionally, while days had visual selection states, this state was not communicated semantically to assistive technologies.
+
+### 📸 Before/After
+**Before:** Navigation buttons had no labels, and selected days only changed visually.
+**After:** Navigation buttons announce their purpose ("Previous month" / "Next month"), and selected days announce their pressed state.
+
+### ♿ Accessibility
+- Added `aria-label`s for context on icon-only buttons.
+- Added `aria-pressed={isSelectedDay}` to buttons acting as toggles to properly indicate selection state.
