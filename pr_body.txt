@@ -1,0 +1,4 @@
+💡 What: Added aria-label to previous/next month buttons and day buttons, and added aria-pressed to day buttons in GlassCalendar.
+🎯 Why: Improves keyboard and screen reader accessibility for users navigating the calendar.
+📸 Before/After: Visuals are unchanged.
+♿ Accessibility: Added missing ARIA labels to icon-only buttons and proper aria-pressed state for selected days.
