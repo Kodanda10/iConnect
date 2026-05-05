@@ -1,0 +1,4 @@
+💡 What: Replaced the O(N) `taskExists` array search with an O(1) pre-computed Set and hoisted the expensive `.toISOString().split('T')[0]` date formatting outside the constituent loop.
+🎯 Why: The daily scan loops over all constituents. Previously, it performed `O(N^2)` lookups for existing tasks and generated 4 new formatted date strings per constituent, causing significant CPU overhead and garbage collection pressure.
+📊 Impact: Reduces time complexity from `O(N^2)` to `O(N)` and removes thousands of redundant `toISOString()` calls, drastically speeding up task generation.
+🔬 Measurement: Check execution time of `scanForTasks` and observe reduced memory allocations.
