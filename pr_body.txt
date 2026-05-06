@@ -1,0 +1,4 @@
+💡 What: Extracted expensive date string formatting outside of the `constituents` loop and replaced O(N²) nested array searches (`taskExists`) with an O(1) Set lookup in `scanForTasks`.
+🎯 Why: When scanning potentially thousands of constituents for birthdays and anniversaries, calling `.toISOString().split('T')[0]` repeatedly inside the loop creates significant allocation overhead. Furthermore, `.some()` inside the loop creates an O(N*M) time complexity. Using a Set provides O(N+M) time complexity.
+📊 Impact: Reduces computational complexity from O(N*M) to O(N+M) and removes repeated date string allocations, which will significantly lower Cloud Function execution time and memory usage during the daily scan.
+🔬 Measurement: Verification can be done by running `npm test` in the functions directory and observing that all tasks tests continue to pass correctly, meaning functionality is exactly preserved while execution overhead is reduced.
