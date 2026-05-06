@@ -1,0 +1,7 @@
+💡 What: Added comprehensive ARIA attributes (aria-label, aria-expanded, aria-pressed) to the interactive elements of GlassCalendar.
+🎯 Why: To ensure screen reader compatibility and improve keyboard accessibility for users relying on assistive technologies.
+📸 Before/After: N/A (Non-visual change)
+♿ Accessibility:
+- Added descriptive aria-labels to icon-only previous/next month buttons.
+- Added aria-expanded to dropdown toggles.
+- Replaced missing selection state with aria-pressed on individual calendar day buttons.
