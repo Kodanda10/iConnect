@@ -4,6 +4,21 @@
  */
 
 /**
+ * Sanitizes generic user input to prevent injection attacks
+ * Restricts length to 100 characters and removes HTML/angle brackets and control characters.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    // eslint-disable-next-line no-control-regex
+    return input
+        .slice(0, 100)
+        .replace(/<[^>]*>/g, '') // remove HTML tags
+        .replace(/[<>]/g, '')    // remove standalone angle brackets
+        .replace(/[\x00-\x1F\x7F]/g, '') // remove control characters
+        .trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */

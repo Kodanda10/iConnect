@@ -1,0 +1,5 @@
+**Severity:** HIGH
+**Vulnerability:** Unsanitized user inputs were being directly interpolated into Gemini AI prompts, allowing for prompt injection or HTML injection.
+**Impact:** Malicious users could manipulate the AI greeting generation to return inappropriate content, extract information, or execute unwanted commands within the AI context.
+**Fix:** Implemented `sanitizeInput` in `utils/security.ts` to restrict length and strip HTML/control characters, and applied it to all user inputs in `greeting.ts` before AI prompt generation.
+**Verification:** Code review confirms inputs are sanitized after validation and before being used in `buildPrompt`. Tests pass successfully.
