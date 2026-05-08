@@ -1,0 +1,4 @@
+💡 What: Replaced O(N²) nested array search with O(1) Set lookup and hoisted date string generation outside hot loop.
+🎯 Why: Cloud Functions iterating over large arrays experienced exponential degradation due to repeated `.some()` lookups and `toISOString()` operations.
+📊 Impact: Reduces computational complexity from O(N*M) to O(N+M) and removes duplicate date parsing, greatly improving performance for large data sets.
+🔬 Measurement: Verify by running the test suite and benchmarking function execution time with large constituent datasets.
