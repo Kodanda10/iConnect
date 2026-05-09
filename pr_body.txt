@@ -1,0 +1,4 @@
+💡 What: Added aria-labels to the icon-only next/prev month navigation buttons, and aria-labels/aria-pressed attributes to the day buttons.
+🎯 Why: Makes the calendar accessible to screen readers, allowing users to understand which month they are navigating to, what date each button represents, and which date is currently selected.
+📸 Before/After: Visuals unchanged, purely semantic HTML improvements.
+♿ Accessibility: Improved screen reader navigation, selection states (using aria-pressed for role="button" elements), and explicit labeling for icon-only controls.
