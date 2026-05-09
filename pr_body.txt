@@ -1,0 +1,5 @@
+🚨 Severity: HIGH
+💡 Vulnerability: Unsanitized user inputs in Gemini AI prompts.
+🎯 Impact: Malicious users could supply crafted names to execute prompt injections, altering the greeting logic or leaking information.
+🔧 Fix: Implemented `sanitizeInput` utility in `security.ts` to strip HTML, control characters, and limit length to 100 characters. Applied this sanitization to inputs in `greeting.ts` before prompt generation.
+✅ Verification: Handled inputs are validated and tested against potentially unsafe inputs.
