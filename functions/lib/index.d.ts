@@ -41,3 +41,4 @@ export declare const sendMeetingSmsBatch: import("firebase-functions/v2/tasks").
  * Region: asia-south1
  */
 export declare const dailyScan: import("firebase-functions/v2/scheduler").ScheduleFunction;
+export { generateCampaignVariations, CampaignRequest } from './campaign';

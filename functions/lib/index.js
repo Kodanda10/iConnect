@@ -40,7 +40,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.getUserClaims = exports.setUserRole = exports.syncRoleToClaims = exports.formatAudioMessage = exports.determinePushTimes = exports.schedulePushForLeader = exports.sendBulkSMS = exports.queryConstituentsByAudience = exports.createMessagingProvider = exports.processPushNotifications = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scheduleDailyNotifications = exports.scanForTasks = void 0;
+exports.generateCampaignVariations = exports.dailyScan = exports.sendMeetingSmsBatch = exports.generateGreeting = exports.getUserClaims = exports.setUserRole = exports.syncRoleToClaims = exports.formatAudioMessage = exports.determinePushTimes = exports.schedulePushForLeader = exports.sendBulkSMS = exports.queryConstituentsByAudience = exports.createMessagingProvider = exports.processPushNotifications = exports.onConstituentWritten = exports.onMeetingCreated = exports.createConferenceBridge = exports.createMeetingTicker = exports.generateGreetingMessage = exports.scheduleDailyNotifications = exports.scanForTasks = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const scheduler_1 = require("firebase-functions/v2/scheduler");
 const tasks_1 = require("firebase-functions/v2/tasks");
@@ -257,4 +257,6 @@ exports.dailyScan = (0, scheduler_1.onSchedule)({
         throw error;
     }
 });
+var campaign_1 = require("./campaign");
+Object.defineProperty(exports, "generateCampaignVariations", { enumerable: true, get: function () { return campaign_1.generateCampaignVariations; } });
 //# sourceMappingURL=index.js.map

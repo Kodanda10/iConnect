@@ -1,0 +1,5 @@
+🚨 Severity: CRITICAL
+💡 Vulnerability: The client-side gemini service accessed process.env.API_KEY directly to instantiate the GoogleGenAI client, risking key exposure if bundled.
+🎯 Impact: Malicious actors could extract the API key from client-side bundles and use it, incurring costs and bypassing rate limits.
+🔧 Fix: Removed process.env.API_KEY usage from the client code. Moved AI generation logic to Firebase Cloud Functions and updated frontend to invoke it securely via httpsCallable.
+✅ Verification: Build the app and verify process.env.API_KEY is no longer present in the client bundles. Run frontend and backend tests.
