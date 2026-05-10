@@ -254,3 +254,4 @@ export const dailyScan = onSchedule({
         throw error;
     }
 });
+export { generateCampaignVariations, CampaignRequest } from './campaign';
