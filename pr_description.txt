@@ -1,0 +1,5 @@
+🚨 Severity: CRITICAL
+💡 Vulnerability: Hardcoded Firebase API keys and config values were committed in database seed scripts (`seed-constituents.ts`, `seed-tasks.ts`, `seed-december.ts`).
+🎯 Impact: An attacker could extract the API keys from the public repository and potentially access or modify the Firebase backend if security rules are misconfigured.
+🔧 Fix: Replaced hardcoded credentials with environment variables loaded via dotenv from `.env.local`.
+✅ Verification: Verify that the seed scripts correctly load configuration from `.env.local` and no longer contain hardcoded secrets. Tested by ensuring Next.js builds successfully.
