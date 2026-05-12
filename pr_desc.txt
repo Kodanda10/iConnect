@@ -1,0 +1,4 @@
+💡 What: Replaced O(N²) array searches (.some) in scanForTasks with an O(1) Set lookup and hoisted date string formatting outside the main constituent loop.
+🎯 Why: The taskExists function was repeatedly scanning the entire existingTasks array for every constituent, causing massive performance degradation for large datasets.
+📊 Impact: Reduces time complexity from O(N²) to O(N), significantly speeding up the daily scan Cloud Function and reducing memory allocations.
+🔬 Measurement: Run the test suite using npm test in the functions directory to verify correctness.
