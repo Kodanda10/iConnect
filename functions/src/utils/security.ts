@@ -44,3 +44,35 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes user input to prevent Prompt Injection and XSS by stripping
+ * HTML tags, standalone angle brackets, and control characters, and
+ * truncating to a maximum length.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+
+    // Convert to string in case it's not
+    let sanitized = String(input);
+
+    // Aggressively remove HTML tags: <anything>
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+
+    // Remove standalone angle brackets
+    sanitized = sanitized.replace(/[<>]/g, '');
+
+    // Remove control characters (e.g., \x00-\x1F, \x7F)
+    // Note: Allowing standard whitespace (\n, \r, \t, etc) is usually fine,
+    // but we'll stick to a strict printable character approach minus some controls if needed.
+    // Basic control char removal:
+    sanitized = sanitized.replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+
+    // Restrict length to mitigate large prompt injections
+    const MAX_LENGTH = 100;
+    if (sanitized.length > MAX_LENGTH) {
+        sanitized = sanitized.slice(0, MAX_LENGTH);
+    }
+
+    return sanitized.trim();
+}
