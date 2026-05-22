@@ -1,0 +1,6 @@
+## 2026-05-22 - Adding aria-attributes to custom interactive UI controls
+**Learning:** When implementing custom interactive UI controls in React (like calendars or select dropdowns), visual selection states must be accompanied by explicit ARIA attributes to ensure accessibility. Specifically, use `aria-pressed` instead of `aria-selected` for elements with `role="button"` (like calendar days), as `role="button"` does not support `aria-selected`, and `aria-expanded` for dropdown buttons.
+**Action:** Ensure that any future interactive components use appropriate ARIA attributes mapping to their visual state.
+## 2026-05-22 - Dynamic aria-labels on dropdowns
+**Learning:** When adding `aria-label` attributes to dropdown buttons that display current selections (like a month or year selector), avoid hardcoded labels like 'Select month'. A hardcoded `aria-label` completely replaces the button's inner text in the accessibility tree, meaning screen reader users will no longer hear the currently selected value. Instead, use a dynamic label that includes both the action and the current state, such as `aria-label={\`Select month, currently ${monthNamesShort[viewDate.getMonth()]}\`}`.
+**Action:** Ensure that `aria-label` attributes on elements with dynamic content preserve or include that content to maintain context for screen reader users.
