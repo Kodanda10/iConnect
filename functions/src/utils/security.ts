@@ -44,3 +44,22 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes user input for AI prompts to prevent injection and XSS
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    let sanitized = input;
+    // Strip HTML tags
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+    // Remove standalone angle brackets
+    sanitized = sanitized.replace(/[<>]/g, '');
+    // Remove control characters
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
+    // Restrict length to 100 characters
+    if (sanitized.length > 100) {
+        sanitized = sanitized.substring(0, 100);
+    }
+    return sanitized;
+}
