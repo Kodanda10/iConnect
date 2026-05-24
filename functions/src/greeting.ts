@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -113,6 +114,15 @@ export async function generateGreetingMessage(
 
     if (!VALID_LANGUAGES.includes(request.language)) {
         throw new Error('Invalid language');
+    }
+
+    // Sanitize user inputs after validation
+    request.name = sanitizeInput(request.name);
+    if (request.leaderName) {
+        request.leaderName = sanitizeInput(request.leaderName);
+    }
+    if (request.ward) {
+        request.ward = sanitizeInput(request.ward);
     }
 
     // Try Gemini API if key is configured
