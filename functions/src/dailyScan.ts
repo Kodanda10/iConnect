@@ -84,32 +84,6 @@ function createTask(
 }
 
 /**
- * Check if a task already exists for this constituent, type, and date
- */
-function taskExists(
-    existingTasks: Task[],
-    constituentId: string,
-    type: TaskType,
-    dueDate: string
-): boolean {
-    return existingTasks.some((task) => {
-        // Handle both Timestamp and String for backward compatibility during migration
-        let taskDateStr = '';
-        if (task.due_date && typeof task.due_date.toDate === 'function') {
-            taskDateStr = task.due_date.toDate().toISOString().split('T')[0];
-        } else if (typeof task.due_date === 'string') {
-            taskDateStr = task.due_date;
-        }
-
-        return (
-            (task.constituent_id === constituentId || (task as any).constituentId === constituentId) &&
-            task.type === type &&
-            taskDateStr === dueDate
-        );
-    });
-}
-
-/**
  * Scan constituents for upcoming birthdays and anniversaries
  * Creates tasks for today and tomorrow
  */
@@ -122,37 +96,52 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Build O(1) lookup set for existing tasks
+    const existingTasksSet = new Set<string>();
+    for (const task of existingTasks) {
+        let taskDateStr = '';
+        if (task.due_date && typeof (task.due_date as any).toDate === 'function') {
+            taskDateStr = (task.due_date as any).toDate().toISOString().split('T')[0];
+        } else if (typeof task.due_date === 'string') {
+            taskDateStr = task.due_date;
+        }
+
+        const cId = task.constituent_id || (task as any).constituentId;
+        if (cId && task.type && taskDateStr) {
+            existingTasksSet.add(`${cId}_${task.type}_${taskDateStr}`);
+        }
+    }
+
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!existingTasksSet.has(`${constituent.id}_BIRTHDAY_${todayStr}`)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
         }
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!existingTasksSet.has(`${constituent.id}_BIRTHDAY_${tomorrowStr}`)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
         }
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!existingTasksSet.has(`${constituent.id}_ANNIVERSARY_${todayStr}`)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
             }
         }
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!existingTasksSet.has(`${constituent.id}_ANNIVERSARY_${tomorrowStr}`)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
         }
