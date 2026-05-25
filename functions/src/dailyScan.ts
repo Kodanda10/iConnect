@@ -124,35 +124,35 @@ export function scanForTasks(
 
     const newTasks: Task[] = [];
 
+    // ⚡ Bolt: Hoist date formatting outside loop to avoid redundant string allocation
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
     for (const constituent of constituents) {
         // Check Birthday - Today
         if (isDateMatch(constituent.dob, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', todayStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
             }
         }
 
         // Check Birthday - Tomorrow
         if (isDateMatch(constituent.dob, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
             }
         }
 
         // Check Anniversary - Today
         if (isDateMatch(constituent.anniversary, today)) {
-            const dueDateStr = today.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', todayStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
             }
         }
 
         // Check Anniversary - Tomorrow
         if (isDateMatch(constituent.anniversary, tomorrow)) {
-            const dueDateStr = tomorrow.toISOString().split('T')[0];
-            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
+            if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', tomorrowStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
             }
         }
