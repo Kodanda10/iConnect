@@ -1,0 +1,3 @@
+## 2026-05-27 - Dynamic ARIA Labels and aria-pressed
+**Learning:** When adding `aria-label` attributes to elements that display dynamic content (like a dropdown showing the currently selected month or year), hardcoded labels obscure the current selection for screen readers. Additionally, `role="button"` elements do not support `aria-selected`, so `aria-pressed` must be used for visual selection states.
+**Action:** Always use a dynamic `aria-label` that includes both the action and the current state (e.g., `aria-label={"Select month, currently " + currentValue}`). Use `aria-pressed` for custom interactive UI controls like calendar days.
