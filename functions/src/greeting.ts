@@ -7,6 +7,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { sanitizeInput } from './utils/security';
 
 export type TaskType = 'BIRTHDAY' | 'ANNIVERSARY';
 export type Language = 'ODIA' | 'ENGLISH' | 'HINDI';
@@ -102,16 +103,27 @@ function getTemplateMessage(request: GreetingRequest): string {
 export async function generateGreetingMessage(
     request: GreetingRequest
 ): Promise<string> {
+    // Sanitize user inputs to prevent prompt injection and XSS
+    const sanitizedName = sanitizeInput(request.name);
+    const sanitizedLeaderName = sanitizeInput(request.leaderName);
+
+    // Update the request with sanitized values
+    const safeRequest = {
+        ...request,
+        name: sanitizedName,
+        leaderName: sanitizedLeaderName,
+    };
+
     // Input validation
-    if (!request.name || request.name.trim() === '') {
+    if (!safeRequest.name || safeRequest.name === '') {
         throw new Error('Name is required');
     }
 
-    if (!VALID_TYPES.includes(request.type)) {
+    if (!VALID_TYPES.includes(safeRequest.type)) {
         throw new Error('Invalid type');
     }
 
-    if (!VALID_LANGUAGES.includes(request.language)) {
+    if (!VALID_LANGUAGES.includes(safeRequest.language)) {
         throw new Error('Invalid language');
     }
 
@@ -126,7 +138,7 @@ export async function generateGreetingMessage(
         try {
             const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            const prompt = buildPrompt(request);
+            const prompt = buildPrompt(safeRequest);
             const result = await model.generateContent(prompt);
             const text = result.response.text();
             if (text && text.trim().length > 0) {
@@ -138,5 +150,5 @@ export async function generateGreetingMessage(
     }
 
     // Fallback to templates
-    return getTemplateMessage(request);
+    return getTemplateMessage(safeRequest);
 }
