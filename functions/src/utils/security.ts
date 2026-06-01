@@ -4,6 +4,19 @@
  */
 
 /**
+ * Sanitizes user input to prevent injection attacks (like HTML/XSS or prompt injection).
+ * Restricts to 100 characters, strips HTML tags, standalone angle brackets, and control chars.
+ */
+export function sanitizeInput(input: string | null | undefined): string {
+    if (!input) return '';
+    let sanitized = input.slice(0, 100);
+    sanitized = sanitized.replace(/<[^>]*>/g, ''); // Remove complete HTML tags
+    sanitized = sanitized.replace(/[<>]/g, '');    // Remove stray angle brackets
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+    return sanitized.trim();
+}
+
+/**
  * Redacts a mobile number, keeping only the last 4 digits
  * Example: +919876543210 -> ********3210
  */
