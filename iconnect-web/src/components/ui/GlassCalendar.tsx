@@ -101,6 +101,7 @@ export default function GlassCalendar({
             <div className="flex items-center justify-between mb-4">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
+                    aria-label="Previous month"
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                     <ChevronLeft className="w-4 h-4" />
@@ -117,6 +118,8 @@ export default function GlassCalendar({
                                 setShowMonthDropdown(!showMonthDropdown);
                                 setShowYearDropdown(false);
                             }}
+                            aria-label={"Select month, currently " + monthNamesShort[viewDate.getMonth()]}
+                            aria-expanded={showMonthDropdown}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
                         >
                             {monthNamesShort[viewDate.getMonth()]}
@@ -129,6 +132,7 @@ export default function GlassCalendar({
                                     <button
                                         key={month}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectMonth(index); }}
+                                        aria-pressed={viewDate.getMonth() === index}
                                         className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${viewDate.getMonth() === index
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
@@ -150,6 +154,8 @@ export default function GlassCalendar({
                                 setShowYearDropdown(!showYearDropdown);
                                 setShowMonthDropdown(false);
                             }}
+                            aria-label={"Select year, currently " + viewDate.getFullYear()}
+                            aria-expanded={showYearDropdown}
                             className="px-2 py-1 rounded-lg hover:bg-white/10 text-sm font-bold text-white flex items-center gap-1 transition-colors"
                         >
                             {viewDate.getFullYear()}
@@ -162,6 +168,7 @@ export default function GlassCalendar({
                                     <button
                                         key={year}
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); selectYear(year); }}
+                                        aria-pressed={viewDate.getFullYear() === year}
                                         className={`w-full px-2 py-1.5 text-xs rounded-lg transition-colors text-center ${viewDate.getFullYear() === year
                                             ? 'bg-emerald-500 text-white'
                                             : 'text-white/70 hover:bg-white/10 hover:text-white'
@@ -177,6 +184,7 @@ export default function GlassCalendar({
 
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
+                    aria-label="Next month"
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                     <ChevronRight className="w-4 h-4" />
@@ -210,6 +218,8 @@ export default function GlassCalendar({
                         <button
                             key={day}
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            aria-label={date.toDateString()}
+                            aria-pressed={isSelectedDay}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
                                 border-r border-b border-white/5
