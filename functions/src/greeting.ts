@@ -69,14 +69,33 @@ const LANGUAGE_NAMES: Record<Language, string> = {
 let warnedMissingGeminiKey = false;
 
 /**
+ * Sanitize user input to prevent prompt injection attacks.
+ * Strips control characters, common injection wrappers, and restricts length,
+ * while allowing international characters.
+ */
+function sanitizeInput(input: string): string {
+    if (!input) return '';
+    return input
+        .replace(/[\r\n\t]/g, ' ')
+        .replace(/[<>{}\[\]`\\\|]/g, '')
+        .trim()
+        .substring(0, 100);
+}
+
+/**
  * Build a prompt for Gemini AI
  */
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    // Sanitize user inputs before interpolation
+    const safeName = sanitizeInput(request.name);
+    const safeLeaderName = request.leaderName ? sanitizeInput(request.leaderName) : '';
+
+    const leaderMention = safeLeaderName ? ` on behalf of ${safeLeaderName}` : '';
+
+    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${safeName} in ${language}.
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
