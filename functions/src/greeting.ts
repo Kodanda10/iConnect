@@ -69,14 +69,33 @@ const LANGUAGE_NAMES: Record<Language, string> = {
 let warnedMissingGeminiKey = false;
 
 /**
+ * Sanitizes input for LLM prompts to prevent prompt injection and control character abuse.
+ * Preserves international characters while removing dangerous symbols and limiting length.
+ */
+function sanitizeInput(input: string, maxLength: number = 50): string {
+    if (!input) return '';
+    // Remove control characters, common prompt injection wrappers, and restrict length
+    return input
+        .replace(/[\x00-\x1F\x7F]/g, '') // Strip control chars
+        .replace(/[<>{}\[\]`|]/g, '')    // Strip syntax wrappers
+        .trim()
+        .slice(0, maxLength);
+}
+
+/**
  * Build a prompt for Gemini AI
  */
 function buildPrompt(request: GreetingRequest): string {
     const occasion = request.type === 'BIRTHDAY' ? 'birthday' : 'wedding anniversary';
     const language = LANGUAGE_NAMES[request.language];
-    const leaderMention = request.leaderName ? ` on behalf of ${request.leaderName}` : '';
 
-    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${request.name} in ${language}. 
+    // Sanitize user inputs before interpolating into the prompt
+    const safeName = sanitizeInput(request.name, 100);
+    const safeLeaderName = request.leaderName ? sanitizeInput(request.leaderName, 100) : '';
+
+    const leaderMention = safeLeaderName ? ` on behalf of ${safeLeaderName}` : '';
+
+    return `Generate a warm and heartfelt ${occasion} greeting message${leaderMention} for ${safeName} in ${language}.
 The message should be:
 - Personal and sincere
 - 2-3 sentences maximum
@@ -92,7 +111,10 @@ function getTemplateMessage(request: GreetingRequest): string {
     const typeTemplates = TEMPLATES[request.type];
     const langTemplates = typeTemplates[request.language];
     const template = langTemplates[Math.floor(Math.random() * langTemplates.length)];
-    return template.replace('{name}', request.name);
+
+    // Sanitize name for template as well
+    const safeName = sanitizeInput(request.name, 100);
+    return template.replace('{name}', safeName);
 }
 
 /**
