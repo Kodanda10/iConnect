@@ -338,7 +338,7 @@ export default function SchedulerPage() {
                 <div className="glass-card-light p-6 rounded-2xl h-fit">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-white text-lg">Festivals</h3>
-                        <button onClick={() => setShowAddFestivalModal(true)} className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors">
+                        <button onClick={() => setShowAddFestivalModal(true)} className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors" aria-label="Add new festival">
                             <Plus className="w-4 h-4" />
                         </button>
                     </div>
@@ -363,6 +363,7 @@ export default function SchedulerPage() {
                                     onClick={(e) => { e.stopPropagation(); setDeletingFestivalId(festival.id); }}
                                     className="p-2 rounded-lg bg-red-500/20 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
                                     title="Remove Festival"
+                                    aria-label={`Delete ${festival.name} festival`}
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
@@ -394,7 +395,7 @@ export default function SchedulerPage() {
                     <div className="glass-card-light p-6 rounded-2xl w-full max-w-sm mx-auto relative z-50">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-white font-bold text-lg">Add New Festival</h3>
-                            <button onClick={() => setShowAddFestivalModal(false)}><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
+                            <button onClick={() => setShowAddFestivalModal(false)} aria-label="Close add festival modal"><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
                         </div>
                         <div className="space-y-4">
                             {/* Name Input */}
@@ -441,7 +442,7 @@ export default function SchedulerPage() {
                                     <p className="text-sm text-white/60">Generate greetings for {selectedFestival?.name || 'Festival'}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setShowCampaignWizard(false)}><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
+                            <button onClick={() => setShowCampaignWizard(false)} aria-label="Close campaign wizard modal"><X className="w-5 h-5 text-white/60 hover:text-white" /></button>
                         </div>
 
                         {/* Steps */}
