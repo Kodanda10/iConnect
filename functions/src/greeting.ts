@@ -69,6 +69,17 @@ const LANGUAGE_NAMES: Record<Language, string> = {
 let warnedMissingGeminiKey = false;
 
 /**
+ * Sanitizes input to prevent prompt injection
+ */
+function sanitizeInput(input: string | undefined): string {
+    if (!input) return '';
+    let sanitized = input.substring(0, 100);
+    // Remove control characters and common injection syntax wrappers
+    sanitized = sanitized.replace(/[\x00-\x1F\x7F<>\[\]{}"\\]/g, '');
+    return sanitized.trim();
+}
+
+/**
  * Build a prompt for Gemini AI
  */
 function buildPrompt(request: GreetingRequest): string {
@@ -113,6 +124,12 @@ export async function generateGreetingMessage(
 
     if (!VALID_LANGUAGES.includes(request.language)) {
         throw new Error('Invalid language');
+    }
+
+    // Sanitize user inputs to prevent prompt injection
+    request.name = sanitizeInput(request.name);
+    if (request.leaderName) {
+        request.leaderName = sanitizeInput(request.leaderName);
     }
 
     // Try Gemini API if key is configured
