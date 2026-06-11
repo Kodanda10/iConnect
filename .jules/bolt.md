@@ -1,3 +1,7 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+
+## 2026-06-11 - Pre-calculate Sets and Dates to avoid O(N^2) in Hot Loops
+**Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated nested `some()` lookups on arrays create O(N^2) bottlenecks, and `toISOString()` allocations add up.
+**Action:** Pre-construct a `Set` for `O(1)` lookups of existing data, and hoist invariant string manipulations outside the main loop to save CPU cycles and allocations.
