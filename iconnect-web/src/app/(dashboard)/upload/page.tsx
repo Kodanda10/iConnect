@@ -595,8 +595,10 @@ export default function UploadPage() {
                                     <button
                                         onClick={() => {
                                             const rows = parseCsvToRows(csvContent);
+                                            // Optimization: Use Set for O(1) lookup instead of O(N^2) some()
+                                            const invalidRowNumbers = new Set(csvValidation.invalidRows.map(r => r.rowNumber));
                                             const validRows = rows.filter((_, i) =>
-                                                !csvValidation.invalidRows.some(r => r.rowNumber === i + 1)
+                                                !invalidRowNumbers.has(i + 1)
                                             );
                                             uploadValidRows(validRows);
                                         }}
