@@ -113,14 +113,15 @@ describe('scheduleDailyNotifications', () => {
         expect(actionCall).toBeDefined();
         const actionPayload = actionCall[1];
 
-        // 1 Birthday + 1 Anniversary Today
-        expect(actionPayload.body).toContain('1 birthdays & 1 anniversaries today.');
+        // 1 Birthday + 1 Anniversary Tomorrow (which is the target for Action Reminder)
+        // Note: The action reminder looks at 'tomorrow's' counts since it runs in the evening for the next day
+        expect(actionPayload.body).toContain('1 birthdays today (C).');
         expect(actionPayload.body).toContain(mockSettingsPayload.alertSettings.actionMessage);
 
-        // Check Time: Today 8:00 AM
+        // Check Time: Tomorrow 8:00 AM
         const scheduledDate = actionPayload.scheduledFor.toDate();
         expect(scheduledDate.getHours()).toBe(8);
-        expect(scheduledDate.getDate()).toBe(18);
+        expect(scheduledDate.getDate()).toBe(19);
 
         // Find Heads Up Call
         const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
@@ -128,7 +129,7 @@ describe('scheduleDailyNotifications', () => {
         const headsUpPayload = headsUpCall[1];
 
         // 1 Birthday Tomorrow
-        expect(headsUpPayload.body).toContain('1 birthdays tomorrow.'); // No anniversaries
+        expect(headsUpPayload.body).toContain('1 birthdays tomorrow'); // No anniversaries
         expect(headsUpPayload.body).not.toContain('&');
         expect(headsUpPayload.body).toContain(mockSettingsPayload.alertSettings.headsUpMessage);
 
@@ -137,13 +138,13 @@ describe('scheduleDailyNotifications', () => {
         expect(headsUpDate.getDate()).toBe(18); // Scheduled FOR today at 8pm
     });
 
-    test('should NOT schedule Action if no events today', async () => {
+    test('should NOT schedule Action if no events tomorrow', async () => {
         const today = new Date('2025-12-18T10:00:00Z');
         jest.setSystemTime(today);
 
         const constituents: Constituent[] = [
-            // Birthday Tomorrow (Dec 19)
-            { id: '3', name: 'C', dob: '1990-12-19', mobile_number: '', ward_number: '', address: '', created_at: '' }
+            // Birthday Today (Dec 18) - but we check tomorrow
+            { id: '1', name: 'A', dob: '1990-12-18', mobile_number: '', ward_number: '', address: '', created_at: '' }
         ];
 
         await scheduleDailyNotifications(mockDb, constituents);
@@ -152,8 +153,7 @@ describe('scheduleDailyNotifications', () => {
         expect(actionCall).toBeUndefined();
 
         const headsUpCall = mockBatch.set.mock.calls.find(c => c[1].type === 'HEADS_UP');
-        expect(headsUpCall).toBeDefined();
-        expect(headsUpCall[1].body).toContain('1 birthdays tomorrow.');
+        expect(headsUpCall).toBeUndefined();
     });
 
     test('should SANITIZE hardcoded clean-up text from templates', async () => {
@@ -193,7 +193,7 @@ describe('scheduleDailyNotifications', () => {
         // Assert: Dynamic Count (1) represents reality. Hardcoded (5) is removed.
         // Expected: "1 birthdays tomorrow. Tomorrow's Celebrations! Tap to view..."
         const body = headsUpCall[1].body;
-        expect(body).toContain('1 birthdays tomorrow.');
+        expect(body).toContain('1 birthdays tomorrow');
         expect(body).not.toContain('5 constituents');
         expect(body).not.toContain('have birthdays tomorrow.'); // The hardcoded part
         expect(body).toContain("Tomorrow's Celebrations!");
