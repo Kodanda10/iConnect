@@ -44,3 +44,15 @@ export function redactToken(token: string | null | undefined): string {
     if (token.length < 8) return '***';
     return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
+
+/**
+ * Sanitizes input text to prevent prompt injection and remove control characters.
+ * Replaces denylisted characters with an empty string and enforces a length limit.
+ */
+export function sanitizeInput(input: string | null | undefined, maxLength: number = 100): string {
+    if (!input) return '';
+    // Denylist regex: control chars, brackets, less/greater than, backticks
+    // We allow letters, numbers, spaces, and basic punctuation
+    const sanitized = input.replace(/[\x00-\x1F\x7F\[\]{}<>\`]/g, '').trim();
+    return sanitized.substring(0, maxLength);
+}
