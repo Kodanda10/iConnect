@@ -12,4 +12,4 @@
  * Process scheduled push notifications every minute
  * Queries scheduled_notifications where scheduledFor <= now AND sent == false
  */
-export declare const processPushNotifications: import("firebase-functions/v2/scheduler").ScheduleFunction;
+export declare const processPushNotifications: import("firebase-functions/scheduler").ScheduleFunction;
