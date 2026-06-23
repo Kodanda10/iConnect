@@ -100,6 +100,7 @@ export default function GlassCalendar({
             {/* Navigation Header */}
             <div className="flex items-center justify-between mb-4">
                 <button
+                    aria-label="Previous month"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
@@ -111,6 +112,8 @@ export default function GlassCalendar({
                     {/* Month Dropdown */}
                     <div className="relative dropdown-container">
                         <button
+                            aria-label="Select month"
+                            aria-expanded={showMonthDropdown}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -144,6 +147,8 @@ export default function GlassCalendar({
                     {/* Year Dropdown */}
                     <div className="relative dropdown-container">
                         <button
+                            aria-label="Select year"
+                            aria-expanded={showYearDropdown}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -176,6 +181,7 @@ export default function GlassCalendar({
                 </div>
 
                 <button
+                    aria-label="Next month"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
