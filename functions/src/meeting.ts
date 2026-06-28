@@ -61,6 +61,18 @@ export const createMeetingTicker = onCall(
             );
         }
 
+        // Security: Validate meetUrl to prevent malicious URLs
+        if (meetingType === 'VIDEO_MEET' && meetUrl) {
+            try {
+                const url = new URL(meetUrl);
+                if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+                    throw new Error('Invalid protocol');
+                }
+            } catch (e) {
+                throw new HttpsError("invalid-argument", "Invalid meetUrl provided. Must be a valid HTTP/HTTPS URL.");
+            }
+        }
+
         try {
             const tickerRef = admin.firestore().collection("active_tickers").doc(leaderUid);
 
