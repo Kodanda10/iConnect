@@ -91,6 +91,12 @@ export default function DataMetricsCard() {
         return null;
     }
 
+    // Performance Optimization: Pre-calculate max count for the hovered block's GP data
+    // This prevents an O(N^2) operation where Math.max was being recalculated inside the .map loop
+    // for every single GP progress bar rendering.
+    const currentGpData = hoveredBlock ? (gpData[hoveredBlock] || []) : [];
+    const currentGpMaxCount = Math.max(...currentGpData.map(g => g.count), 1);
+
     return (
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
             {/* LEFT: Dynamic Info Card (50%) */}
@@ -118,17 +124,17 @@ export default function DataMetricsCard() {
                                 <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
                                 <span className="text-sm">Fetching GP data...</span>
                             </div>
-                        ) : gpData[hoveredBlock]?.length === 0 ? (
+                        ) : currentGpData.length === 0 ? (
                             <div className="py-12 text-center text-white/40 text-sm">
                                 No GP data available for {hoveredBlock}
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGpData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={currentGpMaxCount}
                                         delay={index * 50}
                                         index={index}
                                     />
