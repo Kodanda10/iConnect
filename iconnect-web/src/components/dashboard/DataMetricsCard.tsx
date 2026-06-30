@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -58,6 +58,13 @@ export default function DataMetricsCard() {
         setHoveredBlock(blockName);
         loadGPData(blockName);
     };
+
+    const currentGpData = useMemo(() => {
+        return hoveredBlock ? gpData[hoveredBlock] || [] : [];
+    }, [hoveredBlock, gpData]);
+    const maxGpCount = useMemo(() => {
+        return Math.max(...currentGpData.map(g => g.count), 1);
+    }, [currentGpData]);
 
     // Loading state
     if (loading) {
@@ -124,11 +131,11 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGpData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
