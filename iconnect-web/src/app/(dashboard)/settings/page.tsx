@@ -230,12 +230,13 @@ export default function SettingsPage() {
                     {/* Col 1: Inputs */}
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-white/70 mb-2">
+                        <label htmlFor="appName" className="block text-sm font-medium text-white/70 mb-2">
                                 App Name
                             </label>
                             <div className="relative">
                                 <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                id="appName"
                                     type="text"
                                     value={settings.appName}
                                     onChange={(e) => setSettings({ ...settings, appName: e.target.value })}
