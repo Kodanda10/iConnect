@@ -20,7 +20,7 @@ export { syncRoleToClaims, setUserRole, getUserClaims } from "./auth";
  * Callable function to secure API key on server side
  * Region: asia-south1 (matches Flutter client)
  */
-export declare const generateGreeting: import("firebase-functions/https").CallableFunction<GreetingRequest, any, unknown>;
+export declare const generateGreeting: import("firebase-functions/v2/https").CallableFunction<GreetingRequest, any, unknown>;
 export interface MeetingSmsBatchPayload {
     dialInNumber: string;
     accessCode: string;
@@ -33,11 +33,11 @@ export interface MeetingSmsBatchPayload {
  * This avoids unbounded fan-out inside Firestore triggers which can time out as
  * the notified constituent list grows.
  */
-export declare const sendMeetingSmsBatch: import("firebase-functions/tasks").TaskQueueFunction<MeetingSmsBatchPayload>;
+export declare const sendMeetingSmsBatch: import("firebase-functions/v2/tasks").TaskQueueFunction<MeetingSmsBatchPayload>;
 /**
  * Daily scan cron job - runs at 00:01 AM IST every day
  * Scans constituents for birthdays/anniversaries and creates tasks
  * OPTIMIZED: Uses indexed date fields if available, falls back to full scan
  * Region: asia-south1
  */
-export declare const dailyScan: import("firebase-functions/scheduler").ScheduleFunction;
+export declare const dailyScan: import("firebase-functions/v2/scheduler").ScheduleFunction;

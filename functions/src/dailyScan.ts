@@ -45,22 +45,10 @@ export interface ScanResult {
 /**
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
  */
-function isDateMatch(dateStr: string | undefined, targetMonth: number, targetDay: number): boolean {
+function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
     if (!dateStr) return false;
 
-    // Fast path: strict YYYY-MM-DD parsing without array allocation
-    if (dateStr.length === 10 && dateStr.charCodeAt(4) === 45 && dateStr.charCodeAt(7) === 45) { // 45 is '-'
-        const m1 = dateStr.charCodeAt(5) - 48; // 48 is '0'
-        const m2 = dateStr.charCodeAt(6) - 48;
-        const d1 = dateStr.charCodeAt(8) - 48;
-        const d2 = dateStr.charCodeAt(9) - 48;
-
-        const month = m1 * 10 + m2 - 1;
-        const day = d1 * 10 + d2;
-        return month === targetMonth && day === targetDay;
-    }
-
-    // Fallback for irregular YYYY-MM-DD formats
+    // Handle YYYY-MM-DD format
     const parts = dateStr.split('-');
     if (parts.length !== 3) return false;
 
@@ -68,8 +56,8 @@ function isDateMatch(dateStr: string | undefined, targetMonth: number, targetDay
     const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
 
     return (
-        day === targetDay &&
-        month === targetMonth
+        day === targetDate.getDate() &&
+        month === targetDate.getMonth()
     );
 }
 
@@ -134,16 +122,11 @@ export function scanForTasks(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
-    const tomorrowMonth = tomorrow.getMonth();
-    const tomorrowDay = tomorrow.getDate();
-
     const newTasks: Task[] = [];
 
     for (const constituent of constituents) {
         // Check Birthday - Today
-        if (isDateMatch(constituent.dob, todayMonth, todayDay)) {
+        if (isDateMatch(constituent.dob, today)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', today, TimestampClass));
@@ -151,7 +134,7 @@ export function scanForTasks(
         }
 
         // Check Birthday - Tomorrow
-        if (isDateMatch(constituent.dob, tomorrowMonth, tomorrowDay)) {
+        if (isDateMatch(constituent.dob, tomorrow)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'BIRTHDAY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'BIRTHDAY', tomorrow, TimestampClass));
@@ -159,7 +142,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Today
-        if (isDateMatch(constituent.anniversary, todayMonth, todayDay)) {
+        if (isDateMatch(constituent.anniversary, today)) {
             const dueDateStr = today.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', today, TimestampClass));
@@ -167,7 +150,7 @@ export function scanForTasks(
         }
 
         // Check Anniversary - Tomorrow
-        if (isDateMatch(constituent.anniversary, tomorrowMonth, tomorrowDay)) {
+        if (isDateMatch(constituent.anniversary, tomorrow)) {
             const dueDateStr = tomorrow.toISOString().split('T')[0];
             if (!taskExists(existingTasks, constituent.id, 'ANNIVERSARY', dueDateStr)) {
                 newTasks.push(createTask(constituent, 'ANNIVERSARY', tomorrow, TimestampClass));
@@ -202,23 +185,18 @@ export async function scheduleDailyNotifications(
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
-    const tomorrowMonth = tomorrow.getMonth();
-    const tomorrowDay = tomorrow.getDate();
-
     // 1. Calculate Counts
     let todayCount = { birthdays: 0, anniversaries: 0 };
     let tomorrowCount = { birthdays: 0, anniversaries: 0 };
 
-    // NOTE: isDateMatch compares with targetDay (Local system time of Date object)
+    // NOTE: isDateMatch compares with targetDate.getDate() (Local system time of Date object)
     // Since 'today' is created from IST string, its 'local' components are correct for IST
     for (const c of constituents) {
-        if (isDateMatch(c.dob, todayMonth, todayDay)) todayCount.birthdays++;
-        if (isDateMatch(c.anniversary, todayMonth, todayDay)) todayCount.anniversaries++;
+        if (isDateMatch(c.dob, today)) todayCount.birthdays++;
+        if (isDateMatch(c.anniversary, today)) todayCount.anniversaries++;
 
-        if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay)) tomorrowCount.birthdays++;
-        if (isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay)) tomorrowCount.anniversaries++;
+        if (isDateMatch(c.dob, tomorrow)) tomorrowCount.birthdays++;
+        if (isDateMatch(c.anniversary, tomorrow)) tomorrowCount.anniversaries++;
     }
 
     // 2. Fetch Settings & Leader
@@ -265,7 +243,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow (to be displayed as "Today" in the morning notification)
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay) || isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay)) {
+            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
                 names.push(c.name.split(' ')[0]);
             }
         });
@@ -313,7 +291,7 @@ export async function scheduleDailyNotifications(
         // Collect names for tomorrow
         const names: string[] = [];
         constituents.forEach(c => {
-            if (isDateMatch(c.dob, tomorrowMonth, tomorrowDay) || isDateMatch(c.anniversary, tomorrowMonth, tomorrowDay)) {
+            if (isDateMatch(c.dob, tomorrow) || isDateMatch(c.anniversary, tomorrow)) {
                 names.push(c.name.split(' ')[0]);
             }
         });

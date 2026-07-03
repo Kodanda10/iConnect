@@ -20,7 +20,7 @@ export declare function setUserRole(uid: string, role: UserRole): Promise<{
  * Firestore trigger: Sync role changes to custom claims
  * Fires on users/{userId} document create/update
  */
-export declare const syncRoleToClaims: import("firebase-functions/core").CloudFunction<import("firebase-functions/firestore").FirestoreEvent<import("firebase-functions/firestore").Change<import("firebase-functions/firestore").DocumentSnapshot> | undefined, {
+export declare const syncRoleToClaims: import("firebase-functions/core").CloudFunction<import("firebase-functions/v2/firestore").FirestoreEvent<import("firebase-functions/v2/firestore").Change<import("firebase-functions/v2/firestore").DocumentSnapshot> | undefined, {
     userId: string;
 }>>;
 /**
