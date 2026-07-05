@@ -236,7 +236,7 @@ interface BlockItemProps {
     onMouseLeave: () => void;
 }
 
-function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
+const BlockItem = React.memo(function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: BlockItemProps) {
     const percentage = total > 0 ? Math.round((block.count / total) * 100) : 0;
 
     return (
@@ -280,7 +280,14 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             </div>
         </div>
     );
-}
+}, (prev, next) => {
+    return (
+        prev.block.name === next.block.name &&
+        prev.block.count === next.block.count &&
+        prev.total === next.total &&
+        prev.isHovered === next.isHovered
+    );
+});
 
 interface GPProgressBarProps {
     gp: GPMetric;

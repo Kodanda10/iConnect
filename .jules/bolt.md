@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2026-07-05 - Memoize List Items with Callbacks
+**Learning:** Passing inline arrow functions (like `onMouseEnter={() => handleBlockHover(block.name)}`) as props to list items causes unnecessary re-renders of all items when the parent component re-renders (e.g., on hover state change), causing severe layout thrashing and performance degradation for long lists.
+**Action:** When a parent passes inline functions to child list items and parent state frequently updates, wrap the child in `React.memo` and use a custom props equality check (e.g., `(prev, next) => prev.isHovered === next.isHovered`) to safely ignore the inline function reference changes.
