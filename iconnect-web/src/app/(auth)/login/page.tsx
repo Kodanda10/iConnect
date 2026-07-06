@@ -59,12 +59,8 @@ export default function LoginPage() {
         } catch (err: unknown) {
             let msg = 'Authentication failed';
             const firebaseErr = err as { code?: string };
-            if (firebaseErr.code === 'auth/invalid-credential') {
+            if (firebaseErr.code === 'auth/invalid-credential' || firebaseErr.code === 'auth/user-not-found' || firebaseErr.code === 'auth/wrong-password') {
                 msg = 'Invalid email or password';
-            } else if (firebaseErr.code === 'auth/user-not-found') {
-                msg = 'User not found';
-            } else if (firebaseErr.code === 'auth/wrong-password') {
-                msg = 'Incorrect password';
             } else if (firebaseErr.code === 'auth/too-many-requests') {
                 msg = 'Too many attempts. Try again later.';
             }
