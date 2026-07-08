@@ -7,7 +7,7 @@
  */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface GlassCalendarProps {
@@ -30,6 +30,9 @@ export default function GlassCalendar({
     const [viewDate, setViewDate] = useState(selectedDate || new Date());
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
+
+    // Optimize event checks with a Set for O(1) lookups
+    const eventDatesSet = useMemo(() => new Set(eventDates), [eventDates]);
 
     // Update view if selectedDate changes externally
     useEffect(() => {
@@ -204,7 +207,7 @@ export default function GlassCalendar({
                     const isSelectedDay = isSelected(day);
                     const isTodayDay = isToday(day);
                     const dateKey = formatDateKey(day);
-                    const hasEvent = eventDates.includes(dateKey);
+                    const hasEvent = eventDatesSet.has(dateKey);
 
                     return (
                         <button
