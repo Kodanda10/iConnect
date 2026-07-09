@@ -46,14 +46,14 @@ export interface ScanResult {
  * Check if a date string (YYYY-MM-DD) matches a target date (month and day only)
  */
 function isDateMatch(dateStr: string | undefined, targetDate: Date): boolean {
-    if (!dateStr) return false;
+    if (!dateStr || typeof dateStr !== 'string' || dateStr.length !== 10) return false;
 
-    // Handle YYYY-MM-DD format
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return false;
+    // Validate format before parsing to ensure safety
+    if (dateStr[4] !== '-' || dateStr[7] !== '-') return false;
 
-    const day = parseInt(parts[2], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-indexed
+    // Use substring instead of split to avoid array allocations in hot loops
+    const day = parseInt(dateStr.substring(8, 10), 10);
+    const month = parseInt(dateStr.substring(5, 7), 10) - 1; // JS months are 0-indexed
 
     return (
         day === targetDate.getDate() &&

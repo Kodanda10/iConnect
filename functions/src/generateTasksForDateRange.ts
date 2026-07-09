@@ -79,13 +79,14 @@ export interface GenerateTasksResult {
  * Returns null if invalid
  */
 function parseDateParts(dateStr: string | undefined): { month: number; day: number } | null {
-    if (!dateStr || typeof dateStr !== 'string') return null;
+    if (!dateStr || typeof dateStr !== 'string' || dateStr.length !== 10) return null;
 
-    const parts = dateStr.split('-');
-    if (parts.length !== 3) return null;
+    // Validate format before parsing to ensure safety
+    if (dateStr[4] !== '-' || dateStr[7] !== '-') return null;
 
-    const month = parseInt(parts[1], 10);
-    const day = parseInt(parts[2], 10);
+    // Use substring instead of split to avoid array allocations in hot loops
+    const month = parseInt(dateStr.substring(5, 7), 10);
+    const day = parseInt(dateStr.substring(8, 10), 10);
 
     if (isNaN(month) || isNaN(day) || month < 1 || month > 12 || day < 1 || day > 31) {
         return null;
