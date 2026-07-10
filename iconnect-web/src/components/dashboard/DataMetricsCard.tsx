@@ -124,15 +124,20 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
-                                    <GPProgressBar
-                                        key={gp.name}
-                                        gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
-                                        delay={index * 50}
-                                        index={index}
-                                    />
-                                ))}
+                                {(() => {
+                                    const gpList = gpData[hoveredBlock] || [];
+                                    const maxCount = Math.max(...gpList.map(g => g.count), 1);
+
+                                    return gpList.map((gp, index) => (
+                                        <GPProgressBar
+                                            key={gp.name}
+                                            gp={gp}
+                                            maxCount={maxCount}
+                                            delay={index * 50}
+                                            index={index}
+                                        />
+                                    ));
+                                })()}
                             </div>
                         )}
                     </div>
