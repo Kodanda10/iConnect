@@ -1131,8 +1131,8 @@ export const StaffPortal: React.FC = () => {
                                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                              </h2>
                              <div className="flex gap-1 bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
-                                <button onClick={prevMonth} className="p-1.5 hover:bg-gray-50 rounded-md transition active:scale-90"><ChevronLeft className="w-4 h-4 text-gray-600" /></button>
-                                <button onClick={nextMonth} className="p-1.5 hover:bg-gray-50 rounded-md transition active:scale-90"><ChevronRight className="w-4 h-4 text-gray-600" /></button>
+                                <button onClick={prevMonth} className="p-1.5 hover:bg-gray-50 rounded-md transition active:scale-90" aria-label="Previous month"><ChevronLeft className="w-4 h-4 text-gray-600" /></button>
+                                <button onClick={nextMonth} className="p-1.5 hover:bg-gray-50 rounded-md transition active:scale-90" aria-label="Next month"><ChevronRight className="w-4 h-4 text-gray-600" /></button>
                             </div>
                          </div>
                          <button 
@@ -1509,7 +1509,7 @@ export const StaffPortal: React.FC = () => {
                             </h2>
                             <p className="text-gray-400 text-xs mt-1">Step {wizardStep} of 3</p>
                         </div>
-                        <button onClick={() => setCampaignWizardOpen(false)} className="hover:bg-white/20 p-1.5 rounded-full transition">
+                        <button onClick={() => setCampaignWizardOpen(false)} className="hover:bg-white/20 p-1.5 rounded-full transition" aria-label="Close campaign wizard">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
