@@ -14,7 +14,7 @@ interface MeetingTickerData {
  * Creates a new meeting ticker in Firestore.
  * Supports VIDEO_MEET and CONFERENCE_CALL types.
  */
-export declare const createMeetingTicker: import("firebase-functions/v2/https").CallableFunction<MeetingTickerData, Promise<{
+export declare const createMeetingTicker: import("firebase-functions/https").CallableFunction<MeetingTickerData, Promise<{
     success: boolean;
     message: string;
 }>, unknown>;
@@ -22,7 +22,7 @@ export declare const createMeetingTicker: import("firebase-functions/v2/https").
  * Mocks the creation of a Conference Bridge.
  * Returns a random Dial-In Number and Access Code.
  */
-export declare const createConferenceBridge: import("firebase-functions/v2/https").CallableFunction<unknown, Promise<{
+export declare const createConferenceBridge: import("firebase-functions/https").CallableFunction<unknown, Promise<{
     success: boolean;
     data: {
         dialInNumber: string;

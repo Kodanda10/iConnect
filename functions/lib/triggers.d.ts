@@ -8,7 +8,7 @@ export declare function handleMeetingCreated(meetingData: any): Promise<void>;
 /**
  * Firestore Trigger: Run when a new document is added to 'scheduled_meetings'
  */
-export declare const onMeetingCreated: import("firebase-functions/core").CloudFunction<import("firebase-functions/v2/firestore").FirestoreEvent<import("firebase-functions/v2/firestore").QueryDocumentSnapshot | undefined, {
+export declare const onMeetingCreated: import("firebase-functions/core").CloudFunction<import("firebase-functions/firestore").FirestoreEvent<import("firebase-functions/firestore").QueryDocumentSnapshot | undefined, {
     meetingId: string;
 }>>;
 /**
@@ -17,6 +17,6 @@ export declare const onMeetingCreated: import("firebase-functions/core").CloudFu
  * Ensures `dob_month`, `dob_day`, `anniversary_month`, `anniversary_day` are
  * present and correct regardless of which client wrote the document.
  */
-export declare const onConstituentWritten: import("firebase-functions/core").CloudFunction<import("firebase-functions/v2/firestore").FirestoreEvent<import("firebase-functions/v2/firestore").Change<import("firebase-functions/v2/firestore").DocumentSnapshot> | undefined, {
+export declare const onConstituentWritten: import("firebase-functions/core").CloudFunction<import("firebase-functions/firestore").FirestoreEvent<import("firebase-functions/firestore").Change<import("firebase-functions/firestore").DocumentSnapshot> | undefined, {
     constituentId: string;
 }>>;

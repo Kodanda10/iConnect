@@ -46,11 +46,11 @@ service cloud.firestore {
                     );
       
       // 2. Update: Users can update own data but CANNOT change their role
-      //    Only LEADER can change roles or update other users
+      //    Only STAFF can change roles or update other users
       allow update: if (isSignedIn() && request.auth.uid == userId && request.resource.data.role == resource.data.role)
-                    || isLeader();
+                    || isStaff();
                     
-      allow delete: if isLeader();
+      allow delete: if isStaff();
     }
     
     // Settings collection - singleton document
