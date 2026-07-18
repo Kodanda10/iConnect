@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Upload, Activity, CheckCircle, Database, Calendar as CalendarIcon, ChevronLeft, ChevronRight, UserPlus, Gift, Heart, Plus, Save, FileText, Search, Users, Smartphone, Loader2, Send, LayoutTemplate, MapPin, Briefcase, Clock, Check, Sparkles, ArrowRight, Phone, MessageSquare, X, Languages, ListChecks, Bell, ToggleLeft, ToggleRight, Image as ImageIcon, PartyPopper } from 'lucide-react';
 import { DB } from '../services/db';
 import { Constituent, EnrichedTask, Task, TaskStatus, TaskType, Festival } from '../types';
@@ -496,24 +496,50 @@ export const StaffPortal: React.FC = () => {
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-  const getEventsForDay = (day: number) => {
-      return constituents.filter(c => {
-          const dob = new Date(c.dob);
-          const ann = c.anniversary ? new Date(c.anniversary) : null;
-          
-          const isBirthday = dob.getDate() === day && dob.getMonth() === currentDate.getMonth();
-          const isAnniversary = ann && ann.getDate() === day && ann.getMonth() === currentDate.getMonth();
-          
-          return isBirthday || isAnniversary;
+  const eventsByDay = useMemo(() => {
+      const map = new Map<number, Constituent[]>();
+      const currMonth = currentDate.getMonth();
+      constituents.forEach(c => {
+          if (c.dob) {
+              const parts = c.dob.split('-');
+              if (parseInt(parts[1], 10) - 1 === currMonth) {
+                  const d = parseInt(parts[2], 10);
+                  if (!map.has(d)) map.set(d, []);
+                  map.get(d)!.push(c);
+              }
+          }
+          if (c.anniversary) {
+              const parts = c.anniversary.split('-');
+              if (parseInt(parts[1], 10) - 1 === currMonth) {
+                  const d = parseInt(parts[2], 10);
+                  if (!map.has(d)) map.set(d, []);
+                  map.get(d)!.push(c);
+              }
+          }
       });
-  };
-  
-  const getFestivalsForDay = (day: number) => {
-      return festivals.filter(f => {
-          const fDate = new Date(f.date);
-          return fDate.getDate() === day && fDate.getMonth() === currentDate.getMonth() && fDate.getFullYear() === currentDate.getFullYear();
+      return map;
+  }, [constituents, currentDate]);
+
+  const festivalsByDay = useMemo(() => {
+      const map = new Map<number, Festival[]>();
+      const currMonth = currentDate.getMonth();
+      const currYear = currentDate.getFullYear();
+      festivals.forEach(f => {
+          if (f.date) {
+              const parts = f.date.split('-');
+              if (parseInt(parts[0], 10) === currYear && parseInt(parts[1], 10) - 1 === currMonth) {
+                  const d = parseInt(parts[2], 10);
+                  if (!map.has(d)) map.set(d, []);
+                  map.get(d)!.push(f);
+              }
+          }
       });
-  }
+      return map;
+  }, [festivals, currentDate]);
+
+  const getEventsForDay = (day: number) => eventsByDay.get(day) || [];
+
+  const getFestivalsForDay = (day: number) => festivalsByDay.get(day) || [];
 
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
