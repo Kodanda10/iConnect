@@ -388,7 +388,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                   <div className="bg-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-scale-in">
                       {selectedTaskIds.size}
                   </div>
-                  <button onClick={toggleSelectionMode} className="p-1 rounded-full hover:bg-white/10 ml-1 active:scale-90 transition-transform">
+                  <button aria-label="Close selection mode" onClick={toggleSelectionMode} className="p-1 rounded-full hover:bg-white/10 ml-1 active:scale-90 transition-transform">
                       <X className="w-4 h-4 text-gray-400" />
                   </button>
                   <span className="text-xs font-medium text-gray-300 ml-1">Selected</span>
@@ -398,6 +398,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
               </div>
               <div className="flex gap-2">
                   <button 
+                    aria-label="Send bulk SMS"
                     disabled={selectedTaskIds.size === 0}
                     onClick={handleBulkSMS}
                     className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white p-2.5 rounded-xl transition-transform ease-spring active:scale-90 shadow-lg shadow-blue-900/20"
@@ -405,6 +406,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                       <MessageSquare className="w-5 h-5" />
                   </button>
                   <button 
+                    aria-label="Mark selected as complete"
                     disabled={selectedTaskIds.size === 0}
                     onClick={handleBulkComplete}
                     className="bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white p-2.5 rounded-xl transition-transform ease-spring active:scale-90 shadow-lg shadow-teal-900/20"
@@ -519,7 +521,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                     <h3 className="text-lg font-bold text-gray-900">
                         {generatedMessage ? (currentAction === 'sms' ? 'Send SMS' : 'Send WhatsApp') : 'Outcome for ' + selectedTask.constituent.name + '?'}
                     </h3>
-                    <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50">
+                    <button aria-label="Close modal" onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50">
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
                 </div>
