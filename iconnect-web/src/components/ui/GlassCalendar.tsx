@@ -101,6 +101,7 @@ export default function GlassCalendar({
             <div className="flex items-center justify-between mb-4">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
+                    aria-label="Previous month"
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                     <ChevronLeft className="w-4 h-4" />
@@ -177,6 +178,7 @@ export default function GlassCalendar({
 
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
+                    aria-label="Next month"
                     className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
                 >
                     <ChevronRight className="w-4 h-4" />
