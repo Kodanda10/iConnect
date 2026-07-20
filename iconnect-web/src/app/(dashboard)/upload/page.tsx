@@ -1036,12 +1036,14 @@ export default function UploadPage() {
                     <div className="flex gap-2">
                         <button
                             disabled
+                            aria-label="Previous page"
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             disabled
+                            aria-label="Next page"
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
                         >
                             <ChevronRight className="w-4 h-4" />
