@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Upload, Activity, CheckCircle, Database, Calendar as CalendarIcon, ChevronLeft, ChevronRight, UserPlus, Gift, Heart, Plus, Save, FileText, Search, Users, Smartphone, Loader2, Send, LayoutTemplate, MapPin, Briefcase, Clock, Check, Sparkles, ArrowRight, Phone, MessageSquare, X, Languages, ListChecks, Bell, ToggleLeft, ToggleRight, Image as ImageIcon, PartyPopper } from 'lucide-react';
 import { DB } from '../services/db';
 import { Constituent, EnrichedTask, Task, TaskStatus, TaskType, Festival } from '../types';
@@ -475,18 +475,18 @@ export const StaffPortal: React.FC = () => {
 
 
   // --- Search & Pagination Logic ---
-  const filteredConstituents = constituents.filter(c => 
+  const filteredConstituents = useMemo(() => constituents.filter(c =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       c.mobile_number.includes(searchTerm) ||
       c.ward_number.includes(searchTerm) ||
       (c.block && c.block.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ), [constituents, searchTerm]);
   
   const totalPages = Math.ceil(filteredConstituents.length / itemsPerPage);
-  const currentData = filteredConstituents.slice(
+  const currentData = useMemo(() => filteredConstituents.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
-  );
+  ), [filteredConstituents, currentPage]);
 
   const goToPage = (p: number) => {
       if (p >= 1 && p <= totalPages) setCurrentPage(p);
@@ -557,18 +557,18 @@ export const StaffPortal: React.FC = () => {
   
   const rawSidebarTasks = getSidebarTasks();
 
-  const filteredSidebarTasks = rawSidebarTasks.filter(t => {
+  const filteredSidebarTasks = useMemo(() => rawSidebarTasks.filter(t => {
       if (t.status !== filterStatus) return false;
       if (filterType !== 'ALL' && t.type !== filterType) return false;
       return true;
-  });
+  }), [rawSidebarTasks, filterStatus, filterType]);
 
-  const sidebarCounts = {
+  const sidebarCounts = useMemo(() => ({
       pending: rawSidebarTasks.filter(t => t.status === 'PENDING').length,
       history: rawSidebarTasks.filter(t => t.status === 'COMPLETED').length,
       birthdays: rawSidebarTasks.filter(t => t.status === filterStatus && t.type === 'BIRTHDAY').length,
       anniversaries: rawSidebarTasks.filter(t => t.status === filterStatus && t.type === 'ANNIVERSARY').length
-  };
+  }), [rawSidebarTasks, filterStatus]);
 
   // Render Table Row Skeleton
   const renderTableSkeleton = () => (

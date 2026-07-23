@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Phone, Check, MapPin, X, User, Gift, Heart, MessageSquare, Filter, ListChecks, Calendar, Languages, Clock } from 'lucide-react';
 import { DB } from '../services/db';
 import { GreetingService } from '../services/greetings';
@@ -63,7 +63,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
   };
 
   // --- Derived Data ---
-  const filteredTasks = allTasks.filter(t => {
+  const filteredTasks = useMemo(() => allTasks.filter(t => {
       if (t.status !== filterStatus) return false;
       if (filterType !== 'ALL' && t.type !== filterType) return false;
       
@@ -76,15 +76,15 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
       }
 
       return true;
-  });
+  }), [allTasks, filterStatus, filterType, historyMode, historyDate]);
 
-  const counts = {
+  const counts = useMemo(() => ({
       pending: allTasks.filter(t => t.status === 'PENDING').length,
       history: allTasks.filter(t => t.status === 'COMPLETED').length,
       birthdays: allTasks.filter(t => t.status === filterStatus && t.type === 'BIRTHDAY').length,
       anniversaries: allTasks.filter(t => t.status === filterStatus && t.type === 'ANNIVERSARY').length,
       allTypes: allTasks.filter(t => t.status === filterStatus).length
-  };
+  }), [allTasks, filterStatus]);
 
   // --- Selection Logic ---
   const toggleSelectionMode = () => {
