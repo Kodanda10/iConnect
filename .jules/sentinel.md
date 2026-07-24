@@ -1,0 +1,4 @@
+## 2024-07-24 - Hardcoded Firebase API Keys in Seed Scripts
+**Vulnerability:** Found hardcoded Firebase API keys and project configuration strings directly embedded within multiple database seeding scripts (`seed-constituents.ts`, `seed-tasks.ts`, and `seed-december.ts`) in the `iconnect-web` workspace.
+**Learning:** Although these are utility scripts intended for testing and population, hardcoding production or even staging credentials directly into source control is a severe risk (CWE-798: Use of Hard-coded Credentials). These credentials can easily be leaked if the repository becomes public or is inadvertently shared.
+**Prevention:** All configuration variables, especially API keys and secrets, must be injected via environment variables (`process.env`) using tools like `dotenv`. Seed scripts must dynamically read these values from a `.env.local` or environment-specific configuration file that is strictly excluded from version control via `.gitignore`.
