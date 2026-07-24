@@ -497,21 +497,26 @@ export const StaffPortal: React.FC = () => {
   const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
   const getEventsForDay = (day: number) => {
+      const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(day).padStart(2, '0');
+      const searchStr = `-${currentMonthStr}-${dayStr}`;
+
       return constituents.filter(c => {
-          const dob = new Date(c.dob);
-          const ann = c.anniversary ? new Date(c.anniversary) : null;
-          
-          const isBirthday = dob.getDate() === day && dob.getMonth() === currentDate.getMonth();
-          const isAnniversary = ann && ann.getDate() === day && ann.getMonth() === currentDate.getMonth();
+          const isBirthday = c.dob.endsWith(searchStr);
+          const isAnniversary = c.anniversary ? c.anniversary.endsWith(searchStr) : false;
           
           return isBirthday || isAnniversary;
       });
   };
   
   const getFestivalsForDay = (day: number) => {
+      const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(day).padStart(2, '0');
+      const currentYearStr = String(currentDate.getFullYear());
+      const searchStr = `${currentYearStr}-${currentMonthStr}-${dayStr}`;
+
       return festivals.filter(f => {
-          const fDate = new Date(f.date);
-          return fDate.getDate() === day && fDate.getMonth() === currentDate.getMonth() && fDate.getFullYear() === currentDate.getFullYear();
+          return f.date === searchStr;
       });
   }
 
@@ -1197,7 +1202,8 @@ export const StaffPortal: React.FC = () => {
                                                 </span>
                                             )}
                                             {events.slice(0, 5).map((e, idx) => {
-                                                 const isBday = new Date(e.dob).getDate() === day;
+                                                 const dayStr = String(day).padStart(2, '0');
+                                                 const isBday = e.dob.endsWith(`-${dayStr}`);
                                                  return (
                                                      <div 
                                                         key={idx} 
