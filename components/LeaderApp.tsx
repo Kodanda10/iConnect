@@ -519,7 +519,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                     <h3 className="text-lg font-bold text-gray-900">
                         {generatedMessage ? (currentAction === 'sms' ? 'Send SMS' : 'Send WhatsApp') : 'Outcome for ' + selectedTask.constituent.name + '?'}
                     </h3>
-                    <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50">
+                    <button aria-label="Close modal" onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50">
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
                 </div>
