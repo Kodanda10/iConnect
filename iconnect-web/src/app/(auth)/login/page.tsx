@@ -112,17 +112,19 @@ export default function LoginPage() {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
                                 Email Address
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                    id="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="admin@admin.com"
                                     autoComplete="email"
+                                    required
                                     className="glass-input-dark"
                                 />
                             </div>
@@ -130,17 +132,19 @@ export default function LoginPage() {
 
                         {/* Password Field */}
                         <div>
-                            <label className="block text-sm font-medium text-white/80 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
                                 Password
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                                 <input
+                                    id="password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     autoComplete="current-password"
+                                    required
                                     className="glass-input-dark"
                                 />
                             </div>
