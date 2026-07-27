@@ -4,7 +4,7 @@ import { Constituent, TaskType } from "../types";
 
 const getClient = () => {
     // NOTE: In a production app, the key would be in process.env.API_KEY
-    const apiKey = process.env.API_KEY; 
+    const apiKey = process.env.API_KEY;
     if (!apiKey) return null;
     return new GoogleGenAI({ apiKey });
 }
@@ -17,18 +17,18 @@ export const generateWish = async (constituent: Constituent, type: TaskType): Pr
     }
 
     const occasion = type === 'BIRTHDAY' ? 'Birthday' : 'Wedding Anniversary';
-    
+
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Write a short, warm, and professional ${occasion} wish message for a constituent named "${constituent.name}". 
-            Context: I am their political representative/leader. 
+            contents: `Write a short, warm, and professional ${occasion} wish message for a constituent named "${constituent.name}".
+            Context: I am their political representative/leader.
             They live in "${constituent.address}".
-            Keep it under 30 words. 
+            Keep it under 30 words.
             Do not use hashtags.
             Tone: Friendly, Respectful, Connecting.`
         });
-        
+
         return response.text.trim();
     } catch (error) {
         console.error("Gemini Error:", error);
@@ -38,7 +38,7 @@ export const generateWish = async (constituent: Constituent, type: TaskType): Pr
 
 export const getCampaignVariations = async (eventName: string, leaderName: string, language: 'ODIA' | 'ENGLISH' | 'HINDI'): Promise<string[]> => {
     const ai = getClient();
-    
+
     // Fallback if no API key
     if (!ai) {
         if (language === 'ODIA') return [`${eventName} ଉପଲକ୍ଷେ ଆପଣଙ୍କୁ ଓ ଆପଣଙ୍କ ପରିବାରକୁ ହାର୍ଦ୍ଦିକ ଶୁଭେଚ୍ଛା। - ${leaderName}`];
@@ -63,7 +63,7 @@ export const getCampaignVariations = async (eventName: string, leaderName: strin
                 }
             }
         });
-        
+
         const json = JSON.parse(response.text || '[]');
         return json;
     } catch (error) {

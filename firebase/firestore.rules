@@ -59,7 +59,7 @@ service cloud.firestore {
     // SECURITY UPDATE: Restricted read access of non-public settings to STAFF only.
     match /settings/{docId} {
       allow read: if docId == 'app_config' || isStaffOrLeader();
-      allow write: if isStaffOrLeader(); // Grant full access to both for now
+      allow write: if isStaff();
     }
     
     // Constituents collection
@@ -87,7 +87,7 @@ service cloud.firestore {
     // Active Tickers collection (Public Read for App users, Write for Staff/Leader)
     match /active_tickers/{docId} {
       allow read: if isSignedIn();
-      allow write: if isStaffOrLeader();
+      allow write: if isStaff() || (isLeader() && request.auth.uid == docId);
     }
 
     // Action Logs collection - Leaders log their actions, Staff can read/modify
