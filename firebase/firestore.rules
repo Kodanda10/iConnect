@@ -59,7 +59,7 @@ service cloud.firestore {
     // SECURITY UPDATE: Restricted read access of non-public settings to STAFF only.
     match /settings/{docId} {
       allow read: if docId == 'app_config' || isStaffOrLeader();
-      allow write: if isStaffOrLeader(); // Grant full access to both for now
+      allow write: if isStaff();
     }
     
     // Constituents collection
