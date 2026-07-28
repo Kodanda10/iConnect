@@ -496,24 +496,48 @@ export const StaffPortal: React.FC = () => {
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-  const getEventsForDay = (day: number) => {
-      return constituents.filter(c => {
+  const eventsByDay = React.useMemo(() => {
+      const month = currentDate.getMonth();
+      const map = new Map<number, Constituent[]>();
+      constituents.forEach(c => {
           const dob = new Date(c.dob);
           const ann = c.anniversary ? new Date(c.anniversary) : null;
-          
-          const isBirthday = dob.getDate() === day && dob.getMonth() === currentDate.getMonth();
-          const isAnniversary = ann && ann.getDate() === day && ann.getMonth() === currentDate.getMonth();
-          
-          return isBirthday || isAnniversary;
+          let addedToDay = -1;
+          if (dob.getMonth() === month) {
+              const d = dob.getDate();
+              if (!map.has(d)) map.set(d, []);
+              map.get(d)!.push(c);
+              addedToDay = d;
+          }
+          if (ann && ann.getMonth() === month) {
+              const d = ann.getDate();
+              if (addedToDay !== d) {
+                  if (!map.has(d)) map.set(d, []);
+                  map.get(d)!.push(c);
+              }
+          }
       });
-  };
-  
-  const getFestivalsForDay = (day: number) => {
-      return festivals.filter(f => {
+      return map;
+  }, [constituents, currentDate]);
+
+  const getEventsForDay = (day: number) => eventsByDay.get(day) || [];
+
+  const festivalsByDay = React.useMemo(() => {
+      const month = currentDate.getMonth();
+      const year = currentDate.getFullYear();
+      const map = new Map<number, Festival[]>();
+      festivals.forEach(f => {
           const fDate = new Date(f.date);
-          return fDate.getDate() === day && fDate.getMonth() === currentDate.getMonth() && fDate.getFullYear() === currentDate.getFullYear();
+          if (fDate.getMonth() === month && fDate.getFullYear() === year) {
+              const d = fDate.getDate();
+              if (!map.has(d)) map.set(d, []);
+              map.get(d)!.push(f);
+          }
       });
-  }
+      return map;
+  }, [festivals, currentDate]);
+
+  const getFestivalsForDay = (day: number) => festivalsByDay.get(day) || [];
 
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
