@@ -1,5 +1,6 @@
 import { onCall, CallableRequest, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import * as crypto from "crypto";
 
 // Ensure Admin SDK is initialized
 if (admin.apps.length === 0) {
@@ -150,8 +151,8 @@ export const createConferenceBridge = onCall(
         await new Promise(resolve => setTimeout(resolve, 800));
 
         // Generate Mock Data
-        const mockDialIn = "+91" + Math.floor(6000000000 + Math.random() * 3000000000).toString();
-        const mockAccessCode = Math.floor(1000 + Math.random() * 9000).toString();
+        const mockDialIn = "+91" + crypto.randomInt(6000000000, 9000000000).toString();
+        const mockAccessCode = crypto.randomInt(1000, 10000).toString();
 
         return {
             success: true,
