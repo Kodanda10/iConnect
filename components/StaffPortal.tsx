@@ -497,21 +497,34 @@ export const StaffPortal: React.FC = () => {
   const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
   const getEventsForDay = (day: number) => {
+      const currentMonth = currentDate.getMonth();
       return constituents.filter(c => {
-          const dob = new Date(c.dob);
-          const ann = c.anniversary ? new Date(c.anniversary) : null;
-          
-          const isBirthday = dob.getDate() === day && dob.getMonth() === currentDate.getMonth();
-          const isAnniversary = ann && ann.getDate() === day && ann.getMonth() === currentDate.getMonth();
+          const dobParts = c.dob.split('-');
+          const dobDay = parseInt(dobParts[2], 10);
+          const dobMonth = parseInt(dobParts[1], 10) - 1;
+          const isBirthday = dobDay === day && dobMonth === currentMonth;
+
+          let isAnniversary = false;
+          if (c.anniversary) {
+              const annParts = c.anniversary.split('-');
+              const annDay = parseInt(annParts[2], 10);
+              const annMonth = parseInt(annParts[1], 10) - 1;
+              isAnniversary = annDay === day && annMonth === currentMonth;
+          }
           
           return isBirthday || isAnniversary;
       });
   };
   
   const getFestivalsForDay = (day: number) => {
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
       return festivals.filter(f => {
-          const fDate = new Date(f.date);
-          return fDate.getDate() === day && fDate.getMonth() === currentDate.getMonth() && fDate.getFullYear() === currentDate.getFullYear();
+          const fParts = f.date.split('-');
+          const fDay = parseInt(fParts[2], 10);
+          const fMonth = parseInt(fParts[1], 10) - 1;
+          const fYear = parseInt(fParts[0], 10);
+          return fDay === day && fMonth === currentMonth && fYear === currentYear;
       });
   }
 
@@ -590,17 +603,29 @@ export const StaffPortal: React.FC = () => {
   // --- LIVE PREVIEW DATA HELPER ---
   const getPreviewItems = () => {
     const today = new Date();
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth();
     
     // 1. Try to find actual events for today
     let items = constituents.filter(c => {
-         const dob = new Date(c.dob);
-         const isBday = dob.getDate() === today.getDate() && dob.getMonth() === today.getMonth();
-         const ann = c.anniversary ? new Date(c.anniversary) : null;
-         const isAnn = ann && ann.getDate() === today.getDate() && ann.getMonth() === today.getMonth();
+         const dobParts = c.dob.split('-');
+         const dobDay = parseInt(dobParts[2], 10);
+         const dobMonth = parseInt(dobParts[1], 10) - 1;
+         const isBday = dobDay === todayDay && dobMonth === todayMonth;
+
+         let isAnn = false;
+         if (c.anniversary) {
+             const annParts = c.anniversary.split('-');
+             const annDay = parseInt(annParts[2], 10);
+             const annMonth = parseInt(annParts[1], 10) - 1;
+             isAnn = annDay === todayDay && annMonth === todayMonth;
+         }
          return isBday || isAnn;
     }).map(c => {
-         const dob = new Date(c.dob);
-         const isBday = dob.getDate() === today.getDate() && dob.getMonth() === today.getMonth();
+         const dobParts = c.dob.split('-');
+         const dobDay = parseInt(dobParts[2], 10);
+         const dobMonth = parseInt(dobParts[1], 10) - 1;
+         const isBday = dobDay === todayDay && dobMonth === todayMonth;
          return { ...c, type: isBday ? 'BIRTHDAY' : 'ANNIVERSARY' };
     });
 
@@ -1197,7 +1222,9 @@ export const StaffPortal: React.FC = () => {
                                                 </span>
                                             )}
                                             {events.slice(0, 5).map((e, idx) => {
-                                                 const isBday = new Date(e.dob).getDate() === day;
+                                                 const dobParts = e.dob.split('-');
+                                                 const dobDay = parseInt(dobParts[2], 10);
+                                                 const isBday = dobDay === day;
                                                  return (
                                                      <div 
                                                         key={idx} 
@@ -1225,7 +1252,9 @@ export const StaffPortal: React.FC = () => {
                                             {events.length > 0 ? (
                                                 <div className="space-y-1">
                                                     {events.slice(0, 3).map((e, idx) => {
-                                                        const isBday = new Date(e.dob).getDate() === day;
+                                                        const dobParts = e.dob.split('-');
+                                                        const dobDay = parseInt(dobParts[2], 10);
+                                                        const isBday = dobDay === day;
                                                         return (
                                                             <div key={idx} className="flex items-center gap-1.5 text-[10px] font-medium text-gray-700 truncate">
                                                                 <div className={`w-1.5 h-1.5 rounded-full ${isBday ? 'bg-pink-400' : 'bg-purple-400'}`}></div>
