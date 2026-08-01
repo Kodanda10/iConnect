@@ -388,7 +388,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                   <div className="bg-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm animate-scale-in">
                       {selectedTaskIds.size}
                   </div>
-                  <button onClick={toggleSelectionMode} className="p-1 rounded-full hover:bg-white/10 ml-1 active:scale-90 transition-transform">
+                  <button onClick={toggleSelectionMode} className="p-1 rounded-full hover:bg-white/10 ml-1 active:scale-90 transition-transform" aria-label="Close selection mode">
                       <X className="w-4 h-4 text-gray-400" />
                   </button>
                   <span className="text-xs font-medium text-gray-300 ml-1">Selected</span>
@@ -519,7 +519,7 @@ export const LeaderApp: React.FC<LeaderAppProps> = ({ isMirrorMode = false }) =>
                     <h3 className="text-lg font-bold text-gray-900">
                         {generatedMessage ? (currentAction === 'sms' ? 'Send SMS' : 'Send WhatsApp') : 'Outcome for ' + selectedTask.constituent.name + '?'}
                     </h3>
-                    <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50">
+                    <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-transform active:scale-90 bg-gray-50" aria-label="Close modal">
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
                 </div>
