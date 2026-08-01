@@ -39,6 +39,11 @@ export default function DataMetricsCard() {
         }
     };
 
+    // Calculate max count for GP bars based on hovered block
+    const maxGpCount = hoveredBlock && gpData[hoveredBlock]
+        ? Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)
+        : 1;
+
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {
         if (gpData[blockName] || gpLoading[blockName]) return;
@@ -128,7 +133,7 @@ export default function DataMetricsCard() {
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
