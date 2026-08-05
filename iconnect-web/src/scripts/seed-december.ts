@@ -8,12 +8,9 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import * as dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
     authDomain: 'iconnect-crm.firebaseapp.com',
     projectId: 'iconnect-crm',
     storageBucket: 'iconnect-crm.firebasestorage.app',

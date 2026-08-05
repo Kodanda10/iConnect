@@ -8,9 +8,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 
 // Firebase config
-import * as dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+// Note: dotenv and path not needed when using hardcoded config
 
 // Constituent type for type-safe access
 interface ConstituentDoc {
@@ -20,7 +18,7 @@ interface ConstituentDoc {
 }
 
 const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
     authDomain: 'iconnect-crm.firebaseapp.com',
     projectId: 'iconnect-crm',
     storageBucket: 'iconnect-crm.firebasestorage.app',
