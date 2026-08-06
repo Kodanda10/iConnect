@@ -106,8 +106,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {/* Right Section */}
                         <div className="flex items-center gap-2">
                             {/* Notification Bell */}
-                            <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
-                                <Bell className="w-5 h-5 text-white/70" />
+                            <button
+                                className="relative p-2 rounded-full hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                                aria-label="Notifications"
+                            >
+                                <Bell className="w-5 h-5 text-white/70" aria-hidden="true" />
                                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-[rgba(30,45,40,0.8)]" />
                             </button>
 
@@ -123,10 +126,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 </div>
                                 <button
                                     onClick={() => signOut()}
-                                    className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-red-400 transition-colors"
+                                    className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-red-400 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                                     title="Sign Out"
+                                    aria-label="Sign Out"
                                 >
-                                    <LogOut className="w-4 h-4" />
+                                    <LogOut className="w-4 h-4" aria-hidden="true" />
                                 </button>
                             </div>
                         </div>
