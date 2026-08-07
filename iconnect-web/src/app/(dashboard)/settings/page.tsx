@@ -349,6 +349,7 @@ export default function SettingsPage() {
                                     <p className="text-[10px] text-white/60 mt-1">Evening before event</p>
                                 </div>
                                 <button
+                                    aria-label="Toggle Heads Up Alert"
                                     onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, headsUp: !settings.alertSettings.headsUp } })}
                                     className="scale-90"
                                 >
@@ -379,6 +380,7 @@ export default function SettingsPage() {
                                     <p className="text-[10px] text-white/60 mt-1">Morning of event</p>
                                 </div>
                                 <button
+                                    aria-label="Toggle Action Reminder"
                                     onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, action: !settings.alertSettings.action } })}
                                     className="scale-90"
                                 >
