@@ -70,20 +70,34 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
+    const viewYear = viewDate.getFullYear();
+    const viewMonth = viewDate.getMonth();
+    const viewMonthStr = String(viewMonth + 1).padStart(2, '0');
+
+    // Precalculate for isToday
+    const today = new Date();
+    const todayDay = today.getDate();
+    const isTodayMonthYear = viewMonth === today.getMonth() && viewYear === today.getFullYear();
+
     const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+        return day === todayDay && isTodayMonthYear;
     };
+
+    // Precalculate for isSelected
+    const selectedDay = selectedDate ? selectedDate.getDate() : null;
+    const isSelectedMonthYear = selectedDate ? (viewMonth === selectedDate.getMonth() && viewYear === selectedDate.getFullYear()) : false;
 
     const isSelected = (day: number) => {
-        if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
+        return day === selectedDay && isSelectedMonthYear;
     };
 
+    // Optimize formatDateKey - manual formatting avoids expensive new Date() and toISOString()
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        return `${viewYear}-${viewMonthStr}-${String(day).padStart(2, '0')}`;
     };
+
+    // Optimize eventDates lookup to O(1)
+    const eventDatesSet = new Set(eventDates);
 
     // Close dropdowns when clicking outside
     const handleCalendarClick = (e: React.MouseEvent) => {
@@ -200,16 +214,19 @@ export default function GlassCalendar({
 
                 {Array.from({ length: daysInMonth }, (_, i) => {
                     const day = i + 1;
-                    const date = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
                     const isSelectedDay = isSelected(day);
                     const isTodayDay = isToday(day);
                     const dateKey = formatDateKey(day);
-                    const hasEvent = eventDates.includes(dateKey);
+                    const hasEvent = eventDatesSet.has(dateKey);
 
                     return (
                         <button
                             key={day}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onSelect(new Date(viewYear, viewMonth, day));
+                            }}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
                                 border-r border-b border-white/5
