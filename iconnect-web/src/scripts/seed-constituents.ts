@@ -12,15 +12,17 @@ import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore'
 import * as dotenv from 'dotenv';
 import path from 'path';
 
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
-    authDomain: 'iconnect-crm.firebaseapp.com',
-    projectId: 'iconnect-crm',
-    storageBucket: 'iconnect-crm.firebasestorage.app',
-    messagingSenderId: '887016822564',
-    appId: '1:887016822564:web:dd5f49de3ef0138fe1c5b1',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
-console.log('Using Hardcoded Config for Project:', firebaseConfig.projectId);
+console.log('Using Environment Config for Project:', firebaseConfig.projectId);
 
 // Sample data
 const firstNames = ['Rajesh', 'Priya', 'Amit', 'Sunita', 'Vikram', 'Anjali', 'Suresh', 'Kavita', 'Ravi', 'Meena', 'Anil', 'Pooja', 'Deepak', 'Nisha', 'Manoj', 'Rekha', 'Sanjay', 'Geeta', 'Ashok', 'Shobha'];
