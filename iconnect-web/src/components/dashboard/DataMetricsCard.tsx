@@ -241,9 +241,13 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
 
     return (
         <div
+            role="button"
+            tabIndex={0}
+            aria-expanded={isHovered}
+            aria-controls={isHovered ? 'gp-details-panel' : undefined}
             data-testid={`block-${block.name}`}
             className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
+                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
                 ${isHovered
                     ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
                     : 'bg-white/5 hover:bg-white/10'
@@ -251,6 +255,18 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             `}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onFocus={onMouseEnter}
+            onBlur={onMouseLeave}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (isHovered) {
+                        onMouseLeave();
+                    } else {
+                        onMouseEnter();
+                    }
+                }
+            }}
         >
             {/* Progress bar background */}
             <div
