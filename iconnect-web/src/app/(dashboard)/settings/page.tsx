@@ -350,7 +350,10 @@ export default function SettingsPage() {
                                 </div>
                                 <button
                                     onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, headsUp: !settings.alertSettings.headsUp } })}
-                                    className="scale-90"
+                                    className="scale-90 focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-full"
+                                    role="switch"
+                                    aria-checked={settings.alertSettings.headsUp}
+                                    aria-label="Toggle Heads Up Alert"
                                 >
                                     {settings.alertSettings.headsUp ? <ToggleRight className="w-10 h-10 text-emerald-400" /> : <ToggleLeft className="w-10 h-10 text-white/40" />}
                                 </button>
@@ -380,7 +383,10 @@ export default function SettingsPage() {
                                 </div>
                                 <button
                                     onClick={() => setSettings({ ...settings, alertSettings: { ...settings.alertSettings, action: !settings.alertSettings.action } })}
-                                    className="scale-90"
+                                    className="scale-90 focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-full"
+                                    role="switch"
+                                    aria-checked={settings.alertSettings.action}
+                                    aria-label="Toggle Action Reminder"
                                 >
                                     {settings.alertSettings.action ? <ToggleRight className="w-10 h-10 text-emerald-400" /> : <ToggleLeft className="w-10 h-10 text-white/40" />}
                                 </button>
