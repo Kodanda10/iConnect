@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -22,22 +22,21 @@ export default function DataMetricsCard() {
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
+        const loadMetrics = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await fetchConstituentMetrics();
+                setMetrics(data);
+            } catch (err) {
+                setError('Failed to load metrics');
+                console.error('Error fetching metrics:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
         loadMetrics();
     }, []);
-
-    const loadMetrics = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const data = await fetchConstituentMetrics();
-            setMetrics(data);
-        } catch (err) {
-            setError('Failed to load metrics');
-            console.error('Error fetching metrics:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {
@@ -58,6 +57,9 @@ export default function DataMetricsCard() {
         setHoveredBlock(blockName);
         loadGPData(blockName);
     };
+
+    const currentGPs = useMemo(() => hoveredBlock ? gpData[hoveredBlock] || [] : [], [hoveredBlock, gpData]);
+    const maxCount = useMemo(() => Math.max(...currentGPs.map(g => g.count), 1), [currentGPs]);
 
     // Loading state
     if (loading) {
@@ -124,11 +126,11 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGPs.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxCount}
                                         delay={index * 50}
                                         index={index}
                                     />
