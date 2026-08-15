@@ -198,19 +198,31 @@ export const DB = {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const isMatch = (dateStr: string | undefined, targetDate: Date) => {
-      if (!dateStr) return false;
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth();
+    const tomorrowDay = tomorrow.getDate();
+    const tomorrowMonth = tomorrow.getMonth();
+
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const createdAtStr = today.toISOString();
+
+    const getMatchDate = (dateStr: string | undefined): string | null => {
+      if (!dateStr) return null;
       const d = new Date(dateStr);
-      return d.getDate() === targetDate.getDate() && d.getMonth() === targetDate.getMonth();
+      const day = d.getDate();
+      const month = d.getMonth();
+
+      if (day === todayDay && month === todayMonth) return todayStr;
+      if (day === tomorrowDay && month === tomorrowMonth) return tomorrowStr;
+      return null;
     };
 
     let newCount = 0;
 
     constituents.forEach(c => {
       // 1. Check Birthday
-      let bdayDueDate: string | null = null;
-      if (isMatch(c.dob, today)) bdayDueDate = today.toISOString().split('T')[0];
-      else if (isMatch(c.dob, tomorrow)) bdayDueDate = tomorrow.toISOString().split('T')[0];
+      const bdayDueDate = getMatchDate(c.dob);
 
       if (bdayDueDate) {
           const exists = tasks.some(t => t.constituent_id === c.id && t.type === 'BIRTHDAY' && t.due_date === bdayDueDate);
@@ -221,18 +233,14 @@ export const DB = {
                   type: 'BIRTHDAY',
                   due_date: bdayDueDate,
                   status: 'PENDING',
-                  created_at: new Date().toISOString()
+                  created_at: createdAtStr
               });
               newCount++;
           }
       }
 
       // 2. Check Anniversary
-      let annDueDate: string | null = null;
-      if (c.anniversary) {
-          if (isMatch(c.anniversary, today)) annDueDate = today.toISOString().split('T')[0];
-          else if (isMatch(c.anniversary, tomorrow)) annDueDate = tomorrow.toISOString().split('T')[0];
-      }
+      const annDueDate = c.anniversary ? getMatchDate(c.anniversary) : null;
 
       if (annDueDate) {
           const exists = tasks.some(t => t.constituent_id === c.id && t.type === 'ANNIVERSARY' && t.due_date === annDueDate);
@@ -243,7 +251,7 @@ export const DB = {
                   type: 'ANNIVERSARY',
                   due_date: annDueDate,
                   status: 'PENDING',
-                  created_at: new Date().toISOString()
+                  created_at: createdAtStr
               });
               newCount++;
           }
