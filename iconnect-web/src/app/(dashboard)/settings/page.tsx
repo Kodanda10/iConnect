@@ -108,13 +108,13 @@ export default function SettingsPage() {
                 // Import dynamically to avoid circular deps if any (though standard import is fine here, treating as service)
                 const { getConstituentsForDate } = await import('@/lib/services/constituents');
 
-                // Heads Up (Tomorrow)
-                const tmrwBdays = await getConstituentsForDate(tomorrow.getMonth() + 1, tomorrow.getDate(), 'birthday');
-                const tmrwAnns = await getConstituentsForDate(tomorrow.getMonth() + 1, tomorrow.getDate(), 'anniversary');
-
-                // Action Reminder (Today)
-                const todayBdays = await getConstituentsForDate(today.getMonth() + 1, today.getDate(), 'birthday');
-                const todayAnns = await getConstituentsForDate(today.getMonth() + 1, today.getDate(), 'anniversary');
+                // Parallelize API calls to reduce total loading time
+                const [tmrwBdays, tmrwAnns, todayBdays, todayAnns] = await Promise.all([
+                    getConstituentsForDate(tomorrow.getMonth() + 1, tomorrow.getDate(), 'birthday'),
+                    getConstituentsForDate(tomorrow.getMonth() + 1, tomorrow.getDate(), 'anniversary'),
+                    getConstituentsForDate(today.getMonth() + 1, today.getDate(), 'birthday'),
+                    getConstituentsForDate(today.getMonth() + 1, today.getDate(), 'anniversary')
+                ]);
 
                 setPreviewData({
                     headsUpBirthdays: tmrwBdays.map(c => c.gp_ulb ? `${c.name || 'Unknown'} (${c.gp_ulb})` : (c.name || 'Unknown')),
