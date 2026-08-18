@@ -21,10 +21,6 @@ export default function DataMetricsCard() {
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
-    useEffect(() => {
-        loadMetrics();
-    }, []);
-
     const loadMetrics = async () => {
         try {
             setLoading(true);
@@ -38,6 +34,10 @@ export default function DataMetricsCard() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadMetrics();
+    }, []);
 
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {
@@ -241,9 +241,12 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
 
     return (
         <div
+            role="button"
+            tabIndex={0}
+            aria-expanded={isHovered}
             data-testid={`block-${block.name}`}
             className={`
-                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group
+                p-3 rounded-xl transition-all cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500
                 ${isHovered
                     ? 'bg-emerald-500/10 ring-1 ring-emerald-500/30 translate-x-1'
                     : 'bg-white/5 hover:bg-white/10'
@@ -251,6 +254,14 @@ function BlockItem({ block, total, isHovered, onMouseEnter, onMouseLeave }: Bloc
             `}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onFocus={onMouseEnter}
+            onBlur={onMouseLeave}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onMouseEnter();
+                }
+            }}
         >
             {/* Progress bar background */}
             <div
