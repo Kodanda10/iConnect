@@ -10,7 +10,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: 'iconnect-crm.firebaseapp.com',
     projectId: 'iconnect-crm',
     storageBucket: 'iconnect-crm.firebasestorage.app',
