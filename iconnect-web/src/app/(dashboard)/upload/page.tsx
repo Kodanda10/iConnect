@@ -1037,12 +1037,14 @@ export default function UploadPage() {
                         <button
                             disabled
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
+                            aria-label="Previous page"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             disabled
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
+                            aria-label="Next page"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
