@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -19,6 +19,14 @@ export default function DataMetricsCard() {
     const [error, setError] = useState<string | null>(null);
     const [hoveredBlock, setHoveredBlock] = useState<string | null>(null);
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
+
+    // Memoize the max count to prevent O(N²) recalculations in the render loop
+    const hoveredBlockMaxGpCount = useMemo(() => {
+        if (!hoveredBlock || !gpData[hoveredBlock] || gpData[hoveredBlock].length === 0) {
+            return 1;
+        }
+        return Math.max(...gpData[hoveredBlock].map(g => g.count), 1);
+    }, [hoveredBlock, gpData]);
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
@@ -128,7 +136,7 @@ export default function DataMetricsCard() {
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={hoveredBlockMaxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
