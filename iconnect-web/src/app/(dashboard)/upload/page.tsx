@@ -60,11 +60,6 @@ export default function UploadPage() {
     const [csvValidation, setCsvValidation] = useState<CsvDataValidation | null>(null);
     const [showCsvErrors, setShowCsvErrors] = useState(false);
 
-    // Fetch constituents on mount
-    useEffect(() => {
-        fetchConstituents();
-    }, []);
-
     const fetchConstituents = async () => {
         setIsLoadingConstituents(true);
         try {
@@ -76,6 +71,11 @@ export default function UploadPage() {
             setIsLoadingConstituents(false);
         }
     };
+
+    // Fetch constituents on mount
+    useEffect(() => {
+        fetchConstituents();
+    }, []);
 
     // Seed 50 test constituents
     const handleSeedDatabase = async () => {
@@ -1037,12 +1037,14 @@ export default function UploadPage() {
                         <button
                             disabled
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
+                            aria-label="Previous page"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             disabled
                             className="p-2 rounded-lg bg-white/5 text-white/40 disabled:opacity-30"
+                            aria-label="Next page"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
