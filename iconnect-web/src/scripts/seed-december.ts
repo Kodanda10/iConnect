@@ -6,11 +6,15 @@
  * - 2024-12-12: Created for testing frontend activity display
  */
 
+import * as dotenv from 'dotenv';
+import path from 'path';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
     authDomain: 'iconnect-crm.firebaseapp.com',
     projectId: 'iconnect-crm',
     storageBucket: 'iconnect-crm.firebasestorage.app',
