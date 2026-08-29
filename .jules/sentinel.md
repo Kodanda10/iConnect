@@ -1,0 +1,4 @@
+## 2024-08-20 - Hardcoded API Keys in Seed Scripts
+**Vulnerability:** Found hardcoded Firebase API keys in multiple backend Node.js seed scripts (e.g., `seed-tasks.ts`, `seed-constituents.ts`, `seed-december.ts`). While Firebase keys in client-side code are public, having them hardcoded in backend/utility scripts triggers credential scanners and violates the principle of keeping configuration out of code.
+**Learning:** Utility scripts in non-browser environments often require manual environment variable loading (like `dotenv`). Developers may take shortcuts by hardcoding keys when `process.env` is empty, instead of correctly configuring the environment loader.
+**Prevention:** Always use `dotenv` or similar configuration managers in Node.js utility scripts to securely load environment variables, preventing automated credential scanners from flagging hardcoded secrets.
