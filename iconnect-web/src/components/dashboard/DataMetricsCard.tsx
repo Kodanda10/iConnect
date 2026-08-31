@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -21,7 +21,11 @@ export default function DataMetricsCard() {
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
-    const loadMetrics = useCallback(async () => {
+    useEffect(() => {
+        loadMetrics();
+    }, []);
+
+    const loadMetrics = async () => {
         try {
             setLoading(true);
             setError(null);
@@ -33,11 +37,7 @@ export default function DataMetricsCard() {
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    useEffect(() => {
-        loadMetrics();
-    }, [loadMetrics]);
+    };
 
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {
@@ -58,12 +58,6 @@ export default function DataMetricsCard() {
         setHoveredBlock(blockName);
         loadGPData(blockName);
     };
-
-    // Memoize the max count to prevent O(N²) recalculations
-    const maxGPCount = useMemo(() => {
-        if (!hoveredBlock || !gpData[hoveredBlock]) return 1;
-        return Math.max(...gpData[hoveredBlock].map(g => g.count), 1);
-    }, [hoveredBlock, gpData]);
 
     // Loading state
     if (loading) {
@@ -134,7 +128,7 @@ export default function DataMetricsCard() {
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={maxGPCount}
+                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
                                         delay={index * 50}
                                         index={index}
                                     />
