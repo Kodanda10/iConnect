@@ -1,0 +1,4 @@
+## 2025-02-18 - Remove Hardcoded Firebase API Keys from Seed Scripts
+**Vulnerability:** Found hardcoded Firebase API keys in multiple utility/seed scripts (`seed-constituents.ts`, `seed-tasks.ts`, `seed-december.ts`). While Firebase client config variables are generally considered public identifiers, having them hardcoded triggers automated credential scanners, which is a known pattern.
+**Learning:** Hardcoding config variables instead of reading them from the environment is an anti-pattern. While client-side, they should still be injected via environment variables (e.g., `process.env.NEXT_PUBLIC_FIREBASE_API_KEY`) to keep the repository clean of keys and pass secret scanning.
+**Prevention:** Always use `process.env` and configure dotenv correctly for Node.js utility scripts rather than hardcoding configuration values directly in the source code.
