@@ -6,9 +6,14 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Firebase config
-// Note: dotenv and path not needed when using hardcoded config
+// Note: using dotenv to prevent exposing keys to automated scanners
 
 // Constituent type for type-safe access
 interface ConstituentDoc {
@@ -18,12 +23,12 @@ interface ConstituentDoc {
 }
 
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
-    authDomain: 'iconnect-crm.firebaseapp.com',
-    projectId: 'iconnect-crm',
-    storageBucket: 'iconnect-crm.firebasestorage.app',
-    messagingSenderId: '887016822564',
-    appId: '1:887016822564:web:dd5f49de3ef0138fe1c5b1',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN as string,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID as string,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET as string,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID as string,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID as string,
 };
 
 async function seedTasks() {
