@@ -1,0 +1,63 @@
+1. replace_with_git_merge_diff
+filepath: iconnect-web/src/components/dashboard/DataMetricsCard.tsx
+```diff
+<<<<<<< SEARCH
+import React, { useState, useEffect, useCallback } from 'react';
+=======
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    const handleBlockHover = (blockName: string) => {
+        setHoveredBlock(blockName);
+        loadGPData(blockName);
+    };
+
+    // Loading state
+=======
+    const handleBlockHover = (blockName: string) => {
+        setHoveredBlock(blockName);
+        loadGPData(blockName);
+    };
+
+    // Memoize the max count to prevent O(N²) recalculations
+    const hoveredGpData = hoveredBlock ? gpData[hoveredBlock] || [] : [];
+    const maxGpCount = useMemo(() => {
+        return Math.max(...hoveredGpData.map(g => g.count), 1);
+    }, [hoveredGpData]);
+
+    // Loading state
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                    <GPProgressBar
+                                        key={gp.name}
+                                        gp={gp}
+                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        delay={index * 50}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+=======
+                            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {hoveredGpData.map((gp, index) => (
+                                    <GPProgressBar
+                                        key={gp.name}
+                                        gp={gp}
+                                        maxCount={maxGpCount}
+                                        delay={index * 50}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+>>>>>>> REPLACE
+```
+2. git diff --cached iconnect-web/src/components/dashboard/DataMetricsCard.tsx
+3. cd /app && pnpm install; cd /app/iconnect-web && pnpm install; pnpm lint; pnpm test; cd /app && cp iconnect-web/ENV_SETUP.md .env.local && pnpm run build; git restore package.json package-lock.json iconnect-web/package.json iconnect-web/package-lock.json; rm -f pnpm-lock.yaml iconnect-web/pnpm-lock.yaml .env.local
+4. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+5. submit
+branch_name: bolt-memoize-gp-max-count
+commit_message: "⚡ Bolt: Memoize maxCount in DataMetricsCard to prevent O(N²) re-renders"
+title: "⚡ Bolt: Memoize maxCount in DataMetricsCard to prevent O(N²) re-renders"
+description: "💡 What: Extracted and memoized the calculation of maxCount in DataMetricsCard.\n🎯 Why: The previous implementation recalculated Math.max inside the mapping loop, leading to O(N²) complexity during rendering.\n📊 Impact: Reduces computational overhead on each render when hovering over blocks with many GP entries.\n🔬 Measurement: Hovering over different block entries should be noticeably faster without lagging."
