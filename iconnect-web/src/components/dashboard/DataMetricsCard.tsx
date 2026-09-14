@@ -21,6 +21,12 @@ export default function DataMetricsCard() {
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
+    // Memoize the max count to prevent O(N²) recalculations in the render loop
+    const maxGpCount = React.useMemo(() => {
+        if (!hoveredBlock || !gpData[hoveredBlock]) return 1;
+        return Math.max(...gpData[hoveredBlock].map(g => g.count), 1);
+    }, [hoveredBlock, gpData]);
+
     useEffect(() => {
         loadMetrics();
     }, []);
@@ -128,7 +134,7 @@ export default function DataMetricsCard() {
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
