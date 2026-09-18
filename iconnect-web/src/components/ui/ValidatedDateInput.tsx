@@ -48,7 +48,8 @@ export default function ValidatedDateInput({
 
     // Sync external value changes
     useEffect(() => {
-        setDisplayValue(formatDateForDisplay(value));
+        const newDisplayValue = formatDateForDisplay(value);
+        setDisplayValue(prev => prev !== newDisplayValue ? newDisplayValue : prev);
     }, [value]);
 
     // Get current validation state
