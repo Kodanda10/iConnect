@@ -71,6 +71,19 @@ export function downloadConstituentsAsCSV(constituents: Constituent[]): void {
 }
 
 /**
+ * Escapes HTML characters to prevent XSS
+ */
+function escapeHTML(str: string | undefined): string {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/**
  * Opens print dialog for constituent data as a simple PDF-like format
  * Uses browser's native print-to-PDF functionality
  */
@@ -110,13 +123,13 @@ export function downloadConstituentsAsPDF(constituents: Constituent[]): void {
                 <tbody>
                     ${constituents.map(c => `
                         <tr>
-                            <td>${c.full_name || c.name || '-'}</td>
-                            <td>${c.phone || c.mobile_number || '-'}</td>
-                            <td>${c.ward_number || c.ward || '-'}</td>
-                            <td>${c.block || '-'}</td>
-                            <td>${c.gp_ulb || '-'}</td>
-                            <td>${c.birthday_mmdd || '-'}</td>
-                            <td>${c.anniversary_mmdd || '-'}</td>
+                            <td>${escapeHTML(c.full_name || c.name) || '-'}</td>
+                            <td>${escapeHTML(c.phone || c.mobile_number) || '-'}</td>
+                            <td>${escapeHTML(c.ward_number || c.ward) || '-'}</td>
+                            <td>${escapeHTML(c.block) || '-'}</td>
+                            <td>${escapeHTML(c.gp_ulb) || '-'}</td>
+                            <td>${escapeHTML(c.birthday_mmdd) || '-'}</td>
+                            <td>${escapeHTML(c.anniversary_mmdd) || '-'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
