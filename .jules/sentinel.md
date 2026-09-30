@@ -1,0 +1,4 @@
+## 2025-01-20 - Missing Authorization on Settings and Constituents
+**Vulnerability:** The Firestore security rules granted the `LEADER` role full write access to the `settings` collection and the ability to delete records in the `constituents` collection, violating the explicit PRD requirement that "Firestore Security Rules must prevent LEADER role from writing to settings or deleting constituents."
+**Learning:** Overly permissive wildcard functions like `isStaffOrLeader()` are prone to being incorrectly applied to sensitive endpoints during rapid prototyping, resulting in unauthorized data modification and privilege escalation.
+**Prevention:** Strictly separate read, create, update, and delete permissions in security rules and review access controls against the product specification for each specific role before deploying.
