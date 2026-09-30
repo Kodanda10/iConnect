@@ -28,13 +28,15 @@ export default function GlassCalendar({
     maxYear = new Date().getFullYear() + 5
 }: GlassCalendarProps) {
     const [viewDate, setViewDate] = useState(selectedDate || new Date());
+    const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
     // Update view if selectedDate changes externally
-    useEffect(() => {
+    if (selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
         if (selectedDate) setViewDate(selectedDate);
-    }, [selectedDate]);
+    }
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -101,7 +103,8 @@ export default function GlassCalendar({
             <div className="flex items-center justify-between mb-4">
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevMonth(); }}
-                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    aria-label="Previous month"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -177,7 +180,8 @@ export default function GlassCalendar({
 
                 <button
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextMonth(); }}
-                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    aria-label="Next month"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>
