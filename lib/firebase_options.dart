@@ -23,7 +23,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY'),
     appId: '1:887016822564:web:dd5f49de3ef0138fe1c5b1',
     messagingSenderId: '887016822564',
     projectId: 'iconnect-crm',
@@ -34,7 +34,7 @@ class DefaultFirebaseOptions {
   // Android config - uses same Firebase project
   // Note: For production, download google-services.json from Firebase Console
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY'),
     appId: '1:887016822564:android:iconnect_mobile_android',
     messagingSenderId: '887016822564',
     projectId: 'iconnect-crm',
@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
   // iOS config - uses same Firebase project
   // Note: For production, download GoogleService-Info.plist from Firebase Console
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY'),
     appId: '1:887016822564:ios:iconnect_mobile_ios',
     messagingSenderId: '887016822564',
     projectId: 'iconnect-crm',
