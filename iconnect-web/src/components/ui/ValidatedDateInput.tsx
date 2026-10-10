@@ -42,14 +42,16 @@ export default function ValidatedDateInput({
     const id = useId();
     const calendarId = `${id}-calendar`;
     const [displayValue, setDisplayValue] = useState(formatDateForDisplay(value));
+    const [prevValue, setPrevValue] = useState(value);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Sync external value changes
-    useEffect(() => {
+    if (value !== prevValue) {
+        setPrevValue(value);
         setDisplayValue(formatDateForDisplay(value));
-    }, [value]);
+    }
 
     // Get current validation state
     const validationState = getValidationState(displayValue, allowFuture);
