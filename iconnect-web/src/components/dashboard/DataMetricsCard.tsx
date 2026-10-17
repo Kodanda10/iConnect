@@ -9,7 +9,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Database, Users, ChevronRight, Loader2, AlertCircle, BarChart3, MapPin } from 'lucide-react';
 import { fetchConstituentMetrics, fetchGPMetricsForBlock, ConstituentMetrics, BlockMetric, GPMetric } from '@/lib/services/metrics';
 
@@ -58,6 +58,16 @@ export default function DataMetricsCard() {
         setHoveredBlock(blockName);
         loadGPData(blockName);
     };
+
+    const currentGpData = useMemo(() => {
+        if (!hoveredBlock) return [];
+        return gpData[hoveredBlock] || [];
+    }, [hoveredBlock, gpData]);
+
+    const maxGpCount = useMemo(() => {
+        if (currentGpData.length === 0) return 1;
+        return Math.max(...currentGpData.map(g => g.count), 1);
+    }, [currentGpData]);
 
     // Loading state
     if (loading) {
@@ -118,17 +128,17 @@ export default function DataMetricsCard() {
                                 <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
                                 <span className="text-sm">Fetching GP data...</span>
                             </div>
-                        ) : gpData[hoveredBlock]?.length === 0 ? (
+                        ) : currentGpData.length === 0 ? (
                             <div className="py-12 text-center text-white/40 text-sm">
                                 No GP data available for {hoveredBlock}
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGpData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
