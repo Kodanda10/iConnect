@@ -8,12 +8,17 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
 
 // Firebase config from environment
-// Firebase config from environment
 import * as dotenv from 'dotenv';
 import path from 'path';
 
+// Construct the path to .env.local
+const envPath = path.resolve(process.cwd(), '.env.local');
+
+// Load environment variables from .env.local
+dotenv.config({ path: envPath });
+
 const firebaseConfig = {
-    apiKey: 'AIzaSyAygMgePqu-C__yOoqDyqFHgnJ5Snr4Ic8',
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY,
     authDomain: 'iconnect-crm.firebaseapp.com',
     projectId: 'iconnect-crm',
     storageBucket: 'iconnect-crm.firebasestorage.app',
