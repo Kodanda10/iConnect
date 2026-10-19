@@ -1,0 +1,3 @@
+## 2024-12-18 - Added ARIA labels to icon-only buttons
+**Learning:** Found some icon-only buttons like the Notification Bell and Sign Out buttons in the dashboard layout without `aria-label`s. Since they don't have text content, they are completely invisible to screen readers, making the app harder to navigate for visually impaired users. Adding `aria-label`s to all icon-only buttons ensures that they are screen reader friendly.
+**Action:** Always ensure any button without explicit visible text has an `aria-label` attribute describing its function, particularly for standard navigation controls like bells or sign-out icons.
