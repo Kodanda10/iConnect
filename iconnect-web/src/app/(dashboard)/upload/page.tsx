@@ -60,11 +60,6 @@ export default function UploadPage() {
     const [csvValidation, setCsvValidation] = useState<CsvDataValidation | null>(null);
     const [showCsvErrors, setShowCsvErrors] = useState(false);
 
-    // Fetch constituents on mount
-    useEffect(() => {
-        fetchConstituents();
-    }, []);
-
     const fetchConstituents = async () => {
         setIsLoadingConstituents(true);
         try {
@@ -76,6 +71,11 @@ export default function UploadPage() {
             setIsLoadingConstituents(false);
         }
     };
+
+    // Fetch constituents on mount
+    useEffect(() => {
+        fetchConstituents();
+    }, []);
 
     // Seed 50 test constituents
     const handleSeedDatabase = async () => {

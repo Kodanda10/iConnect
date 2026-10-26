@@ -21,10 +21,6 @@ export default function DataMetricsCard() {
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
-    useEffect(() => {
-        loadMetrics();
-    }, []);
-
     const loadMetrics = async () => {
         try {
             setLoading(true);
@@ -38,6 +34,10 @@ export default function DataMetricsCard() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadMetrics();
+    }, []);
 
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {

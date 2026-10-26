@@ -28,13 +28,15 @@ export default function GlassCalendar({
     maxYear = new Date().getFullYear() + 5
 }: GlassCalendarProps) {
     const [viewDate, setViewDate] = useState(selectedDate || new Date());
+    const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
-    // Update view if selectedDate changes externally
-    useEffect(() => {
-        if (selectedDate) setViewDate(selectedDate);
-    }, [selectedDate]);
+    // Update view if selectedDate changes externally (Render Phase Update)
+    if (selectedDate && selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
+        setViewDate(selectedDate);
+    }
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
