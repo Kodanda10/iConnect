@@ -70,19 +70,29 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
+    // Cache calculations that are constant for this render
+    const today = new Date();
+    const todayDay = today.getDate();
+    const todayMonth = today.getMonth();
+    const todayYear = today.getFullYear();
+
+    const viewYear = viewDate.getFullYear();
+    const viewMonth = viewDate.getMonth();
+
     const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+        return day === todayDay && viewMonth === todayMonth && viewYear === todayYear;
     };
 
     const isSelected = (day: number) => {
         if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
+        return day === selectedDate.getDate() && viewMonth === selectedDate.getMonth() && viewYear === selectedDate.getFullYear();
     };
 
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        // Construct string manually for better performance, avoiding new Date()
+        const mm = String(viewMonth + 1).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        return `${viewYear}-${mm}-${dd}`;
     };
 
     // Close dropdowns when clicking outside
@@ -200,7 +210,6 @@ export default function GlassCalendar({
 
                 {Array.from({ length: daysInMonth }, (_, i) => {
                     const day = i + 1;
-                    const date = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
                     const isSelectedDay = isSelected(day);
                     const isTodayDay = isToday(day);
                     const dateKey = formatDateKey(day);
@@ -209,7 +218,11 @@ export default function GlassCalendar({
                     return (
                         <button
                             key={day}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onSelect(new Date(viewYear, viewMonth, day));
+                            }}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
                                 border-r border-b border-white/5
