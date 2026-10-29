@@ -70,19 +70,29 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    const viewMonth = viewDate.getMonth();
+    const viewYear = viewDate.getFullYear();
+
+    // Pre-calculate date string prefix for the current view
+    const viewMonthStr = String(viewMonth + 1).padStart(2, '0');
+    const dateKeyPrefix = `${viewYear}-${viewMonthStr}-`;
+
     const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+        return day === currentDay && viewMonth === currentMonth && viewYear === currentYear;
     };
 
     const isSelected = (day: number) => {
         if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
+        return day === selectedDate.getDate() && viewMonth === selectedDate.getMonth() && viewYear === selectedDate.getFullYear();
     };
 
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        return dateKeyPrefix + String(day).padStart(2, '0');
     };
 
     // Close dropdowns when clicking outside
