@@ -28,13 +28,15 @@ export default function GlassCalendar({
     maxYear = new Date().getFullYear() + 5
 }: GlassCalendarProps) {
     const [viewDate, setViewDate] = useState(selectedDate || new Date());
+    const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
-    // Update view if selectedDate changes externally
-    useEffect(() => {
+    // Render phase update to prevent cascading re-renders
+    if (selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
         if (selectedDate) setViewDate(selectedDate);
-    }, [selectedDate]);
+    }
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -70,19 +72,28 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
-    const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
-    };
+    // Pre-calculate constants outside loop to avoid redundant allocations
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
 
-    const isSelected = (day: number) => {
-        if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
-    };
+    const viewYear = viewDate.getFullYear();
+    const viewMonth = viewDate.getMonth();
+
+    const isViewMonthToday = viewYear === todayYear && viewMonth === todayMonth;
+    const isViewMonthSelected = selectedDate ? viewYear === selectedDate.getFullYear() && viewMonth === selectedDate.getMonth() : false;
+    const selectedDay = selectedDate?.getDate();
+
+    const isToday = (day: number) => isViewMonthToday && day === todayDay;
+
+    const isSelected = (day: number) => isViewMonthSelected && day === selectedDay;
 
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        // Fast, timezone-safe manual formatting instead of .toISOString()
+        const mm = String(viewMonth + 1).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        return `${viewYear}-${mm}-${dd}`;
     };
 
     // Close dropdowns when clicking outside

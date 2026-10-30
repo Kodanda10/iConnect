@@ -1,3 +1,3 @@
-## 2024-05-20 - Date Parsing in Hot Loops
-**Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
-**Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2024-12-16 - Date Instantiations in Hot Render Loops
+**Learning:** Found redundant `new Date()` allocations inside a hot loop (like calendar day cells). Relying on `.toISOString().split('T')[0]` causes both performance overhead and subtle timezone bugs (e.g., UTC off-by-one errors) in local date strings.
+**Action:** When rendering calendars or grids, pre-calculate constant parts of the date (year, month) outside the loop and use fast, timezone-safe manual string concatenation (`String().padStart`) instead of `new Date(...).toISOString()`.

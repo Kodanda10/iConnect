@@ -1,0 +1,4 @@
+💡 What: Optimized Date logic in the hot render loop of `GlassCalendar.tsx` and refactored the external selection update to a render-phase update.
+🎯 Why: Recreating `new Date()` multiple times per day cell inside the loop caused unnecessary instantiation overhead, and using `.toISOString()` is both slower and risky due to UTC timezone offsets. Additionally, calling `setState` inside `useEffect` triggered cascading renders.
+📊 Impact: Considerably faster date calculation in the calendar's render loop (avoiding hundreds of redundant allocations) and prevents cascading double-renders.
+🔬 Measurement: Verify calendar renders faster visually without extra updates in React DevTools.
