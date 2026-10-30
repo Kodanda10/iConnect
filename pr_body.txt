@@ -1,0 +1,4 @@
+💡 What: Added `aria-label`s to the Previous Month and Next Month icon-only navigation buttons in `GlassCalendar.tsx`. Added `aria-label` to the close button and bulk action buttons in `LeaderApp.tsx`.
+🎯 Why: Icon-only buttons without accessible names are invisible or unhelpful to screen reader users. Adding `aria-label`s makes these core interactions fully accessible.
+📸 Before/After: N/A (non-visual change)
+♿ Accessibility: Improved screen reader navigation for the calendar component and the bulk action bar by ensuring all interactive icon-only buttons have descriptive labels.
