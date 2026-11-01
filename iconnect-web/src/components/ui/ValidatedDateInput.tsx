@@ -46,10 +46,12 @@ export default function ValidatedDateInput({
     const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Sync external value changes
-    useEffect(() => {
+    // Sync external value changes using render phase update
+    const [prevValue, setPrevValue] = useState<string | null | undefined>(value);
+    if (value !== prevValue) {
+        setPrevValue(value);
         setDisplayValue(formatDateForDisplay(value));
-    }, [value]);
+    }
 
     // Get current validation state
     const validationState = getValidationState(displayValue, allowFuture);

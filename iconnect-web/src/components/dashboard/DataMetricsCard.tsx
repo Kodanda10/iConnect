@@ -21,10 +21,6 @@ export default function DataMetricsCard() {
     const [gpData, setGpData] = useState<Record<string, GPMetric[]>>({});
     const [gpLoading, setGpLoading] = useState<Record<string, boolean>>({});
 
-    useEffect(() => {
-        loadMetrics();
-    }, []);
-
     const loadMetrics = async () => {
         try {
             setLoading(true);
@@ -38,6 +34,10 @@ export default function DataMetricsCard() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadMetrics();
+    }, []);
 
     // Lazy load GP data on hover
     const loadGPData = useCallback(async (blockName: string) => {
@@ -91,6 +91,9 @@ export default function DataMetricsCard() {
         return null;
     }
 
+    const currentGpData = hoveredBlock ? (gpData[hoveredBlock] || []) : [];
+    const maxGpCount = Math.max(...currentGpData.map(g => g.count), 1);
+
     return (
         <div className="grid lg:grid-cols-2 gap-6 col-span-2">
             {/* LEFT: Dynamic Info Card (50%) */}
@@ -124,11 +127,11 @@ export default function DataMetricsCard() {
                             </div>
                         ) : (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {(gpData[hoveredBlock] || []).map((gp, index) => (
+                                {currentGpData.map((gp, index) => (
                                     <GPProgressBar
                                         key={gp.name}
                                         gp={gp}
-                                        maxCount={Math.max(...(gpData[hoveredBlock] || []).map(g => g.count), 1)}
+                                        maxCount={maxGpCount}
                                         delay={index * 50}
                                         index={index}
                                     />
