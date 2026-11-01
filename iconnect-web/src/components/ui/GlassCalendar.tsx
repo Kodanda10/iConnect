@@ -31,10 +31,14 @@ export default function GlassCalendar({
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
-    // Update view if selectedDate changes externally
-    useEffect(() => {
-        if (selectedDate) setViewDate(selectedDate);
-    }, [selectedDate]);
+    // Update view if selectedDate changes externally using render phase update
+    const [prevSelectedDate, setPrevSelectedDate] = useState<Date | undefined>(selectedDate);
+    if (selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
+        if (selectedDate) {
+            setViewDate(selectedDate);
+        }
+    }
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
