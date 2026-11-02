@@ -1397,7 +1397,7 @@ export const StaffPortal: React.FC = () => {
                             </h2>
                             <p className="text-sm text-gray-500 mt-1">Manage upcoming events and plan greeting campaigns.</p>
                         </div>
-                        <button onClick={() => setFestivalModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                        <button aria-label="Close" onClick={() => setFestivalModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
                             <X className="w-5 h-5 text-gray-500" />
                         </button>
                     </div>
@@ -1509,7 +1509,7 @@ export const StaffPortal: React.FC = () => {
                             </h2>
                             <p className="text-gray-400 text-xs mt-1">Step {wizardStep} of 3</p>
                         </div>
-                        <button onClick={() => setCampaignWizardOpen(false)} className="hover:bg-white/20 p-1.5 rounded-full transition">
+                        <button aria-label="Close" onClick={() => setCampaignWizardOpen(false)} className="hover:bg-white/20 p-1.5 rounded-full transition">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
