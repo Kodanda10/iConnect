@@ -36,7 +36,7 @@ export default function GlassCalendar({
         if (selectedDate) setViewDate(selectedDate);
     }, [selectedDate]);
 
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -70,19 +70,29 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
+    // Pre-calculate date values outside the render loop for performance
+    const today = new Date();
+    const todayDay = today.getDate();
+    const isTodayMonth = viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+
+    const selectedDay = selectedDate?.getDate();
+    const isSelectedMonth = selectedDate ? (viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear()) : false;
+
+    const viewYear = viewDate.getFullYear();
+    const viewMonth = viewDate.getMonth();
+    const formattedYearMonth = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+
     const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+        return day === todayDay && isTodayMonth;
     };
 
     const isSelected = (day: number) => {
         if (!selectedDate) return false;
-        return day === selectedDate.getDate() && viewDate.getMonth() === selectedDate.getMonth() && viewDate.getFullYear() === selectedDate.getFullYear();
+        return day === selectedDay && isSelectedMonth;
     };
 
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        return `${formattedYearMonth}-${String(day).padStart(2, '0')}`;
     };
 
     // Close dropdowns when clicking outside
@@ -200,7 +210,6 @@ export default function GlassCalendar({
 
                 {Array.from({ length: daysInMonth }, (_, i) => {
                     const day = i + 1;
-                    const date = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
                     const isSelectedDay = isSelected(day);
                     const isTodayDay = isToday(day);
                     const dateKey = formatDateKey(day);
@@ -209,7 +218,7 @@ export default function GlassCalendar({
                     return (
                         <button
                             key={day}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(date); }}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSelect(new Date(viewYear, viewMonth, day)); }}
                             className={`
                                 aspect-square flex items-center justify-center text-xs font-medium transition-all relative
                                 border-r border-b border-white/5
