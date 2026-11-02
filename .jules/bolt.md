@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2024-11-02 - Redundant Date Instantiation in Render Loops
+**Learning:** In React components like `GlassCalendar`, calling `new Date()` inside loops (like generating 31 day cells) causes excessive redundant instantiation overhead and can trigger expensive garbage collection.
+**Action:** Always pre-calculate derived constants (like year, month, and today's properties) outside hot loops, and construct string values manually using `.getFullYear()`, `.getMonth()` and `.padStart()` instead of `new Date(...).toISOString().split('T')[0]` to avoid off-by-one timezone bugs and performance hits. Move event handlers' data instantiations into the handler itself rather than inside the render iteration.
