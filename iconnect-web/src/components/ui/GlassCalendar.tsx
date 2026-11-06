@@ -27,14 +27,16 @@ export default function GlassCalendar({
     minYear = 1920,
     maxYear = new Date().getFullYear() + 5
 }: GlassCalendarProps) {
+    const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
     const [viewDate, setViewDate] = useState(selectedDate || new Date());
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
 
-    // Update view if selectedDate changes externally
-    useEffect(() => {
+    // Render phase update: Update view if selectedDate changes externally without cascading re-renders
+    if (selectedDate !== prevSelectedDate) {
+        setPrevSelectedDate(selectedDate);
         if (selectedDate) setViewDate(selectedDate);
-    }, [selectedDate]);
+    }
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -70,9 +72,13 @@ export default function GlassCalendar({
         setShowYearDropdown(false);
     };
 
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentDay = currentDate.getDate();
+
     const isToday = (day: number) => {
-        const today = new Date();
-        return day === today.getDate() && viewDate.getMonth() === today.getMonth() && viewDate.getFullYear() === today.getFullYear();
+        return day === currentDay && viewDate.getMonth() === currentMonth && viewDate.getFullYear() === currentYear;
     };
 
     const isSelected = (day: number) => {
@@ -81,8 +87,10 @@ export default function GlassCalendar({
     };
 
     const formatDateKey = (day: number) => {
-        const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        return d.toISOString().split('T')[0];
+        const year = viewDate.getFullYear();
+        const month = String(viewDate.getMonth() + 1).padStart(2, '0');
+        const d = String(day).padStart(2, '0');
+        return `${year}-${month}-${d}`;
     };
 
     // Close dropdowns when clicking outside

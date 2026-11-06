@@ -1,3 +1,6 @@
 ## 2024-05-20 - Date Parsing in Hot Loops
 **Learning:** In Cloud Functions with potentially thousands of iterations (like iterating over all constituents), repeated `new Date(string)` calls are significantly expensive.
 **Action:** When comparing dates in a loop, parse the target date once outside the loop. If the source data is a string (e.g. YYYY-MM-DD), consider parsing it once into lightweight components (month/day integers) or ensure the `new Date()` call happens only once per item, not multiple times for different comparisons (e.g. against today vs tomorrow).
+## 2025-01-01 - Avoid sync setState in useEffect for props changes
+**Learning:** Calling `setState` synchronously within a `useEffect` when props change causes a cascading re-render, violating React's recommendation and causing potential performance regressions (and ESLint `react-hooks/set-state-in-effect` errors in this app).
+**Action:** Instead of `useEffect(() => { setViewDate(selectedDate); }, [selectedDate])`, use the "render phase update" pattern: store the previous prop value in state (e.g. `prevSelectedDate`), compare during render, and if different, update both the tracking state and the derived state simultaneously (e.g. `if (selectedDate !== prevSelectedDate) { setPrevSelectedDate(selectedDate); setViewDate(selectedDate); }`).
